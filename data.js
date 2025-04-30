@@ -12,4 +12,4 @@ export const data = new PogObject("slhjaddons", {
         y: 0,
         scale: 1
     }
-}, "data/data.json")
+}, "data.json")
