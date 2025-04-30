@@ -34,7 +34,9 @@ Settings.registerListener('Commands List', value => commandsList =
 )
 
 // Open Quick Commands Gui
-const quickCommandsKeyBind = new KeyBind("Quick commands", keyCode, "AAA Quick commands").registerKeyDown(() => {
+const quickCommandsKeyBind = new KeyBind("Quick commands", keyCode, "AAA Quick commands")
+
+quickCommandsKeyBind.registerKeyPress(() => {
     if (!Settings.toggleQuickCommands) return;
 
     screenWidth = Renderer.screen.getWidth();
@@ -42,14 +44,7 @@ const quickCommandsKeyBind = new KeyBind("Quick commands", keyCode, "AAA Quick c
 
     generateShapesVertex(screenWidth, screenHeight, innerRadius, outerRadius);
     guiQuickCommands.open();
-});
-
-guiQuickCommands.registerOpened(() => {
     quickRelease.register();
-});
-
-guiQuickCommands.registerClosed(() => {
-    quickRelease.unregister();
 });
 
 // Handles the release of keybind
@@ -61,6 +56,7 @@ const quickRelease = register('tick', () => {
             quickCommands(getMouseSection());
         }
         guiQuickCommands.close();
+        quickRelease.unregister();
     }
     keyWasDown = isDown;
 }).unregister();
