@@ -19,8 +19,7 @@ const goldenFishAlert = register("Chat", (message, event) => {
     );
 }).setCriteria('You spot a Golden Fish surface from beneath the lava!').unregister();
 
-initialLoad = Settings.toggleGFAlert
-if (initialLoad) {
+if (Settings.toggleGFAlert) {
     goldenFishAlert.register();
 }
 

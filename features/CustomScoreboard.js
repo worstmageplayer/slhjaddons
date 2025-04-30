@@ -54,8 +54,7 @@ Settings.registerListener("Custom Scoreboard", value => {
     scoreboard.unregister();
 })
 
-initialLoad = Settings.toggleCustomScoreboard
-if (initialLoad) {
+if (Settings.toggleCustomScoreboard) {
     scoreboard.register();
 }
 

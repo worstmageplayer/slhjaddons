@@ -46,8 +46,7 @@ const autoZombieShootout = register("tick", () => {
 
 }).unregister();
 
-initialLoad = Settings.autoZombieShootout
-if (initialLoad) {
+if (Settings.autoZombieShootout) {
     autoZombieShootout.register();
 }
 

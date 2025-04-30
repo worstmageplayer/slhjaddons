@@ -1,47 +1,30 @@
-// Hide Hotbar --------------------------
 import Settings from "../config";
-let prevHeld;
+
+let prevHeld = null;
 let lastSwitchTime = 0;
-let isXPHidden = false;
+let isHidden = false;
 
-Settings.registerListener('Hide Hotbar', value => {
-    if (value) {
-        hideHotbar.register();
-        return;
-    }
-    hideHotbar.unregister();
-    if (isXPHidden) {
-        hideExperience.unregister();
-        isXPHidden = false;
-    }
-})
-
-// Hide Hotbar
 const hideHotbar = register('renderHotbar', (event) => {
     const currentHeld = Player.getHeldItemIndex();
     const now = Date.now();
 
-    if (prevHeld === undefined) {
+    if (prevHeld === null || currentHeld !== prevHeld) {
         prevHeld = currentHeld;
         lastSwitchTime = now;
-        return;
-    }
 
-    if (currentHeld !== prevHeld) {
-        prevHeld = currentHeld;
-        lastSwitchTime = now;
-        if (isXPHidden) {
+        if (isHidden) {
             hideExperience.unregister();
-            isXPHidden = false;
+            isHidden = false;
         }
         return;
     }
 
     if (now - lastSwitchTime >= 5000) {
         cancel(event);
-        if (!isXPHidden) {
+
+        if (!isHidden) {
             hideExperience.register();
-            isXPHidden = true;
+            isHidden = true;
         }
     }
 }).unregister();
@@ -50,7 +33,17 @@ const hideExperience = register('renderExperience', (event) => {
     cancel(event);
 }).unregister();
 
-initialLoad = Settings.toggleHideHotbar;
-if (initialLoad) {
+Settings.registerListener('Hide Hotbar', value => {
+    if (value) {
+        hideHotbar.register();
+    } else {
+        hideHotbar.unregister();
+        hideExperience.unregister();
+        isHidden = false;
+        prevHeld = null;
+    }
+});
+
+if (Settings.toggleHideHotbar) {
     hideHotbar.register();
 }

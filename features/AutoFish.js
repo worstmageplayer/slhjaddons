@@ -34,7 +34,6 @@ const autoFish = register('step', () => {
     });
 }).setFps(5).unregister();
 
-initialLoad = Settings.toggleAutoFish
-if (initialLoad) {
+if (Settings.toggleAutoFish) {
     autoFish.register();
 }

@@ -45,8 +45,7 @@ const autoBlaze = register('AttackEntity', () => {
     toSwapOrNotToSwap(blazeAttunementNumber, heldDaggerInfo, daggerInfoArray, cooldownTime);
 }).unregister();
 
-initialLoad = Settings.toggleBlaze
-if (initialLoad) {
+if (Settings.toggleBlaze) {
     autoBlaze.register();
 }
 

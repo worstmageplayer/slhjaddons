@@ -29,8 +29,7 @@ const cancelSlotHighlight = new RegisterGroup({
     }).unregister()
 })
 
-initialLoad = Settings.toggleCancelSlotHighlight
-if (initialLoad) {
+if (Settings.toggleCancelSlotHighlight) {
     cancelSlotHighlight.register();
 }
 

@@ -41,7 +41,6 @@ Settings.registerListener("Blood Time", value => {
     }
 })
 
-initialLoad = Settings.toggleBloodTime
-if (initialLoad) {
+if (Settings.toggleBloodTime) {
     bloodWarpTimer.register();
 }

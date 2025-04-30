@@ -48,7 +48,6 @@ const playerList = register('renderPlayerList', (event) => {
     });
 }).unregister();
 
-initialLoad = Settings.toggleCustomPlayerList
-if (initialLoad) {
+if (Settings.toggleCustomPlayerList) {
     playerList.register();
 }

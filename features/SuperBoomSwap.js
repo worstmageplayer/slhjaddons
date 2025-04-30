@@ -36,7 +36,6 @@ const superboomSwap = register('Clicked', (x, y, button, state) => {
     if (slottoswap !== -1) Player.setHeldItemIndex(slottoswap);
 }).unregister();
 
-initialLoad = Settings.toggleSuperboomSwap
-if (initialLoad) {
+if (Settings.toggleSuperboomSwap) {
     superboomSwap.register();
 }

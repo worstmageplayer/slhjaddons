@@ -60,8 +60,7 @@ Settings.registerListener("Dungeon Commands", value => {
     dungeonCommands.unregister();
 });
 
-initialLoad = Settings.toggleDcmd
-if (initialLoad) {
+if (Settings.toggleDcmd) {
     dungeonCommands.register();
 }
 

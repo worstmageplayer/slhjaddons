@@ -26,8 +26,7 @@ const guiRender = register('guiRender', (mx, my, gui) => {
     Renderer.drawString(value, (Renderer.screen.getWidth() - Renderer.getStringWidth(value)) / 2, 55, true);
 }).unregister();
 
-const initialLoad = Settings.toggleSignHelper
-if (initialLoad) {
+if (Settings.toggleSignHelper) {
     guiRender.register();
 }
 

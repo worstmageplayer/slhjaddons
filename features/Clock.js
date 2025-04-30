@@ -48,8 +48,7 @@ const clock = new RegisterGroup({
     }).unregister()
 })
 
-initialLoad = Settings.toggleClock
-if (initialLoad) {
+if (Settings.toggleClock) {
     clock.register();
 }
 

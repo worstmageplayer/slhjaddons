@@ -74,7 +74,6 @@ function fadeOut(t) {
     return Math.pow((t - 0.7) / 0.3, 5);
 }
 
-initialLoad = Settings.toggleAutoPetRuleDisplay
-if (initialLoad) {
+if (Settings.toggleAutoPetRuleDisplay) {
     petRule.register();
 }
