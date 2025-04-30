@@ -5,7 +5,7 @@ const GuiEditSign = Java.type("net.minecraft.client.gui.inventory.GuiEditSign");
 const tileSign = GuiEditSign.class.getDeclaredField("field_146848_f");
 tileSign.setAccessible(true);
 
-const guiRender = register('guiRender', (_, __, gui) => {
+const guiRender = register('guiRender', (mx, my, gui) => {
     if (!inHypixel() || !(gui instanceof GuiEditSign)) return;
 
     const tile = tileSign.get(Client.currentGui.get());
