@@ -15,17 +15,15 @@ export class WorldInfo {
                 action !== S38PacketPlayerListItem.Action.UPDATE_DISPLAY_NAME
             ) return;
 
-            entries.forEach(addPlayerData => {
-                const displayName = addPlayerData.func_179961_d();
-                if (!displayName) return;
-                const unformattedText = displayName.func_150260_c();
-                const match = unformattedText.match(regex);
-                if (!match) return;
+            const displayName = entries[0].func_179961_d();
+            if (!displayName) return;
+            const unformattedText = displayName.func_150260_c();
+            const match = unformattedText.match(regex);
+            if (!match) return;
 
-                const newArea = match[1];
-                if (newArea === this.area) return;
-                this.area = newArea;
-            });
+            const newArea = match[1];
+            if (newArea === this.area) return;
+            this.area = newArea;
         }).setFilteredClass(S38PacketPlayerListItem);
 
         this.resetWorldUnload = register('worldUnload', () => this.resetInfo());
