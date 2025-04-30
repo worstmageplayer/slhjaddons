@@ -101,17 +101,18 @@ function generateShapesVertex(screenWidth, screenHeight, innerRadius, outerRadiu
     shapes.length = 0;
     innerPoints.length = 0;
 
-    let centerX = screenWidth / 2, centerY = screenHeight / 2;
-    let numSections = Math.max(commandsList.length, 3);
+    const centerX = screenWidth / 2, centerY = screenHeight / 2;
+    const numSections = Math.max(commandsList.length, 3);
+    const sectionAngle = (pi * 2 / numSections)
+    const deadRadius = +innerRadius + sectionOffset * 10 / 9;
 
     for (let i = 0; i < numSections; i++) {
-        let angle1 = (pi * 2 / numSections) * i + angleOffset;
-        let angle2 = (pi * 2 / numSections) * (i + 1) + angleOffset;
+        let angle1 = sectionAngle * i + angleOffset;
+        let angle2 = sectionAngle * (i + 1) + angleOffset;
         let avgAngle = (angle1 + angle2) / 2;
         let offsetX = Math.cos(avgAngle) * sectionOffset;
         let offsetY = Math.sin(avgAngle) * sectionOffset;
         let cx = centerX + offsetX, cy = centerY + offsetY;
-        let deadRadius = +innerRadius + sectionOffset * 10 / 9;
 
         let cos1 = Math.cos(angle1), sin1 = Math.sin(angle1);
         let cos2 = Math.cos(angle2), sin2 = Math.sin(angle2);
