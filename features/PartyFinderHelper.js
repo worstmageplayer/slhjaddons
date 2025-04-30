@@ -1,8 +1,5 @@
 // Party Finder Helper ------------------
 import Settings from "../config";
-import { WorldInfo } from "../utils/WorldInfo";
-
-const worldinfo = new WorldInfo();
 
 const renderMissingClasses = register("renderItemIntoGui", (item, x, y) => {
     const container = Player.getContainer();
