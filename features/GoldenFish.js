@@ -1,0 +1,27 @@
+// Golden Fish --------------------------
+import Settings from "../config";
+
+Settings.registerListener("Golden Fish Alert", value => {
+    if (value) {
+        goldenFishAlert.register();
+        return;
+    }
+    goldenFishAlert.unregister();
+})
+
+// Golden Fish
+const goldenFishAlert = register("Chat", (message, event) => {
+    Renderer.drawString(
+        '&6Golden Fish&r', 
+        Renderer.screen.getWidth()/2 - Renderer.getStringWidth('&6Golden Fish&r')/2, 
+        Renderer.screen.getHeight()/2, 
+        true
+    );
+}).setCriteria('You spot a Golden Fish surface from beneath the lava!').unregister();
+
+initialLoad = Settings.toggleGFAlert
+if (initialLoad) {
+    goldenFishAlert.register();
+}
+
+//&r&9You spot a &r&6Golden Fish &r&9surface from beneath the lava!&r
