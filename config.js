@@ -131,6 +131,14 @@ class Settings {
 	toggleCancelAutoPetRuleMessage = false;
 
     @SwitchProperty({
+		name: 'Party Finder Helper',
+		description: 'Display missing classes in party finder.',
+		category: 'Dungeons',
+        subcategory: 'Party Finder'
+	})
+	togglePartyFinderHelper = false;
+
+    @SwitchProperty({
 		name: 'Blood Time',
 		description: 'Display time after blood opens. Enter blood at 10s for slightly faster watcher move.',
 		category: 'Dungeons',

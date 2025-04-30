@@ -19,6 +19,7 @@ import "./features/HideHealth";
 import "./features/ShiftClick"
 import "./features/CustomTabList"
 import "./features/SignHelper"
+import "./features/PartyFinderHelper"
 
 import "./features/optimise/TabOutOptimise";
 
