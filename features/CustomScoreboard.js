@@ -1,7 +1,6 @@
 // Custom Scoreboard --------------------
 import Settings from '../config';
 import { RegisterGroup } from '../utils/RegisterStuff';
-import { WorldInfo } from '../utils/WorldInfo';
 
 let scoreboardLines = [];
 let scoreboardFiltered = [];
@@ -18,6 +17,8 @@ let scoreboardHeader = Settings.scoreboardHeader;
 let scoreboardFooter = Settings.scoreboardFooter;
 
 const hiddenLine = '§ewww.hypixel.ne🎂§et';
+const S3EPacketTeams = Java.type('net.minecraft.network.play.server.S3EPacketTeams')
+
 const scoreboard = new RegisterGroup({
     renderScoreboard: register('renderScoreboard', (event) => cancel(event)).unregister(),
     renderOverlay: register('renderOverlay', () => {
@@ -28,8 +29,7 @@ const scoreboard = new RegisterGroup({
         Renderer.scale(scoreboardScale);
         Renderer.drawString(scoreboardText, xPos, yPos, scoreboardShadow);
     }).unregister(),
-    step: register('step', () => updateScoreboardLines()).setFps(5).unregister(),
-    worldLoad: register('worldLoad', () => Client.scheduleTask(1,() => updateScoreboardLines())).unregister(),
+    packetReceived: register('packetReceived', () => updateScoreboardLines()).setFilteredClass(S3EPacketTeams).unregister(),
 })
 
 // Scoreboard Render update
@@ -37,7 +37,7 @@ Settings.registerListener('Scoreboard Scale ', value => scoreboardScale = value)
 Settings.registerListener("Scoreboard Shadow", value => scoreboardShadow = value)
 Settings.registerListener("Scoreboard Padding", value => scoreboardPadding = value)
 Settings.registerListener("Scoreboard Offset", value => scoreboardOffset = value)
-Settings.registerListener("Scoreboard Colour", value => bgColour = value.getRGB())
+Settings.registerListener("Scoreboard Colour", value => scoreboardColour = value.getRGB())
 Settings.registerListener("Scoreboard Header", value => scoreboardHeader = value)
 Settings.registerListener("Scoreboard Footer", value => scoreboardFooter = value)
 
