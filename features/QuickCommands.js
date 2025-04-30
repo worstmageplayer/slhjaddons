@@ -142,11 +142,17 @@ function getMouseSection() {
 
 function pointInPolygon(px, py, polygon) {
     let inside = false;
-    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        let [xi, yi] = polygon[i];
-        let [xj, yj] = polygon[j];
-        let intersect = ((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / ((yj - yi) || 1e-9) + xi);
-        if (intersect) inside = !inside;
+    const len = polygon.length;
+
+    for (let i = 0, j = len - 1; i < len; j = i++) {
+        let xi = polygon[i][0], yi = polygon[i][1];
+        let xj = polygon[j][0], yj = polygon[j][1];
+
+        if ((yi > py) !== (yj > py)) {
+            let slope = (xj - xi) / ((yj - yi) || 1e-9);
+            let xIntersect = slope * (py - yi) + xi;
+            if (px < xIntersect) inside = !inside;
+        }
     }
     return inside;
 }
