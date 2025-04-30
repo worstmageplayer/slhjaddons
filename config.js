@@ -39,6 +39,14 @@ class Settings {
     toggleShiftClick = false;
 
     @SwitchProperty({
+        name: 'Sign Helper',
+        description: 'Displays a formatted number above the sign edit gui.',
+        category: 'Skyblock',
+        subcategory: 'Sign Helper'
+    })
+    toggleSignHelper = false;
+
+    @SwitchProperty({
 		name: 'Activate slhjTech',
 		category: 'Skyblock',
         subcategory: 'slhjTech'

@@ -1,7 +1,7 @@
 {
     "name": "slhjaddons",
     "description": "useless features",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "author": "slhj",
     "entry": "index.js",
     "requires": ["Vigilance", "PogObject"]

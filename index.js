@@ -18,6 +18,7 @@ import "./features/HideHotbar";
 import "./features/HideHealth";
 import "./features/ShiftClick"
 import "./features/CustomTabList"
+import "./features/SignHelper"
 
 import "./features/optimise/TabOutOptimise";
 

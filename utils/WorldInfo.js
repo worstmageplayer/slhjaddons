@@ -1,7 +1,7 @@
 const S38PacketPlayerListItem = Java.type('net.minecraft.network.play.server.S38PacketPlayerListItem');
 const regex = /^(?:Area|Dungeon): ([\w ]+)$/;
 
-export const onHypixel = () => /hypixel\.(?:io|net)|ilovecatgirls\.xyz/.test(Server.getIP());
+export const inHypixel = () => /hypixel\.(?:io|net)|ilovecatgirls\.xyz/.test(Server.getIP());
 
 export class WorldInfo {
     constructor() {
