@@ -14,7 +14,6 @@ let guiColour = Settings.quickCommandsColour.getRGB();
 let guiHoverColour = Settings.quickCommandsHoverColour.getRGB();
 const guiQuickCommands = new Gui();
 
-let keyWasDown = false;
 let hoveredSection = -1;
 let mouseX = 0, mouseY = 0, dx = 0, dy = 0;
 let deadZone = false;
@@ -49,16 +48,11 @@ quickCommandsKeyBind.registerKeyPress(() => {
 
 // Handles the release of keybind
 const quickRelease = register('tick', () => {
-    const isDown = Keyboard.isKeyDown(Client.getKeyBindFromDescription("Quick commands").getKeyCode());
-
-    if (!isDown) {
-        if (keyWasDown && Settings.toggleQuickCommands && !deadZone) {
-            quickCommands(getMouseSection());
-        }
-        guiQuickCommands.close();
-        quickRelease.unregister();
-    }
-    keyWasDown = isDown;
+    const isDown = Keyboard.isKeyDown(quickCommandsKeyBind.getKeyCode());
+    if (isDown) return;
+    if (!deadZone) quickCommands(getMouseSection());
+    guiQuickCommands.close();
+    quickRelease.unregister();
 }).unregister();
 
 // Quick Commands Gui
