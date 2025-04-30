@@ -13,11 +13,9 @@ let scoreboardScale = Settings.scoreboardScale;
 let scoreboardShadow = Settings.toggleScoreboardShadow;
 let scoreboardPadding = Settings.scoreboardPadding;
 let scoreboardOffset = Settings.scoreboardOffset;
-let scoreboardColour = Settings.scoreboardColour;
+let scoreboardColour = Settings.scoreboardColour.getRGB();
 let scoreboardHeader = Settings.scoreboardHeader;
 let scoreboardFooter = Settings.scoreboardFooter;
-let bgColour = scoreboardColour.getRGB();
-const worldInfo = new WorldInfo
 
 const hiddenLine = '§ewww.hypixel.ne🎂§et';
 const scoreboard = new RegisterGroup({
@@ -26,11 +24,11 @@ const scoreboard = new RegisterGroup({
         if (scoreboardLines.length === 0) return;
     
         Renderer.scale(scoreboardScale);
-        Renderer.drawRect(bgColour, bgxPos, bgyPos, bgWidth, bgHeight);
+        Renderer.drawRect(scoreboardColour, bgxPos, bgyPos, bgWidth, bgHeight);
         Renderer.scale(scoreboardScale);
         Renderer.drawString(scoreboardText, xPos, yPos, scoreboardShadow);
     }).unregister(),
-    step: register('step', () => updateScoreboardLines()).setFps(10).unregister(),
+    step: register('step', () => updateScoreboardLines()).setFps(5).unregister(),
     worldLoad: register('worldLoad', () => Client.scheduleTask(1,() => updateScoreboardLines())).unregister(),
 })
 
@@ -39,10 +37,7 @@ Settings.registerListener('Scoreboard Scale ', value => scoreboardScale = value)
 Settings.registerListener("Scoreboard Shadow", value => scoreboardShadow = value)
 Settings.registerListener("Scoreboard Padding", value => scoreboardPadding = value)
 Settings.registerListener("Scoreboard Offset", value => scoreboardOffset = value)
-Settings.registerListener("Scoreboard Colour", value => {
-    scoreboardColour = value;
-    bgColour = scoreboardColour.getRGB();
-})
+Settings.registerListener("Scoreboard Colour", value => bgColour = value.getRGB())
 Settings.registerListener("Scoreboard Header", value => scoreboardHeader = value)
 Settings.registerListener("Scoreboard Footer", value => scoreboardFooter = value)
 
