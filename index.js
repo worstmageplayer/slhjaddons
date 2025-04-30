@@ -20,6 +20,7 @@ import "./features/ShiftClick"
 import "./features/CustomTabList"
 import "./features/SignHelper"
 import "./features/PartyFinderHelper"
+import "./features/GhostPickaxe"
 
 import "./features/optimise/TabOutOptimise";
 

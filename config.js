@@ -131,6 +131,14 @@ class Settings {
 	toggleCancelAutoPetRuleMessage = false;
 
     @SwitchProperty({
+        name: 'Ghost Pickaxe',
+        description: 'Changes your held item into a diamond pickaxe with efficiency 10.',
+        category: 'Dungeons',
+        subcategory: 'Ghost Pickaxe'
+    })
+    toggleGhostPickaxe = false;
+
+    @SwitchProperty({
 		name: 'Party Finder Helper',
 		description: 'Display missing classes in party finder.',
 		category: 'Dungeons',
