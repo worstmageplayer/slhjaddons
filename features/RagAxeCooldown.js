@@ -19,18 +19,18 @@ Settings.moveRagnarockCooldownGui.registerDraw(() => {
 
 Settings.moveRagnarockCooldownGui.registerOpened(() => {
     moveGui.register()
-    handlers.renderCooldown.unregister();
+    registers.renderCooldown.unregister();
 });
 
 Settings.moveRagnarockCooldownGui.registerClosed(() => {
     moveGui.unregister()
     data.save();
-    if (startCast) {handlers.renderCooldown.register()}
+    if (startCast) {registers.renderCooldown.register()}
 });
 
-const handlers = {
+const registers = {
     ragCast: register("actionBar", (number) => {
-        handlers.ragCancel.register();
+        registers.ragCancel.register();
         if (startCast) return;
         startCooldown();
     }).setCriteria('CASTING ${*} ${number}s').setParameter('contains').unregister(),
@@ -52,17 +52,17 @@ const handlers = {
 
 Settings.registerListener("Display Ragnarock Cooldown", value => {
     if (value) {
-        handlers.ragCast.register();
-        handlers.worldLoad.register();
+        registers.ragCast.register();
+        registers.worldLoad.register();
     } else {
-        handlers.ragCast.unregister();
-        handlers.worldLoad.unregister();
+        registers.ragCast.unregister();
+        registers.worldLoad.unregister();
     }
 });
 
 if (Settings.toggleRagCooldown) {
-    handlers.ragCast.register();
-    handlers.worldLoad.register();
+    registers.ragCast.register();
+    registers.worldLoad.register();
 }
 
 function startCooldown() {
@@ -70,7 +70,7 @@ function startCooldown() {
     startCast = true;
     inCooldown = true;
     ragnarockCooldown = baseCooldown * getCooldownMultiplier();
-    handlers.renderCooldown.register();
+    registers.renderCooldown.register();
 
     setTimeout(() => {
         endCooldown();
@@ -78,8 +78,8 @@ function startCooldown() {
 }
 
 function endCooldown() {
-    handlers.renderCooldown.unregister();
-    handlers.ragCancel.unregister();
+    registers.renderCooldown.unregister();
+    registers.ragCancel.unregister();
     startCast = false;
     if (!inCooldown) return;
     if (Settings.toggleRagCooldownSound) {World.playSound('random.successful_hit', 1, 1)}
@@ -89,8 +89,8 @@ function endCooldown() {
 
 function resetCooldown() {
     ragnarockCooldown = baseCooldown;
-    handlers.renderCooldown.unregister();
-    handlers.ragCancel.unregister();
+    registers.renderCooldown.unregister();
+    registers.ragCancel.unregister();
     startCast = false;
     inCooldown = false;
 }
