@@ -30,14 +30,9 @@ Settings.moveRagnarockCooldownGui.registerClosed(() => {
 
 const registers = {
     ragCast: register("actionBar", (number) => {
-        registers.ragCancel.register();
         if (startCast) return;
         startCooldown();
     }).setCriteria('CASTING ${*} ${number}s').setParameter('contains').unregister(),
-
-    ragCancel: register("chat", () => {
-        timeOfCast = Date.now();
-    }).setCriteria("Ragnarock was cancelled due to taking damage!").setParameter("contains").unregister(),
 
     worldLoad: register("worldLoad", () => {
         resetCooldown();
@@ -71,15 +66,11 @@ function startCooldown() {
     inCooldown = true;
     ragnarockCooldown = baseCooldown * getCooldownMultiplier();
     registers.renderCooldown.register();
-
-    setTimeout(() => {
-        endCooldown();
-    }, ragnarockCooldown);
+    setTimeout(endCooldown, ragnarockCooldown);
 }
 
 function endCooldown() {
     registers.renderCooldown.unregister();
-    registers.ragCancel.unregister();
     startCast = false;
     if (!inCooldown) return;
     if (Settings.toggleRagCooldownSound) {World.playSound('random.successful_hit', 1, 1)}
@@ -90,7 +81,6 @@ function endCooldown() {
 function resetCooldown() {
     ragnarockCooldown = baseCooldown;
     registers.renderCooldown.unregister();
-    registers.ragCancel.unregister();
     startCast = false;
     inCooldown = false;
 }
