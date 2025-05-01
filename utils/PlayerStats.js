@@ -17,15 +17,15 @@ export class PlayerStats {
             speed: null,
         };
 
-        this.registerPacketHandler();
-        this.registerWorldUnload(); 
+        this.packetReceived();
+        this.worldUnload(); 
     }
 
     parseNumber(str) {
         return parseInt(str.replace(/,/g, ""), 10) || 0;
     }
 
-    registerPacketHandler() {
+    packetReceived() {
         register('packetReceived', (packet, event) => {
             if (packet.func_179841_c() !== 2) return;
 
@@ -56,7 +56,7 @@ export class PlayerStats {
         }).setFilteredClass(S02PacketChat);
     }
 
-    registerWorldUnload() {
+    worldUnload() {
         register('worldUnload', () => {
             Object.keys(this.stats).forEach(key => this.stats[key] = null);
         })
