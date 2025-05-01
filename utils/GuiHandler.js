@@ -1,12 +1,12 @@
 export class GuiHandler {
     constructor(guiConfig) {
         this.guiConfig = guiConfig;
-        this.clickHandler = this.createClickHandler();
-        this.dragHandler = this.createDragHandler();
-        this.sizeHandler = this.createSizeHandler();
+        this.clickHandler = this.clicked();
+        this.dragHandler = this.dragged();
+        this.sizeHandler = this.scrolled();
     }
 
-    createClickHandler() {
+    clicked() {
         return register('clicked', (mx, my, btn, btnstate) => {
             if (!btnstate) return;
             const scale = this.guiConfig.scale;
@@ -15,7 +15,7 @@ export class GuiHandler {
         }).unregister();
     }
 
-    createDragHandler() {
+    dragged() {
         return register('dragged', (dx, dy, mx, my, btn) => {
             const scale = this.guiConfig.scale;
             const rawX = mx / scale;
@@ -33,7 +33,7 @@ export class GuiHandler {
         }).unregister();
     }
 
-    createSizeHandler() {
+    scrolled() {
         return register('scrolled', (mx, my, dir) => {
             if (dir == 1) this.guiConfig.scale += 0.05;
             else this.guiConfig.scale -= 0.05;
