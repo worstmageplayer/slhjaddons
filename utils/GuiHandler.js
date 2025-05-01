@@ -21,7 +21,7 @@ export class GuiHandler {
             const rawX = mx / scale;
             const rawY = my / scale;
             const distanceSq = dx * dx + dy * dy;
-            const gridSize = 5;
+            const gridSize = 5 / scale;
 
             if (Client.isShiftDown() && distanceSq <= 0.5) {
                 this.guiConfig.x = Math.round(rawX / gridSize) * gridSize;
