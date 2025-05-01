@@ -8,13 +8,7 @@ let renderCustomSlotHighlight = Settings.toggleCustomSlotHighlight;
 Settings.registerListener('Custom Slot Highlight', value => {
     renderCustomSlotHighlight = value;
 })
-Settings.registerListener('Hide Slot Highlight', value => {
-    if (value) {
-        cancelSlotHighlight.register();
-    } else {
-        cancelSlotHighlight.unregister();
-    }
-})
+Settings.registerListener('Hide Slot Highlight', v => v ? cancelSlotHighlight.register() : cancelSlotHighlight.unregister());
 
 const cancelSlotHighlight = new RegisterGroup({
     renderSlotHighlight: register('renderSlotHighlight', (mx, my, slot, container, event) => cancel(event)).unregister(),

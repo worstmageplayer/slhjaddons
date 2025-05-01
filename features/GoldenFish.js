@@ -1,14 +1,6 @@
 // Golden Fish --------------------------
 import Settings from "../config";
 
-Settings.registerListener("Golden Fish Alert", value => {
-    if (value) {
-        goldenFishAlert.register();
-        return;
-    }
-    goldenFishAlert.unregister();
-})
-
 // Golden Fish
 const goldenFishAlert = register("Chat", (message, event) => {
     Renderer.drawString(
@@ -18,6 +10,8 @@ const goldenFishAlert = register("Chat", (message, event) => {
         true
     );
 }).setCriteria('You spot a Golden Fish surface from beneath the lava!').unregister();
+
+Settings.registerListener('Golden Fish Alert', v => v ? goldenFishAlert.register() : goldenFishAlert.unregister());
 
 if (Settings.toggleGFAlert) {
     goldenFishAlert.register();

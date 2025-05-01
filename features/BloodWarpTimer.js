@@ -33,13 +33,7 @@ const bloodWarpTimer = new RegisterGroup({
     worldUnload: register('worldUnload', () => bloodOpen = null).unregister()
 })
 
-Settings.registerListener("Blood Time", value => {
-    if (value) {
-        bloodWarpTimer.register();
-    } else {
-        bloodWarpTimer.unregister();
-    }
-})
+Settings.registerListener('Blood Time', v => v ? bloodWarpTimer.register() : bloodWarpTimer.unregister());
 
 if (Settings.toggleBloodTime) {
     bloodWarpTimer.register();

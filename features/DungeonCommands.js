@@ -52,13 +52,7 @@ const dungeonCommands = new RegisterGroup({
     }).setCriteria('${*}[${rank}] ${name} entered ${dungeontype} Catacombs, Floor ${number}${*}').unregister(),
 })
 
-Settings.registerListener("Dungeon Commands", value => {
-    if (value) {
-        dungeonCommands.register();
-        return;
-    }
-    dungeonCommands.unregister();
-});
+Settings.registerListener('Dungeon Commands', v => v ? dungeonCommands.register() : dungeonCommands.unregister());
 
 if (Settings.toggleDcmd) {
     dungeonCommands.register();

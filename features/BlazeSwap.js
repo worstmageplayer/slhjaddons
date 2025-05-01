@@ -19,13 +19,7 @@ const ATTUNEMENT_REGEX = new RegExp(AttunementKeys.join('|'));
 
 let lastExecutionTime = 0;
 
-Settings.registerListener("Blaze Auto Swap", value => {
-    if (value) {
-        autoBlaze.register();
-    } else {
-        autoBlaze.unregister();
-    }
-})
+Settings.registerListener('Blaze Auto Swap', v => v ? autoBlaze.register() : autoBlaze.unregister());
 
 // Check if Blaze Slayer quest is active
 function isBlazeSlayerActive() {

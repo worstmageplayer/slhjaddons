@@ -41,13 +41,7 @@ Settings.registerListener("Scoreboard Colour", value => scoreboardColour = value
 Settings.registerListener("Scoreboard Header", value => scoreboardHeader = value)
 Settings.registerListener("Scoreboard Footer", value => scoreboardFooter = value)
 
-Settings.registerListener("Custom Scoreboard", value => {
-    if (value) {
-        scoreboard.register();
-        return;
-    }
-    scoreboard.unregister();
-})
+Settings.registerListener('Custom Scoreboard', v => v ? scoreboard.register() : scoreboard.unregister());
 
 if (Settings.toggleCustomScoreboard) {
     scoreboard.register();

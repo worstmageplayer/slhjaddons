@@ -13,13 +13,7 @@ register('packetReceived', (packet, event) => {
 
 }).setFilteredClass(S38PacketPlayerListItem)
 */
-Settings.registerListener("Custom Player List", value => {
-    if (value) {
-        playerList.register();
-        return;
-    }
-    playerList.unregister();
-})
+Settings.registerListener('Custom Player List', v => v ? playerList.register() : playerList.unregister());
 
 const playerList = register('renderPlayerList', (event) => {
     cancel(event);

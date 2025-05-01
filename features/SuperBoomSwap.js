@@ -6,15 +6,6 @@ import { WorldInfo } from '../utils/WorldInfo'
 const worldInfo = new WorldInfo
 const boomboomBlocks = ["minecraft:stonebrick", "minecraft:stone_slab", "minecraft:double_stone_slab"];
 
-Settings.registerListener("Superboom Auto Swap", value => {
-    if (value) {
-        superboomSwap.register();
-        return;
-    }
-    superboomSwap.unregister();
-})
-
-
 const superboomSwap = register('Clicked', (x, y, button, state) => {
     if (button === 1 || !state) return;
 
@@ -35,6 +26,8 @@ const superboomSwap = register('Clicked', (x, y, button, state) => {
 
     if (slottoswap !== -1) Player.setHeldItemIndex(slottoswap);
 }).unregister();
+
+Settings.registerListener('Superboom Auto Swap', v => v ? superboomSwap.register() : superboomSwap.unregister());
 
 if (Settings.toggleSuperboomSwap) {
     superboomSwap.register();

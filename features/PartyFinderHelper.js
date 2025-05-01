@@ -27,9 +27,7 @@ const renderMissingClasses = register("renderItemIntoGui", (item, x, y) => {
     }
 }).unregister();
 
-Settings.registerListener("Party Finder Helper", value =>
-    value ? renderMissingClasses.register() : renderMissingClasses.unregister()
-);
+Settings.registerListener("Party Finder Helper", v => v ? renderMissingClasses.register() : renderMissingClasses.unregister());
 
 if (Settings.togglePartyFinderHelper) {
     renderMissingClasses.register();

@@ -6,13 +6,7 @@ const fishingTimerRegex = /^\d\.\d$/
 
 let shouldClick = false;
 
-Settings.registerListener("Auto Fish", value => {
-    if (value) {
-        autoFish.register();
-    } else {
-        autoFish.unregister();
-    }
-})
+Settings.registerListener('Auto Fish', v => v ? autoFish.register() : autoFish.unregister());
 
 const autoFish = register('step', () => {
     if (Client.isInGui()) return;

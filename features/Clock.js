@@ -26,13 +26,8 @@ Settings.registerListener('Clock Scale', value => clockScale = value)
 Settings.registerListener('Clock Padding', value => clockPadding = value)
 Settings.registerListener('Clock Colour', value => clockColour = value)
 
-Settings.registerListener("Ingame Clock", value => {
-    if (value) {
-        clock.register();
-    } else {
-        clock.unregister();
-    }
-})
+Settings.registerListener('Ingame Clock', v => v ? clock.register() : clock.unregister());
+
 const clock = new RegisterGroup({
     step: register('step', () => {
         const now = new Date();

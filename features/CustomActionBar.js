@@ -37,13 +37,7 @@ function move(start, end, amount) {
     return start + (end - start) * amount;
 }
 
-Settings.registerListener('Custom Action Bar', value => {
-    if (value) {
-        customActionBar.register();
-    } else {
-        customActionBar.unregister();
-    }
-});
+Settings.registerListener('Custom Action Bar', v => v ? customActionBar.register() : customActionBar.unregister());
 
 if (Settings.toggleCustomActionBar) {
     customActionBar.register();

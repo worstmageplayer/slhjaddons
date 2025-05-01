@@ -24,13 +24,7 @@ const cancelItemToolTip = new RegisterGroup ({
     guiClosed: register('guiClosed', () => itemName = null).unregister(),
 })
 
-Settings.registerListener('Hide Empty Tooltip', value => {
-    if (value) {
-        cancelItemToolTip.register();
-    } else {
-        cancelItemToolTip.unregister();
-    }
-});
+Settings.registerListener('Hide Empty Tooltip', v => v ? cancelItemToolTip.register() : cancelItemToolTip.unregister());
 
 if (Settings.toggleCancelEmptyTooltip) {
     cancelItemToolTip.register();

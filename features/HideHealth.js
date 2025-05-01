@@ -30,10 +30,10 @@ const hideHealth = new RegisterGroup({
 Settings.registerListener('Hide Health', value => {
     if (value) {
         hideHealth.register();
-        return;
+    } else {
+        hideHealth.unregister();
+        isHealthHidden = false;
     }
-    hideHealth.unregister();
-    isHealthHidden = false;
 });
 
 if (Settings.toggleHideHealth) {

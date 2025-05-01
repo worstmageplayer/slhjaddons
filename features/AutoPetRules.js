@@ -25,13 +25,7 @@ Settings.moveAutoPetRuleDisplay.registerClosed(() => {
     if (rendering) petRuleRender.register();
 });
 
-Settings.registerListener('Display Auto Pet Rules', value => {
-    if (value) {
-        petRule.register();
-        return;
-    }
-    petRule.unregister();
-})
+Settings.registerListener('Display Auto Pet Rules', v => v ? petRule.register() : petRule.unregister());
 
 const petRule = register('chat', (event) => {
     const chat = ChatLib.getChatMessage(event, true);

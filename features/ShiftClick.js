@@ -1,16 +1,10 @@
 import Settings from "../config";
 
 const containerList = ['Trades', 'Your Equipment and Stats']
-
-Settings.registerListener('Shift Click', value => {
-    if (value) {
-        shiftClick.register();
-    } else {
-        shiftClick.unregister();
-    }
-})
+const guiContainer = Java.type('net.minecraft.client.gui.inventory.GuiContainer')
 
 const shiftClick = register('guiMouseClick', (mx, my, btn, gui, event) => {
+    if (!(gui instanceof guiContainer)) return;
     const container = Player.getContainer()
     const guiName = container?.getName();
     if (!containerList.includes(guiName)) return;
@@ -19,6 +13,8 @@ const shiftClick = register('guiMouseClick', (mx, my, btn, gui, event) => {
     cancel(event)
     container.click(slotIndex, true, 'LEFT');
 }).unregister();
+
+Settings.registerListener('Shift Click', v => v ? shiftClick.register() : shiftClick.unregister());
 
 if (Settings.toggleShiftClick) {
     shiftClick.register();
