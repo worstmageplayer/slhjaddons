@@ -65,9 +65,13 @@ function updateScoreboardLines() {
     updateScoreboardPosition();
 }
 
+const GameSettings = Client.getMinecraft().field_71474_y;
+
 function updateScoreboardPosition() {
-    screenWidth = Renderer.screen.getWidth();
-    screenHeight = Renderer.screen.getHeight();
+    const guiScale = GameSettings.field_74335_Z
+    const rendererScale = Renderer.screen.getScale() // Patcher inventory scale thing
+    screenWidth = Renderer.screen.getWidth() * rendererScale / guiScale;
+    screenHeight = Renderer.screen.getHeight() * rendererScale / guiScale;
 
     xPos = (screenWidth - scoreboardOffset) / scoreboardScale - width;
     yPos = (screenHeight / scoreboardScale - height) / 2;
