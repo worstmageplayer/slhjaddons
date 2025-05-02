@@ -2,69 +2,92 @@
 import Settings from "../config";
 import { RegisterGroup } from "../utils/RegisterStuff";
 
-const pfHelper = register('guiRender', (mx, my, gui) => {
-    const container = Player.getContainer();
-    if (!container || container.getName() !== "Party Finder") return; // Checks if in Party Finder
-    
-    const classCounts = { A: 0, B: 0, M: 0, H: 0, T: 0 };
-    const itemList = container.getItems(); // Gets lists of items in gui
-    
-    for (let i = 0; i < itemList.length; i++) {
-        const item = itemList[i] // Gets item
-        const name = item?.getName()?.removeFormatting();
-        if (!name || !name.endsWith("'s Party")) continue; // Checks item
+let partyList = []
+let mostWanted = "None"
+let leastWanted = "None"
 
-        const lore = item.getLore();
-        if (!lore[2].removeFormatting().endsWith("Floor VII")) continue; // Checks for f7/m7
-
-        const missing = getMissingClasses(lore); // Gets the missing classes e.g. ["H", "T"]
-        if (!missing.length) continue;
+const pfHelper = new RegisterGroup({
+    guiMouseClick: register('guiMouseClick', (mx, my, btn, gui, event) => {
+        Client.scheduleTask(10, () => {
+            const container = Player.getContainer();
+            if (!container || container.getName() !== "Party Finder") return; // Checks in Party Finder
             
-        const slot = gui.field_147002_h?.func_75139_a(i) // Gets the slot of the item
-        const x = slot.field_75223_e + gui?.getGuiLeft() ?? 0; // Gets the position of the slot
-        const y = slot.field_75221_f + gui?.getGuiTop() ?? 0;
-
-        const positions = [   // Position of the classes to be rendered in the slot
-            [x + 1, y],       // TL
-            [x + 10, y],      // TR
-            [x + 1, y + 9],   // BL
-            [x + 10, y + 9],  // BR
-        ];
-
-        for (let i = 0; i < missing.length && i < 4; i++) { // Renders the missing classes in the slot
-            Renderer.translate(0, 0, 260);
-            Renderer.drawString(missing[i], positions[i][0], positions[i][1], true);
-        }
-
-        for (const cls of missing) { // Increments count of how many times each class is needed
-            if (cls in classCounts) classCounts[cls]++;
-        }
-    }
+            const itemList = container.getItems();
+            partyList = getPartyList(itemList, gui); // Array of objects {"slot":11,"missing":["H"],"position":[[135,79]]}
     
-    const entries = Object.entries(classCounts);
-    const maxCount = Math.max(...entries.map(e => e[1])); // Gets the highest count
-    const minCount = Math.min(...entries.map(e => e[1])); // Gets the lowest count
+            const classCounts = { A: 0, B: 0, M: 0, H: 0, T: 0 };
     
-    const mostWanted = entries // Gets the classes with the most count
-        .filter(([_, count]) => count === maxCount)
-        .map(([cls]) => cls)
-        .join(", ") || "None";
+            for (const p of partyList) { // Counts the missing classes
+                for (const cls of p.missing) {
+                    if (cls in classCounts) classCounts[cls]++;
+                }
+            }
     
-    const leastWanted = entries // Gets the classes with the least count
-        .filter(([_, count]) => count === minCount)
-        .map(([cls]) => cls)
-        .join(", ") || "None";
+            const entries = Object.entries(classCounts);
+            const max = Math.max(...entries.map(([_, v]) => v)); // Gets the largest number
+            const min = Math.min(...entries.map(([_, v]) => v)); // Gets the lowest number
+    
+            mostWanted = entries.filter(([_, v]) => v === max && v > 0).map(([k]) => k).join(", ") || "None";
+            leastWanted = entries.filter(([_, v]) => v === min && v > 0).map(([k]) => k).join(", ") || "None";
+        });
+    }).unregister(),
 
-    // Renders the most and least wanted class
-    Renderer.drawStringWithShadow(`Most Wanted: ${mostWanted}\nLeast Wanted: ${leastWanted}`, 10, 10);
-}).unregister()
-
+    guiRender: register('guiRender', (mx, my, gui) => {
+        const container = Player.getContainer();
+        if (!container || container.getName() !== "Party Finder") return; // Checks if in Party Finder
+        if (partyList.length < 1) return;
+        partyList.forEach(p => {
+            for (let i = 0; i < p.missing.length; i++) {
+                Renderer.translate(0, 0, 260);
+                Renderer.drawString(p.missing[i], p.position[i][0], p.position[i][1], true)
+            }
+        });
+    
+        Renderer.drawString(`Most Wanted: ${mostWanted}\nLeast Wanted: ${leastWanted}`, 10, 10, true);
+    }).unregister(),
+})
 
 Settings.registerListener("Party Finder Helper", v => v ? pfHelper.register() : pfHelper.unregister());
 
 if (Settings.togglePartyFinderHelper) {
     pfHelper.register();
 }
+
+function getPartyList(itemList, gui) {
+    let partyList = [];
+    for (let i = 0; i < itemList.length; i++) {
+        let item = itemList[i];
+        let name = item?.getName();
+        if (!name || !name.endsWith("'s Party")) continue;
+
+        let lore = item.getLore();
+        if (!lore[2].removeFormatting().endsWith("Floor VII")) continue;
+
+        let missing = getMissingClasses(lore);
+        if (missing.length === 0) continue;
+
+        let slot = gui.field_147002_h?.func_75139_a(i);
+        if (!slot) continue;
+
+        let x = slot.field_75223_e + (gui?.getGuiLeft() ?? 0);
+        let y = slot.field_75221_f + (gui?.getGuiTop() ?? 0);
+
+        let positions = [
+            [x + 1, y],
+            [x + 10, y],
+            [x + 1, y + 9],
+            [x + 10, y + 9],
+        ].slice(0, missing.length)  ;
+
+        partyList.push({
+            slot: i,
+            missing: missing,
+            position: positions,
+        });
+    }
+    return partyList;
+}
+
 
 const getMissingClasses = (lore) => {
     const required = ["A", "B", "M", "H", "T"];
