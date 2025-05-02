@@ -3,13 +3,18 @@ import Settings from "../config";
 
 // Golden Fish
 const goldenFishAlert = register("Chat", (message, event) => {
+    renderOverlay.register();
+}).setCriteria('You spot a Golden Fish surface from beneath the lava!').unregister();
+
+const renderOverlay = register('renderOverlay', () => {
     Renderer.drawString(
         '&6Golden Fish&r', 
         Renderer.screen.getWidth()/2 - Renderer.getStringWidth('&6Golden Fish&r')/2, 
         Renderer.screen.getHeight()/2, 
         true
     );
-}).setCriteria('You spot a Golden Fish surface from beneath the lava!').unregister();
+    Client.scheduleTask(60, () => renderOverlay.unregister())
+}).unregister()
 
 Settings.registerListener('Golden Fish Alert', v => v ? goldenFishAlert.register() : goldenFishAlert.unregister());
 
