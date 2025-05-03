@@ -27,12 +27,15 @@ const pfHelper = new RegisterGroup({
                     p.missing.forEach(cls => classCounts[cls]++);
                 }); 
         
-                const entries = Object.entries(classCounts);
-                const max = Math.max(...entries.map(([_, v]) => v)); // Gets the largest number
-                const min = Math.min(...entries.map(([_, v]) => v)); // Gets the lowest number
+                const values = Object.values(classCounts);
+                const max = Math.max(...values);
+                const min = Math.min(...values);
 
-                mostWanted = entries.filter(([_, v]) => v === max && v > 0).map(([k]) => k).join(", ") || "None";
-                leastWanted = entries.filter(([_, v]) => v === min).map(([k]) => k).join(", ") || "None";
+                const maxKeys = Object.keys(classCounts).filter(k => classCounts[k] === max && max > 0);
+                const minKeys = Object.keys(classCounts).filter(k => classCounts[k] === min);
+
+                mostWanted = maxKeys.length ? maxKeys.join(", ") : "None";
+                leastWanted = minKeys.length ? minKeys.join(", ") : "None";
             });
         }).unregister(),
 
