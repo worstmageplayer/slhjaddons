@@ -6,12 +6,6 @@ let partyList = []
 let mostWanted = "None"
 let leastWanted = "None"
 
-const reset = () => {
-    partyList = []
-    mostWanted = "None"
-    leastWanted = "None"
-}
-
 const pfHelper = new RegisterGroup({
         guiMouseClick: register('guiMouseClick', (mx, my, btn, gui, event) => {
             Client.scheduleTask(10, () => {
@@ -36,6 +30,7 @@ const pfHelper = new RegisterGroup({
 
                 mostWanted = maxKeys.length ? maxKeys.join(", ") : "None";
                 leastWanted = minKeys.length ? minKeys.join(", ") : "None";
+                guiClosed.register();
             });
         }).unregister(),
 
@@ -52,14 +47,14 @@ const pfHelper = new RegisterGroup({
     
         Renderer.drawString(`Most Wanted: ${mostWanted}\nLeast Wanted: ${leastWanted}`, 10, 10, true);
     }).unregister(),
-
-    guiClosed: register('guiClosed', () => {
-        const container = Player.getContainer();
-        if (container && container.getName() === "Party Finder") {
-            reset();
-        }
-    }).unregister()
 })
+
+const guiClosed = register('guiClosed', () => {
+    partyList = []
+    mostWanted = "None"
+    leastWanted = "None"
+    guiClosed.unregister();
+}).unregister();
 
 Settings.registerListener("Party Finder Helper", v => v ? pfHelper.register() : pfHelper.unregister());
 
@@ -67,7 +62,7 @@ if (Settings.togglePartyFinderHelper) {
     pfHelper.register();
 }
 
-function getPartyList(itemList, gui) {
+const getPartyList = (itemList, gui) => {
     let partyList = [];
     for (let i = 0; i < itemList.length; i++) {
         let item = itemList[i];
