@@ -13,30 +13,28 @@ const reset = () => {
 }
 
 const pfHelper = new RegisterGroup({
-    guiMouseClick: register('guiMouseClick', (mx, my, btn, gui, event) => {
-        Client.scheduleTask(10, () => {
-            const container = Player.getContainer();
-            if (!container || container.getName() !== "Party Finder") return; // Checks in Party Finder
-            
-            const itemList = container.getItems();
-            partyList = getPartyList(itemList, gui); // Array of objects {"slot":11,"missing":["H"],"position":[[135,79]]}
-    
-            const classCounts = { A: 0, B: 0, M: 0, H: 0, T: 0 };
-    
-            for (const p of partyList) { // Counts the missing classes
-                for (const cls of p.missing) {
-                    if (cls in classCounts) classCounts[cls]++;
-                }
-            }
-    
-            const entries = Object.entries(classCounts);
-            const max = Math.max(...entries.map(([_, v]) => v)); // Gets the largest number
-            const min = Math.min(...entries.map(([_, v]) => v)); // Gets the lowest number
-    
-            mostWanted = entries.filter(([_, v]) => v === max && v > 0).map(([k]) => k).join(", ") || "None";
-            leastWanted = entries.filter(([_, v]) => v === min && v > 0).map(([k]) => k).join(", ") || "None";
-        });
-    }).unregister(),
+        guiMouseClick: register('guiMouseClick', (mx, my, btn, gui, event) => {
+            Client.scheduleTask(10, () => {
+                const container = Player.getContainer();
+                if (!container || container.getName() !== "Party Finder") return; // Checks in Party Finder
+                
+                const itemList = container.getItems();
+                partyList = getPartyList(itemList, gui); // Array of objects {"slot":11,"missing":["H"],"position":[[135,79]]}
+        
+                const classCounts = { A: 0, B: 0, M: 0, H: 0, T: 0 };
+        
+                partyList.forEach(p => {
+                    p.missing.forEach(cls => classCounts[cls]++);
+                }); 
+        
+                const entries = Object.entries(classCounts);
+                const max = Math.max(...entries.map(([_, v]) => v)); // Gets the largest number
+                const min = Math.min(...entries.map(([_, v]) => v)); // Gets the lowest number
+
+                mostWanted = entries.filter(([_, v]) => v === max && v > 0).map(([k]) => k).join(", ") || "None";
+                leastWanted = entries.filter(([_, v]) => v === min).map(([k]) => k).join(", ") || "None";
+            });
+        }).unregister(),
 
     guiRender: register('guiRender', (mx, my, gui) => {
         const container = Player.getContainer();
