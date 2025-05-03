@@ -58,7 +58,7 @@ const pfHelper = new RegisterGroup({
         if (container && container.getName() === "Party Finder") {
             reset();
         }
-    })
+    }).unregister()
 })
 
 Settings.registerListener("Party Finder Helper", v => v ? pfHelper.register() : pfHelper.unregister());
