@@ -1,58 +1,55 @@
 // Party Finder Helper ------------------
 import Settings from "../config";
-import { RegisterGroup } from "../utils/RegisterStuff";
 
 let partyList = []
 let mostWanted = "None"
 let leastWanted = "None"
 
-const pfHelper = new RegisterGroup({
-        guiMouseClick: register('guiMouseClick', (mx, my, btn, gui, event) => {
-            Client.scheduleTask(10, () => {
-                const container = Player.getContainer();
-                if (!container || container.getName() !== "Party Finder") return; // Checks in Party Finder
-                
-                const itemList = container.getItems();
-                partyList = getPartyList(itemList, gui); // Array of objects {"slot":11,"missing":["H"],"position":[[135,79]]}
-        
-                const classCounts = { A: 0, B: 0, M: 0, H: 0, T: 0 };
-        
-                partyList.forEach(p => {
-                    p.missing.forEach(cls => classCounts[cls]++);
-                }); 
-        
-                const values = Object.values(classCounts);
-                const max = Math.max(...values);
-                const min = Math.min(...values);
-
-                const maxKeys = Object.keys(classCounts).filter(k => classCounts[k] === max && max > 0);
-                const minKeys = Object.keys(classCounts).filter(k => classCounts[k] === min);
-
-                mostWanted = maxKeys.length ? maxKeys.join(", ") : "None";
-                leastWanted = minKeys.length ? minKeys.join(", ") : "None";
-                guiClosed.register();
-            });
-        }).unregister(),
-
-    guiRender: register('guiRender', (mx, my, gui) => {
+const pfHelper = register('guiMouseClick', (mx, my, btn, gui, event) => {
+    Client.scheduleTask(10, () => {
         const container = Player.getContainer();
-        if (!container || container.getName() !== "Party Finder") return; // Checks if in Party Finder
-        if (partyList.length < 1) return;
+        if (!container || container.getName() !== "Party Finder") return; // Checks in Party Finder
+        
+        const itemList = container.getItems();
+        partyList = getPartyList(itemList, gui); // Array of objects {"slot":11,"missing":["H"],"position":[[135,79]]}
+
+        const classCounts = { A: 0, B: 0, M: 0, H: 0, T: 0 };
+
         partyList.forEach(p => {
-            for (let i = 0; i < p.missing.length; i++) {
-                Renderer.translate(0, 0, 260);
-                Renderer.drawString(p.missing[i], p.position[i][0], p.position[i][1], true)
-            }
-        });
-    
-        Renderer.drawString(`Most Wanted: ${mostWanted}\nLeast Wanted: ${leastWanted}`, 10, 10, true);
-    }).unregister(),
-})
+            p.missing.forEach(cls => classCounts[cls]++);
+        }); 
+
+        const values = Object.values(classCounts);
+        const max = Math.max(...values);
+        const min = Math.min(...values);
+
+        const maxKeys = Object.keys(classCounts).filter(k => classCounts[k] === max && max > 0);
+        const minKeys = Object.keys(classCounts).filter(k => classCounts[k] === min);
+
+        mostWanted = maxKeys.length ? maxKeys.join(", ") : "None";
+        leastWanted = minKeys.length ? minKeys.join(", ") : "None";
+        guiRender.register();
+        guiClosed.register();
+    });
+}).unregister()
+
+const guiRender = register('guiRender', (mx, my, gui) => {
+    if (partyList.length < 1) return;
+    partyList.forEach(p => {
+        for (let i = 0; i < p.missing.length; i++) {
+            Renderer.translate(0, 0, 260);
+            Renderer.drawString(p.missing[i], p.position[i][0], p.position[i][1], true)
+        }
+    });
+
+    Renderer.drawString(`Most Wanted: ${mostWanted}\nLeast Wanted: ${leastWanted}`, 10, 10, true);
+}).unregister()
 
 const guiClosed = register('guiClosed', () => {
     partyList = []
     mostWanted = "None"
     leastWanted = "None"
+    guiRender.unregister();
     guiClosed.unregister();
 }).unregister();
 
