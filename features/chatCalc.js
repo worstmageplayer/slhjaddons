@@ -35,10 +35,10 @@ register('Command', (...args) => {
 register('Command', (...args) => {
     let expression = args.join('').toLowerCase();
     if (!expression || expression.toLowerCase() === 'help') {
-        return [
+        ChatLib.chat([
             "How to use /calc:",
             "- /calc expression (e.g. /calc sin(pi/2) + 3^2)"
-        ].join("\n");
+        ].join("\n"));
     }
     ChatLib.chat(calculator(expression));
     dev.log('---------------------------');
