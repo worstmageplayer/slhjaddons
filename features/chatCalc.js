@@ -34,6 +34,12 @@ register('Command', (...args) => {
 
 register('Command', (...args) => {
     let expression = args.join('').toLowerCase();
+    if (!expression || expression.toLowerCase() === 'help') {
+        return [
+            "How to use /calc:",
+            "- /calc expression (e.g. /calc sin(pi/2) + 3^2)"
+        ].join("\n");
+    }
     ChatLib.chat(calculator(expression));
     dev.log('---------------------------');
 }).setName('calc');
@@ -107,13 +113,6 @@ export function calculator(input) {
     dev.log('===Calculations===');
     dev.step = 1;
     dev.logStep("Starting calculation", input);
-
-    if (!input || input.toLowerCase() === 'help') {
-        return [
-            "How to use /calc:",
-            "- /calc expression (e.g. /calc sin(pi/2) + 3^2)"
-        ].join("\n");
-    }
 
     dev.logStep("Tokenizing expression", input);
     const tokens = splitMathExpression(input);
