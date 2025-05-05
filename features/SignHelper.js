@@ -1,30 +1,50 @@
 import Settings from "../config";
-import { inHypixel } from "../utils/WorldInfo";
+import { calculator, getFunctions } from "./chatCalc";
 
 const GuiEditSign = Java.type("net.minecraft.client.gui.inventory.GuiEditSign");
 const tileSign = GuiEditSign.class.getDeclaredField("field_146848_f");
 tileSign.setAccessible(true);
+let lines = null;
+let result = null;
+
+const guiOpened = register('guiOpened', () => {
+    Client.scheduleTask(10, () => {
+        const gui = Client.currentGui.get()
+
+        if (!(gui instanceof GuiEditSign)) return;
+        const tile = tileSign.get(Client.currentGui.get());
+        lines = tile?.field_145915_a;
+        if (!lines?.[0] || lines[1].func_150254_d().removeFormatting() !== "^^^^^^^^^^^^^^^") return;
+
+        guiRender.register();
+        guiClosed.register();
+    })
+}).unregister()
 
 const guiRender = register('guiRender', (mx, my, gui) => {
-    if (!inHypixel() || !(gui instanceof GuiEditSign)) return;
+    const raw = lines[0].func_150254_d().removeFormatting().trim();
+    if (!raw) return;
+    result = calculator(raw)
+    const display = result == raw ? addCommas(result.toString()) : `${raw} = ${addCommas(result.toString())}`
 
-    const tile = tileSign.get(Client.currentGui.get());
-    const lines = tile?.field_145915_a;
-    if (!lines?.[0] || lines[2].func_150254_d().removeFormatting() !== "Enter amount") return;
+    Renderer.drawString(display, (Renderer.screen.getWidth() - Renderer.getStringWidth(display)) / 2, 55, true);
+}).unregister()
 
-    const raw = lines[0].func_150254_d().removeFormatting();
-    const formatted = addCommas(raw);
-    Renderer.drawString(formatted, (Renderer.screen.getWidth() - Renderer.getStringWidth(formatted)) / 2, 55, true);
-}).unregister();
+const guiClosed = register('guiClosed', (gui) => {
+    if (!isNaN(result)) lines[0] = new net.minecraft.util.IChatComponent.Serializer().func_150699_a(`"${result}"`);
 
-Settings.registerListener("Sign Helper", v => v ? guiRender.register() : guiRender.unregister());
+    lines = null;
+    result = null;
+    guiRender.unregister();
+    guiClosed.unregister();
+}).unregister()
 
-if (Settings.toggleSignHelper) guiRender.register();
+Settings.registerListener("Sign Helper", v => v ? guiOpened.register() : guiOpened.unregister());
+if (Settings.toggleSignHelper) guiOpened.register();
 
 function addCommas(input) {
     const num = Number(input);
     if (isNaN(num)) return "0";
-
     const [intPart, decPart] = num.toString().split(".");
     return intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (decPart ? `.${decPart}` : "");
 }

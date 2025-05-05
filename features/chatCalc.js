@@ -103,7 +103,7 @@ function defineFunction(input) {
     return `Defined function: ${input}`;
 }
 
-function calculator(input) {
+export function calculator(input) {
     dev.log('===Calculations===');
     dev.step = 1;
     dev.logStep("Starting calculation", input);

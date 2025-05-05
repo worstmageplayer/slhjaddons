@@ -13,8 +13,6 @@ let scoreboardShadow = Settings.toggleScoreboardShadow;
 let scoreboardPadding = Settings.scoreboardPadding;
 let scoreboardOffset = Settings.scoreboardOffset;
 let scoreboardColour = Settings.scoreboardColour.getRGB();
-let scoreboardHeader = Settings.scoreboardHeader;
-let scoreboardFooter = Settings.scoreboardFooter;
 
 const hiddenLine = '§ewww.hypixel.ne🎂§et';
 const S3EPacketTeams = Java.type('net.minecraft.network.play.server.S3EPacketTeams')
@@ -38,9 +36,6 @@ Settings.registerListener("Scoreboard Shadow", value => scoreboardShadow = value
 Settings.registerListener("Scoreboard Padding", value => scoreboardPadding = value)
 Settings.registerListener("Scoreboard Offset", value => scoreboardOffset = value)
 Settings.registerListener("Scoreboard Colour", value => scoreboardColour = value.getRGB())
-Settings.registerListener("Scoreboard Header", value => scoreboardHeader = value)
-Settings.registerListener("Scoreboard Footer", value => scoreboardFooter = value)
-
 Settings.registerListener('Custom Scoreboard', v => v ? scoreboard.register() : scoreboard.unregister());
 
 if (Settings.toggleCustomScoreboard) {
