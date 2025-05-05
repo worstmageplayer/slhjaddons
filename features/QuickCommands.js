@@ -16,7 +16,7 @@ const guiQuickCommands = new Gui();
 
 let hoveredSection = -1;
 let mouseX = 0, mouseY = 0, dx = 0, dy = 0;
-let deadZone = false;
+let deadZone = true;
 let innerPoints = [];
 let angleOffset = - pi / 2;
 let showCommandString = Settings.toggleShowCommandString
@@ -53,6 +53,7 @@ const quickRelease = register('tick', () => {
     if (!deadZone) quickCommands(getMouseSection());
     guiQuickCommands.close();
     quickRelease.unregister();
+    deadZone = true;
 }).unregister();
 
 // Quick Commands Gui
