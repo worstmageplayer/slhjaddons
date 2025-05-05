@@ -2,7 +2,7 @@
 import Settings from "../config";
 
 const devMode = Settings.devCalc;
-
+Settings.registerListener('Calc BeDugging', v => devMode = v)
 const dev = {
     step: 1,
     logStep: (msg, detail = "") => devMode && console.log(`Step ${dev.step++}: ${msg}${detail ? ' → ' + detail : ''}`),
