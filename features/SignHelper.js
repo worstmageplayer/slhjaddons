@@ -1,5 +1,5 @@
 import Settings from "../config";
-import { calculator, getFunctions } from "./chatCalc";
+import { calculator } from "./chatCalc";
 
 const GuiEditSign = Java.type("net.minecraft.client.gui.inventory.GuiEditSign");
 const tileSign = GuiEditSign.class.getDeclaredField("field_146848_f");
