@@ -1,7 +1,7 @@
 // Credits to chatGPT
 import Settings from "../config";
 
-const devMode = Settings.devCalc;
+let devMode = Settings.devCalc;
 Settings.registerListener('Calc BeDugging', v => devMode = v)
 const dev = {
     step: 1,
