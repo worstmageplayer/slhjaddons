@@ -80,7 +80,7 @@ guiQuickCommands.registerDraw(() => {
     }
 
     if (deadZone || !showCommandString) return;
-    const commandName = `/${commandsList[getMouseSection()]}`;
+    const commandName = `/${commandsList[hoveredSection]}`;
     Renderer.drawString(commandName, Client.getMouseX() + 2, Client.getMouseY() - 7, true);
 
     // Draw deadzone
