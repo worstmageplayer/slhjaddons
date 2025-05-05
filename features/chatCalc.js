@@ -121,8 +121,8 @@ export function calculator(input) {
     const expandedTokens = expandDefinedFunctions(tokens);
     if (typeof expandedTokens === 'string') return expandedTokens;
 
-    dev.logStep("Replacing suffixes");
-    const expandedSuffix = expandSuffixes(expandedTokens);
+    dev.logStep("Replacing function names");
+    const expandedSuffix = replaceFunctionsInArray(expandSuffixes(expandedTokens));
 
     dev.logStep("Replacing function names");
     const replacedArray = replaceFunctionsInArray(expandedSuffix);
@@ -141,15 +141,22 @@ export function calculator(input) {
 }
 
 function expandSuffixes(tokens) {
-    return tokens.map(token => {
-        const match = token.match(/^(\d*\.?\d*)([kmb])$/i);
-        if (!match) return token;
-        const [, number, suffix] = match;
-        const multiplier = suffix.toLowerCase() === 'k' ? 1e3 :
-                           suffix.toLowerCase() === 'm' ? 1e6 :
-                           suffix.toLowerCase() === 'b' ? 1e9 : 1;
-        return (parseFloat(number) * multiplier).toString();
-    });
+    const multipliers = { k: '1000', m: '1000000', b: '1000000000' };
+    const result = [];
+
+    for (let token of tokens) {
+        const match = token.match(/^(\d*\.?\d+)([kmb])$/i);
+        if (match) {
+            const [, number, suffix] = match;
+            result.push(number, '*', multipliers[suffix.toLowerCase()]);
+        } else if (multipliers[token.toLowerCase()]) {
+            result.push('*', multipliers[token.toLowerCase()]);
+        } else {
+            result.push(token);
+        }
+    }
+
+    return result;
 }
 
 function formatResult(result) {
