@@ -15,7 +15,6 @@ let guiHoverColour = Settings.quickCommandsHoverColour.getRGB();
 const guiQuickCommands = new Gui();
 
 let hoveredSection = -1;
-let mouseX = 0, mouseY = 0, dx = 0, dy = 0;
 let deadZone = true;
 let innerPoints = [];
 let angleOffset = - pi / 2;
@@ -50,23 +49,22 @@ quickCommandsKeyBind.registerKeyPress(() => {
 const quickRelease = register('tick', () => {
     const isDown = Keyboard.isKeyDown(quickCommandsKeyBind.getKeyCode());
     if (isDown) return;
-    if (!deadZone) quickCommands(getMouseSection());
+    if (!deadZone) quickCommands(hoveredSection);
     guiQuickCommands.close();
     quickRelease.unregister();
     deadZone = true;
+    hoveredSection = -1;
 }).unregister();
 
 // Quick Commands Gui
 guiQuickCommands.registerDraw(() => {
-    mouseX = Client.getMouseX();
-    mouseY = Client.getMouseY();
-    dx = mouseX - screenWidth / 2;
-    dy = mouseY - screenHeight / 2;
+    const mouseX = Client.getMouseX(), mouseY = Client.getMouseY();
+    const dx = mouseX - screenWidth / 2, dy = mouseY - screenHeight / 2;
 
     deadZone = pointInPolygon(mouseX, mouseY, innerPoints);
 
     if (!deadZone) {
-        hoveredSection = getMouseSection();
+        hoveredSection = getMouseSection(dx, dy);
     } else {
         hoveredSection = -1;
     }
@@ -132,7 +130,7 @@ function generateShapesVertex(screenWidth, screenHeight, innerRadius, outerRadiu
     }
 }
 
-function getMouseSection() {
+function getMouseSection(dx, dy) {
     let angle = Math.atan2(dy, dx) + (pi / 2);
     if (angle < 0) angle += 2 * pi;
 
