@@ -121,8 +121,11 @@ export function calculator(input) {
     const expandedTokens = expandDefinedFunctions(tokens);
     if (typeof expandedTokens === 'string') return expandedTokens;
 
+    dev.logStep("Replacing suffixes");
+    const expandedSuffix = expandSuffixes(expandedTokens);
+
     dev.logStep("Replacing function names");
-    const replacedArray = replaceFunctionsInArray(expandedTokens);
+    const replacedArray = replaceFunctionsInArray(expandedSuffix);
 
     const joinedExpression = replacedArray.join('');
     dev.logStep("Final JS expression", joinedExpression);
@@ -135,6 +138,18 @@ export function calculator(input) {
         dev.logStep("Error", e.message);
         return "Invalid expression.";
     }
+}
+
+function expandSuffixes(tokens) {
+    return tokens.map(token => {
+        const match = token.match(/^(\d*\.?\d*)([kmb])$/i);
+        if (!match) return token;
+        const [, number, suffix] = match;
+        const multiplier = suffix.toLowerCase() === 'k' ? 1e3 :
+                           suffix.toLowerCase() === 'm' ? 1e6 :
+                           suffix.toLowerCase() === 'b' ? 1e9 : 1;
+        return (parseFloat(number) * multiplier).toString();
+    });
 }
 
 function formatResult(result) {
