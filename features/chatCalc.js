@@ -1,5 +1,5 @@
 // Credits to chatGPT
-import Settings from "../config";
+import Settings from "../config";   
 
 let devMode = Settings.devCalc;
 Settings.registerListener('Calc BeDugging', v => devMode = v)
@@ -122,7 +122,7 @@ export function calculator(input) {
     if (typeof expandedTokens === 'string') return expandedTokens;
 
     dev.logStep("Replacing function names");
-    const expandedSuffix = replaceFunctionsInArray(expandSuffixes(expandedTokens));
+    const expandedSuffix = expandSuffixes(expandedTokens);
 
     dev.logStep("Replacing function names");
     const replacedArray = replaceFunctionsInArray(expandedSuffix);
@@ -145,9 +145,9 @@ function expandSuffixes(tokens) {
     const result = [];
 
     for (let token of tokens) {
-        const match = token.match(/^(\d*\.?\d+)([kmb])$/i);
+        let match = token.match(/^(\d*\.?\d+)([kmb])$/i);
         if (match) {
-            const [, number, suffix] = match;
+            let [, number, suffix] = match;
             result.push(number, '*', multipliers[suffix.toLowerCase()]);
         } else if (multipliers[token.toLowerCase()]) {
             result.push('*', multipliers[token.toLowerCase()]);
@@ -155,7 +155,7 @@ function expandSuffixes(tokens) {
             result.push(token);
         }
     }
-
+    dev.logStep("Replacing Suffix: " + result)
     return result;
 }
 
