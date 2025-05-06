@@ -6,7 +6,7 @@ let mostWanted = "None"
 let leastWanted = "None"
 
 const pfHelper = register('guiMouseClick', (mx, my, btn, gui, event) => {
-    Client.scheduleTask(10, () => {
+    Client.scheduleTask(5, () => {
         const container = Player.getContainer();
         if (!container || container.getName() !== "Party Finder") return; // Checks in Party Finder
         
@@ -33,7 +33,7 @@ const pfHelper = register('guiMouseClick', (mx, my, btn, gui, event) => {
     });
 }).unregister()
 
-const guiRender = register('guiRender', (mx, my, gui) => {
+const guiRender = register('guiRender', () => {
     if (partyList.length < 1) return;
     partyList.forEach(p => {
         for (let i = 0; i < p.missing.length; i++) {
