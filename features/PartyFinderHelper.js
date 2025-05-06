@@ -83,7 +83,7 @@ const getPartyList = (itemList, gui) => {
             [x + 10, y],
             [x + 1, y + 9],
             [x + 10, y + 9],
-        ].slice(0, missing.length)  ;
+        ].slice(0, missing.length);
 
         partyList.push({
             slot: i,
