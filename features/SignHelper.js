@@ -8,7 +8,7 @@ tileSign.setAccessible(true);
 let lines = result = display = null;
 
 const guiOpened = register('guiOpened', () => {
-    Client.scheduleTask(5, () => {
+    Client.scheduleTask(0, () => {
         const gui = Client.currentGui.get()
 
         if (!(gui instanceof GuiEditSign)) return;
