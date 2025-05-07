@@ -5,11 +5,12 @@ let partyList = []
 let mostWanted = "None"
 let leastWanted = "None"
 
-const pfHelper = register('guiMouseClick', (mx, my, btn, gui, event) => {
-    Client.scheduleTask(5, () => {
+const pfHelper = register('guiMouseClick', () => {
+    Client.scheduleTask(10, () => {
         const container = Player.getContainer();
         if (!container || container.getName() !== "Party Finder") return; // Checks in Party Finder
         
+        const gui = Client.currentGui.get()
         const itemList = container.getItems();
         partyList = getPartyList(itemList, gui); // Array of objects {"slot":11,"missing":["H"],"position":[[135,79]]}
 
