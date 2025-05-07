@@ -105,6 +105,7 @@ function defineFunction(input) {
     };
 
     definedFunctions.set(name, funcObject);
+    dev.log(`Function defined: ${name}(${rawVariables})=${rawExpression}`);
     return `Defined function: ${input}`;
 }
 
@@ -167,8 +168,6 @@ function formatResult(result) {
 }
 
 function expandDefinedFunctions(tokens) {
-    const key = tokens.join(',');
-
     dev.log('===Expand Functions===');
     dev.logStep("Expanding functions for tokens:", JSON.stringify(tokens));
 
@@ -197,7 +196,10 @@ function expandDefinedFunctions(tokens) {
                 j++;
             }
 
-            if (args.length !== func.variables.length) return `Invalid number of arguments for ${func.name}`;
+            if (args.length !== func.variables.length) {
+                dev.logStep(`Invalid number of arguments for ${func.name}, expected ${func.variables.length}, got ${args.length}`);
+                return `Invalid number of arguments for ${func.name}`
+            };
 
             let substituted = func.expression;
             args.forEach((argTokens, idx) => {
