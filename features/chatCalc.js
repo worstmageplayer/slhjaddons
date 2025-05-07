@@ -38,6 +38,7 @@ register('Command', (...args) => {
             "How to use /calc:",
             "- /calc expression (e.g. /calc sin(pi/2) + 3^2)"
         ].join("\n"));
+        return;
     }
     const result = calculator(expression)
     const text = new TextComponent(result)
