@@ -16,19 +16,16 @@ const pfHelper = register('guiMouseClick', () => {
 
         const classCounts = { A: 0, B: 0, M: 0, H: 0, T: 0 };
 
-        partyList.forEach(p => {
-            p.missing.forEach(cls => classCounts[cls]++);
-        }); 
+        partyList.forEach(p => p.missing.forEach(cls => classCounts[cls]++));
 
-        const values = Object.values(classCounts);
-        const max = Math.max(...values);
-        const min = Math.min(...values);
-
+        const max = Math.max(...Object.values(classCounts));
+        const min = Math.min(...Object.values(classCounts));
         const maxKeys = Object.keys(classCounts).filter(k => classCounts[k] === max && max > 0);
         const minKeys = Object.keys(classCounts).filter(k => classCounts[k] === min);
 
         mostWanted = maxKeys.length ? maxKeys.join(", ") : "None";
         leastWanted = minKeys.length ? minKeys.join(", ") : "None";
+        
         guiRender.register();
         guiClosed.register();
     });
@@ -61,48 +58,46 @@ if (Settings.togglePartyFinderHelper) {
 }
 
 const getPartyList = (itemList, gui) => {
-    let partyList = [];
-    for (let i = 0; i < itemList.length; i++) {
-        let item = itemList[i];
-        let name = item?.getName();
-        if (!name || !name.endsWith("'s Party")) continue;
+    const partyList = [];
+    const guiLeft = gui?.getGuiLeft() ?? 0;
+    const guiTop = gui?.getGuiTop() ?? 0;
 
-        let lore = item.getLore();
-        if (!lore[2].removeFormatting().endsWith("Floor VII")) continue;
+    itemList.forEach((item, i) => {
+        const name = item?.getName();
+        if (!name || !name.endsWith("'s Party")) return;
 
-        let missing = getMissingClasses(lore);
-        if (missing.length === 0) continue;
+        const lore = item.getLore();
+        if (!lore[2].removeFormatting().endsWith("Floor VII")) return;
 
-        let slot = gui.field_147002_h?.func_75139_a(i);
-        if (!slot) continue;
+        const missing = getMissingClasses(lore);
+        if (missing.length === 0) return;
 
-        let x = slot.field_75223_e + (gui?.getGuiLeft() ?? 0);
-        let y = slot.field_75221_f + (gui?.getGuiTop() ?? 0);
+        const slot = gui.field_147002_h?.func_75139_a(i);
+        if (!slot) return;
 
-        let positions = [
+        const x = slot.field_75223_e + guiLeft;
+        const y = slot.field_75221_f + guiTop;
+        const positions = [
             [x + 1, y],
             [x + 10, y],
             [x + 1, y + 9],
             [x + 10, y + 9],
         ].slice(0, missing.length);
 
-        partyList.push({
-            slot: i,
-            missing: missing,
-            position: positions,
-        });
-    }
+        partyList.push({ slot: i, missing, position: positions });
+    });
+
     return partyList;
 }
 
-
 const getMissingClasses = (lore) => {
-    const required = ["A", "B", "M", "H", "T"];
+    const required = new Set(["A", "B", "M", "H", "T"]);
     const found = new Set();
 
-    for (const line of lore.slice(4, -1)) {
+    lore.slice(4, -1).forEach(line => {
         const match = line.removeFormatting().match(/: ?\(?([ABMHT])\)?/);
         if (match) found.add(match[1]);
-    }
-    return required.filter(cls => !found.has(cls));
-};
+    });
+
+    return [...required].filter(cls => !found.has(cls));
+}
