@@ -12,7 +12,6 @@ const dev = {
 
 const definedFunctions = new Map();
 const tolerance = 1e-7;
-const expandCache = new Map();
 
 const functionMap = {
     'sin': 'Math.sin', 'cos': 'Math.cos', 'tan': 'Math.tan',
@@ -169,7 +168,6 @@ function formatResult(result) {
 
 function expandDefinedFunctions(tokens) {
     const key = tokens.join(',');
-    if (expandCache.has(key)) return expandCache.get(key);
 
     dev.log('===Expand Functions===');
     dev.logStep("Expanding functions for tokens:", JSON.stringify(tokens));
@@ -215,7 +213,6 @@ function expandDefinedFunctions(tokens) {
     }
 
     dev.indent(`Expanded tokens: ${JSON.stringify(tokens)}`);
-    expandCache.set(key, tokens);
     return tokens;
 }
 
