@@ -39,7 +39,10 @@ register('Command', (...args) => {
             "- /calc expression (e.g. /calc sin(pi/2) + 3^2)"
         ].join("\n"));
     }
-    ChatLib.chat(calculator(expression));
+    const result = calculator(expression)
+    const text = new TextComponent(result)
+    text.setHover('show_text', `${expression} = ${result}`)
+    ChatLib.chat(text);
     dev.log('---------------------------');
 }).setName('calc');
 
