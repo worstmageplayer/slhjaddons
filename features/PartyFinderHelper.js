@@ -12,11 +12,10 @@ const pfHelper = register('guiMouseClick', () => {
         if (!container || container.getName() !== "Party Finder") return; // Checks in Party Finder
 
         const tblst = TabList.getNames();
-        for (let i = 0; i < tblst.length; i++) {
-            if (tblst[i].includes('Dungeons:')) {
-                const classLine = tblst[i+2].removeFormatting().trim();
-                playerClass = classLine.match(/^[A-Za-z]/)[0];
-            }
+        const playerClassLine = tblst.find(line => line.includes('Dungeons:'));
+        if (playerClassLine) {
+            const classLine = tblst[tblst.indexOf(playerClassLine) + 2].removeFormatting().trim();
+            playerClass = classLine.match(/^[A-Za-z]/)[0];
         }
         
         const gui = Client.currentGui.get()
