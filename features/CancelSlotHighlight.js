@@ -1,6 +1,7 @@
 // Cancel Slot Highlight ----------------
 import Settings from "../config";
 import { RegisterGroup } from "../utils/RegisterStuff";
+import { drawHollowRect } from "../utils/RendererStuff";
 
 let slotHighlightColour = Renderer.color(255, 255, 255, 170)
 let renderCustomSlotHighlight = Settings.toggleCustomSlotHighlight;
@@ -25,11 +26,4 @@ const cancelSlotHighlight = new RegisterGroup({
 
 if (Settings.toggleCancelSlotHighlight) {
     cancelSlotHighlight.register();
-}
-
-function drawHollowRect(color, x, y, width, height, thickness = 1) {
-    Renderer.drawRect(color, x, y, width, thickness);
-    Renderer.drawRect(color, x, y + height - thickness, width, thickness);
-    Renderer.drawRect(color, x, y + thickness, thickness, height - 2 * thickness);
-    Renderer.drawRect(color, x + width - thickness, y + thickness, thickness, height - 2 * thickness);
 }

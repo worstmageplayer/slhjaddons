@@ -1,6 +1,7 @@
 // Party Finder Helper ------------------
 import Settings from "../config";
-import { data } from "../data"
+import { data } from "../data";
+import { drawHollowRect } from "../utils/RendererStuff";
 
 let partyList = []
 let mostWanted = "None"
@@ -55,6 +56,7 @@ const guiRender = register('guiRender', () => {
 
             if (Settings.toggleHighlightPF && cls === data.player.class) {
                 let [x, y] = p.slotPos
+                Renderer.translate(0, 0, 1);
                 drawHollowRect(Renderer.color(0, 170, 0), x, y, 16, 16, 1)
             }   
         }
@@ -125,15 +127,4 @@ const getMissingClasses = (lore) => {
     });
 
     return [...required].filter(cls => !found.has(cls));
-}
-
-function drawHollowRect(color, x, y, width, height, thickness = 1) {
-    Renderer.translate(0, 0, 1);
-    Renderer.drawRect(color, x, y, width, thickness);
-    Renderer.translate(0, 0, 1);
-    Renderer.drawRect(color, x, y + height - thickness, width, thickness);
-    Renderer.translate(0, 0, 1);
-    Renderer.drawRect(color, x, y + thickness, thickness, height - 2 * thickness);
-    Renderer.translate(0, 0, 1);
-    Renderer.drawRect(color, x + width - thickness, y + thickness, thickness, height - 2 * thickness);
 }
