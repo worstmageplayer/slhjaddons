@@ -49,9 +49,9 @@ const guiRender = register('guiRender', () => {
             Renderer.translate(0, 0, 260);
             Renderer.drawString(cls, x, y, true)
 
-            if (cls === playerClass) {
-                Renderer.translate(0, 0, 1);
-                Renderer.drawRect(Renderer.color(0, 170, 0), p.slotPos[0], p.slotPos[1], 16, 16)
+            if (Settings.toggleHighlightPF && cls === playerClass) {
+                let [x, y] = p.slotPos
+                drawHollowRect(Renderer.color(0, 170, 0), x, y, 16, 16, 1)
             }   
         }
     });
@@ -121,4 +121,15 @@ const getMissingClasses = (lore) => {
     });
 
     return [...required].filter(cls => !found.has(cls));
+}
+
+function drawHollowRect(color, x, y, width, height, thickness = 1) {
+    Renderer.translate(0, 0, 1);
+    Renderer.drawRect(color, x, y, width, thickness);
+    Renderer.translate(0, 0, 1);
+    Renderer.drawRect(color, x, y + height - thickness, width, thickness);
+    Renderer.translate(0, 0, 1);
+    Renderer.drawRect(color, x, y + thickness, thickness, height - 2 * thickness);
+    Renderer.translate(0, 0, 1);
+    Renderer.drawRect(color, x + width - thickness, y + thickness, thickness, height - 2 * thickness);
 }

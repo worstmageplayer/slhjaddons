@@ -147,6 +147,14 @@ class Settings {
 	togglePartyFinderHelper = false;
 
     @SwitchProperty({
+		name: 'Party Highlight',
+		description: 'Highlights the parties that are missing the class you have.',
+		category: 'Dungeons',
+        subcategory: 'Party Finder'
+	})
+	toggleHighlightPF = false;
+
+    @SwitchProperty({
 		name: 'Blood Time',
 		description: 'Display time after blood opens. Enter blood at 10s for slightly faster watcher move.',
 		category: 'Dungeons',
