@@ -19,7 +19,7 @@ const pfHelper = register('guiMouseClick', () => {
             playerClass = classLine.match(/^[A-Za-z]/)[0];
             if (playerClass !== data.player.class) {
                 data.player.class = playerClass
-                data.save()
+                data.save() // when change class in "Dungeon Classes" and leave world without opening pf, does not save
             }
         }
         
