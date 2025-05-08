@@ -4,11 +4,20 @@ import Settings from "../config";
 let partyList = []
 let mostWanted = "None"
 let leastWanted = "None"
+let playerClass = ''
 
 const pfHelper = register('guiMouseClick', () => {
     Client.scheduleTask(10, () => {
         const container = Player.getContainer();
         if (!container || container.getName() !== "Party Finder") return; // Checks in Party Finder
+
+        const tblst = TabList.getNames();
+        for (let i = 0; i < tblst.length; i++) {
+            if (tblst[i].includes('Dungeons:')) {
+                const classLine = tblst[i+2].removeFormatting().trim();
+                playerClass = classLine.match(/^[A-Za-z]/)[0];
+            }
+        }
         
         const gui = Client.currentGui.get()
         const itemList = container.getItems();
@@ -35,8 +44,15 @@ const guiRender = register('guiRender', () => {
     if (partyList.length < 1) return;
     partyList.forEach(p => {
         for (let i = 0; i < p.missing.length; i++) {
+            let cls = p.missing[i];
+            let [x, y] = p.position[i];
             Renderer.translate(0, 0, 260);
-            Renderer.drawString(p.missing[i], p.position[i][0], p.position[i][1], true)
+            Renderer.drawString(cls, x, y, true)
+
+            if (cls === playerClass) {
+                Renderer.translate(0, 0, 1);
+                Renderer.drawRect(Renderer.color(0, 170, 0), p.slotPos[0], p.slotPos[1], 16, 16)
+            }   
         }
     });
 
@@ -84,7 +100,12 @@ const getPartyList = (itemList, gui) => {
             [x + 10, y + 9],
         ].slice(0, missing.length);
 
-        partyList.push({ slot: i, missing, position: positions });
+        partyList.push({ 
+            slot: i, 
+            missing, 
+            position: positions, 
+            slotPos: [x, y] 
+        });
     });
 
     return partyList;
