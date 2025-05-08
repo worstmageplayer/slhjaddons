@@ -11,5 +11,9 @@ export const data = new PogObject("slhjaddons", {
         x: 0,
         y: 0,
         scale: 1
+    },
+
+    player: {
+        class: 'M'
     }
 }, "data.json")

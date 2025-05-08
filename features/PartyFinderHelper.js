@@ -1,5 +1,6 @@
 // Party Finder Helper ------------------
 import Settings from "../config";
+import { data } from "../data"
 
 let partyList = []
 let mostWanted = "None"
@@ -16,6 +17,10 @@ const pfHelper = register('guiMouseClick', () => {
         if (playerClassLine) {
             const classLine = tblst[tblst.indexOf(playerClassLine) + 2].removeFormatting().trim();
             playerClass = classLine.match(/^[A-Za-z]/)[0];
+            if (playerClass !== data.player.class) {
+                data.player.class = playerClass
+                data.save()
+            }
         }
         
         const gui = Client.currentGui.get()
@@ -48,7 +53,7 @@ const guiRender = register('guiRender', () => {
             Renderer.translate(0, 0, 260);
             Renderer.drawString(cls, x, y, true)
 
-            if (Settings.toggleHighlightPF && cls === playerClass) {
+            if (Settings.toggleHighlightPF && cls === data.player.class) {
                 let [x, y] = p.slotPos
                 drawHollowRect(Renderer.color(0, 170, 0), x, y, 16, 16, 1)
             }   
