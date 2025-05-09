@@ -151,9 +151,7 @@ export class ToggleButton {
 
     drag(mx, my) {
         if (!this.clicked) return
-        const relativeX = mx - this.x
-        const newState = relativeX >= this.width / 2
-        this.state = newState
+        this.state = (mx - this.x) >= this.width / 2
     }
 
     getState() {
