@@ -11,22 +11,24 @@ const hideHotbar = register('renderHotbar', (event) => {
     if (prevHeld === null || currentHeld !== prevHeld) {
         prevHeld = currentHeld;
         lastSwitchTime = now;
-
+    
         if (isHidden) {
             hideExperience.unregister();
             isHidden = false;
         }
         return;
     }
-
-    if (now - lastSwitchTime >= 5000) {
-        cancel(event);
-
-        if (!isHidden) {
-            hideExperience.register();
-            isHidden = true;
-        }
+    
+    if (now - lastSwitchTime < 5000) return;
+    
+    cancel(event);
+    
+    if (!isHidden) {
+        hideExperience.register();
+        isHidden = true;
     }
+    
+
 }).unregister();
 
 const hideExperience = register('renderExperience', (event) => {
