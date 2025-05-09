@@ -6,7 +6,6 @@ import { drawHollowRect } from "../utils/RendererStuff";
 let partyList = []
 let mostWanted = "None"
 let leastWanted = "None"
-let playerClass = ''
 
 const pfHelper = register('guiMouseClick', () => {
     Client.scheduleTask(10, () => {
@@ -17,7 +16,7 @@ const pfHelper = register('guiMouseClick', () => {
         const playerClassLine = tblst.find(line => line.includes('Dungeons:'));
         if (playerClassLine) {
             const classLine = tblst[tblst.indexOf(playerClassLine) + 2].removeFormatting().trim();
-            playerClass = classLine.match(/^[A-Za-z]/)[0];
+            const playerClass = classLine.match(/^[A-Za-z]/)[0];
             if (playerClass !== data.player.class) {
                 data.player.class = playerClass
                 data.save() // when change class in "Dungeon Classes" and leave world without opening pf, does not save
