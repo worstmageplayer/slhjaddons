@@ -1,4 +1,4 @@
-// Each element creates its own gui...
+// Each element creates its own guiManager...
 // Will change it tomorrow
 // Also have to implement pogobject
 
@@ -56,7 +56,7 @@ export class Slider {
      * @param {Object} [bgColour=Renderer.color(0, 0, 0, 170)] - The background color of the slider.
      * @param {Object} [sliderColour=Renderer.color(255, 255, 255, 170)] - The color of the filled portion of the slider.
      */
-    constructor(gui, x, y, width = 100, height = 10, defaultValue = 50, min = 0, max = 100, bgColour = Renderer.color(0, 0, 0, 170), sliderColour = Renderer.color(255, 255, 255, 255)) {
+    constructor(guiManager, x, y, width = 100, height = 10, defaultValue = 50, min = 0, max = 100, bgColour = Renderer.color(0, 0, 0, 170), sliderColour = Renderer.color(255, 255, 255, 255)) {
         this.x = x
         this.y = y
         this.width = width
@@ -68,10 +68,10 @@ export class Slider {
         this.bgColour = bgColour
         this.sliderColour = sliderColour
 
-        gui.registerDraw(this.draw.bind(this))
-        gui.registerClicked(this.click.bind(this))
-        gui.registerMouseReleased(() => this.clicked = false)
-        gui.registerMouseDragged(this.drag.bind(this))
+        guiManager.registerDraw(this.draw.bind(this))
+        guiManager.registerClicked(this.click.bind(this))
+        guiManager.registerMouseReleased(() => this.clicked = false)
+        guiManager.registerMouseDragged(this.drag.bind(this))
     }
 
     /**
@@ -126,7 +126,7 @@ export class Slider {
 }
 
 export class ToggleButton {
-    constructor(gui, x, y, width = 25, height = 10, defaultState = false, onColor = Renderer.color(0, 255, 0, 170), offColor = Renderer.color(0, 0, 0, 170), knobColor = Renderer.color(255, 255, 255, 255)) {
+    constructor(guiManager, x, y, width = 25, height = 10, defaultState = false, onColor = Renderer.color(0, 255, 0, 170), offColor = Renderer.color(0, 0, 0, 170), knobColor = Renderer.color(255, 255, 255, 255)) {
         this.x = x
         this.y = y
         this.width = width
@@ -137,10 +137,10 @@ export class ToggleButton {
         this.knobColor = knobColor
         this.clicked = false
 
-        gui.registerDraw(this.draw.bind(this))
-        gui.registerClicked(this.click.bind(this))
-        gui.registerMouseReleased(() => this.clicked = false)
-        gui.registerMouseDragged(this.drag.bind(this))
+        guiManager.registerDraw(this.draw.bind(this))
+        guiManager.registerClicked(this.click.bind(this))
+        guiManager.registerMouseReleased(() => this.clicked = false)
+        guiManager.registerMouseDragged(this.drag.bind(this))
     }
 
     draw(mx, my) {
@@ -174,7 +174,7 @@ export class ToggleButton {
 }
 
 export class MultiCheckbox {
-    constructor(gui, x, y, items = [], states = [], width = 100, height = 20, onColor = Renderer.color(255, 255, 255, 170), offColor = Renderer.color(0, 0, 0, 170)) {
+    constructor(guiManager, x, y, items = [], states = [], width = 100, height = 20, onColor = Renderer.color(255, 255, 255, 170), offColor = Renderer.color(0, 0, 0, 170)) {
         this.x = x
         this.y = y
         this.width = width
@@ -184,8 +184,8 @@ export class MultiCheckbox {
         this.onColor = onColor
         this.offColor = offColor
 
-        gui.registerDraw(this.draw.bind(this))
-        gui.registerClicked(this.click.bind(this))
+        guiManager.registerDraw(this.draw.bind(this))
+        guiManager.registerClicked(this.click.bind(this))
     }
 
     draw(mx, my) {

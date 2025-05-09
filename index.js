@@ -30,12 +30,12 @@ register("command", Settings.openGUI).setName("slhjaddons").setAliases("slhj");
 // test below
 import { GuiManager, Slider, ToggleButton, MultiCheckbox} from "./utils/InputGuiStuff"
 
-const realGui = new Gui()
-const gui = new GuiManager(realGui)
+const gui = new Gui()
+const guiManager = new GuiManager(gui)
 const items = ["Option 1", "Option 2", "Option 3"];
 
-const s = new Slider(gui, 100, 50, undefined, undefined, undefined, 10, 50)
-const b = new ToggleButton(gui, 100, 75)
-const multiCheckbox = new MultiCheckbox(gui, 100, 100, items);
+const s = new Slider(guiManager, 100, 50, undefined, undefined, undefined, 20, 70)
+const b = new ToggleButton(guiManager, 100, 75)
+const multiCheckbox = new MultiCheckbox(guiManager, 100, 100, items);
 
-register('command', () => realGui.open()).setName('guiinput')
+register('command', () => gui.open()).setName('guiinput')
