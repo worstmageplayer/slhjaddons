@@ -152,7 +152,7 @@ function expandSuffixes(tokens) {
         let match = token.match(/^(\d*\.?\d+)([kmb])$/i);
         if (match) {
             let [, number, suffix] = match;
-            result.push(number, '*', multipliers[suffix.toLowerCase()]);
+            result.push('(', number, '*', multipliers[suffix.toLowerCase()], ')');
         } else if (multipliers[token.toLowerCase()]) {
             result.push('*', multipliers[token.toLowerCase()]);
         } else {
