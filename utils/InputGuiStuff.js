@@ -125,9 +125,12 @@ export class ToggleButton {
         this.onColor = onColor
         this.offColor = offColor
         this.knobColor = knobColor
+        this.clicked = false
 
         gui.registerDraw(this.draw.bind(this))
         gui.registerClicked(this.click.bind(this))
+        gui.registerMouseReleased(() => this.clicked = false)
+        gui.registerMouseDragged(this.drag.bind(this))
     }
 
     draw(mx, my) {
@@ -141,8 +144,16 @@ export class ToggleButton {
 
     click(mx, my) {
         if (mx >= this.x && mx <= this.x + this.width && my >= this.y && my <= this.y + this.height) {
+            this.clicked = true
             this.state = !this.state
         }
+    }
+
+    drag(mx, my) {
+        if (!this.clicked) return
+        const relativeX = mx - this.x
+        const newState = relativeX >= this.width / 2
+        this.state = newState
     }
 
     getState() {
