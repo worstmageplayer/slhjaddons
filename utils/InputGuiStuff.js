@@ -72,7 +72,6 @@ export class Slider {
         Renderer.drawRect(this.bgColour, this.x, this.y, this.width, this.height)
         const fillWidth = (this.value / 100) * this.width
         Renderer.drawRect(this.sliderColour, this.x, this.y, fillWidth, this.height)
-        Renderer.drawString(`${Math.round(this.value)}`, this.x + this.width + 5, this.y + (this.height / 2) - 4, true)
     }
 
     /**
