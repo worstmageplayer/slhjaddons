@@ -28,3 +28,12 @@ import Settings from "./config";
 
 register("command", Settings.openGUI).setName("slhjaddons").setAliases("slhj");
 // test below
+import { GuiManager, Slider, ToggleButton } from "./utils/InputGuiStuff"
+
+const realGui = new Gui()
+const gui = new GuiManager(realGui)
+
+const s = new Slider(gui, 100, 50, undefined, undefined, undefined, 10, 50)
+const b = new ToggleButton(gui, 100, 100)
+
+register('command', () => realGui.open()).setName('guiopen')
