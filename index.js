@@ -28,12 +28,14 @@ import Settings from "./config";
 
 register("command", Settings.openGUI).setName("slhjaddons").setAliases("slhj");
 // test below
-import { GuiManager, Slider, ToggleButton } from "./utils/InputGuiStuff"
+import { GuiManager, Slider, ToggleButton, MultiCheckbox} from "./utils/InputGuiStuff"
 
 const realGui = new Gui()
 const gui = new GuiManager(realGui)
+const items = ["Option 1", "Option 2", "Option 3"];
 
 const s = new Slider(gui, 100, 50, undefined, undefined, undefined, 10, 50)
-const b = new ToggleButton(gui, 100, 100)
+const b = new ToggleButton(gui, 100, 75)
+const multiCheckbox = new MultiCheckbox(gui, 100, 100, items);
 
-register('command', () => realGui.open()).setName('guiopen')
+register('command', () => realGui.open()).setName('guiinput')

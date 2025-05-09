@@ -1,6 +1,11 @@
 // Each element creates its own gui...
 // Will change it tomorrow
 // Also have to implement pogobject
+
+/**
+ * Manages GUI event registration and dispatching for multiple components.
+ * Use this to avoid conflicts when multiple GUI elements need to respond to the same events.
+ */
 export class GuiManager {
     constructor(gui) {
         this.gui = gui
@@ -8,11 +13,13 @@ export class GuiManager {
         this.clicks = []
         this.releases = []
         this.drags = []
+        this.keys = []
 
         this.gui.registerDraw((mx, my) => this.draws.forEach(fn => fn(mx, my)))
         this.gui.registerClicked((mx, my, btn) => this.clicks.forEach(fn => fn(mx, my, btn)))
         this.gui.registerMouseReleased(() => this.releases.forEach(fn => fn()))
         this.gui.registerMouseDragged((mx, my, btn) => this.drags.forEach(fn => fn(mx, my, btn)))
+        this.gui.registerKeyTyped((char, keyCode) => this.keys.forEach(fn => fn(char, keyCode)))
     }
 
     registerDraw(fn) {
@@ -29,6 +36,10 @@ export class GuiManager {
 
     registerMouseDragged(fn) {
         this.drags.push(fn)
+    }
+
+    registerKeyTyped(fn) {
+        this.keys.push(fn)
     }
 }
 
@@ -159,5 +170,60 @@ export class ToggleButton {
 
     setState(newState) {
         this.state = newState
+    }
+}
+
+export class MultiCheckbox {
+    constructor(gui, x, y, items = [], states = [], width = 100, height = 20, onColor = Renderer.color(255, 255, 255, 170), offColor = Renderer.color(0, 0, 0, 170)) {
+        this.x = x
+        this.y = y
+        this.width = width
+        this.height = height
+        this.items = items
+        this.states = states.length ? states : new Array(items.length).fill(false)
+        this.onColor = onColor
+        this.offColor = offColor
+
+        gui.registerDraw(this.draw.bind(this))
+        gui.registerClicked(this.click.bind(this))
+    }
+
+    draw(mx, my) {
+        for (let i = 0; i < this.items.length; i++) {
+            let boxColor = this.states[i] ? this.onColor : this.offColor
+            let boxX = this.x
+            let boxY = this.y + (i * (this.height + 5))
+
+            Renderer.drawRect(boxColor, boxX, boxY, this.width, this.height)
+
+            if (this.states[i]) {
+                let padding = 4
+                Renderer.drawLine(boxX + padding, boxY + padding, boxX + this.width - padding, boxY + this.height - padding, 2, Renderer.color(255, 255, 255))
+                Renderer.drawLine(boxX + this.width - padding, boxY + padding, boxX + padding, boxY + this.height - padding, 2, Renderer.color(255, 255, 255))
+            }
+
+            Renderer.drawString(this.items[i], boxX + 5, boxY + (this.height / 2) - 4, true)
+        }
+    }
+
+    click(mx, my) {
+        for (let i = 0; i < this.items.length; i++) {
+            let boxX = this.x
+            let boxY = this.y + (i * (this.height + 5))
+
+            if (mx >= boxX && mx <= boxX + this.width && my >= boxY && my <= boxY + this.height) {
+                this.states[i] = !this.states[i]
+            }
+        }
+    }
+
+    getStates() {
+        return this.states
+    }
+
+    setStates(newStates) {
+        if (newStates.length === this.items.length) {
+            this.states = newStates
+        }
     }
 }
