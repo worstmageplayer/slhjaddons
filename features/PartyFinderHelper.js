@@ -1,12 +1,12 @@
 // Party Finder Helper ------------------
 import Settings from "../config";
-import { PlayerStats } from "../utils/PlayerStats";
 import { data } from "../data";
 import { drawHollowRect } from "../utils/RendererStuff";
+import { RegisterGroup } from "../utils/RegisterStuff";
 
-let partyList = []
-let mostWanted = "None"
-let leastWanted = "None"
+let partyList = null
+let mostWanted = null
+let leastWanted = null
 
 const pfHelper = register('guiMouseClick', () => {
     Client.scheduleTask(10, () => {
@@ -26,41 +26,42 @@ const pfHelper = register('guiMouseClick', () => {
         const maxKeys = Object.keys(classCounts).filter(k => classCounts[k] === max && max > 0);
         const minKeys = Object.keys(classCounts).filter(k => classCounts[k] === min);
 
-        mostWanted = maxKeys.length ? maxKeys.join(", ") : "None";
-        leastWanted = minKeys.length ? minKeys.join(", ") : "None";
+        mostWanted = maxKeys.length > 0 ? maxKeys.join(", ") : "None";
+        leastWanted = minKeys.length > 0 ? minKeys.join(", ") : "None";
         
-        guiRender.register();
-        guiClosed.register();
+        pfStuff.register();
     });
 }).unregister()
 
-const guiRender = register('guiRender', () => {
-    if (partyList.length < 1) return;
-    partyList.forEach(p => {
-        for (let i = 0; i < p.missing.length; i++) {
-            let cls = p.missing[i];
-            let [x, y] = p.position[i];
-            Renderer.translate(0, 0, 260);
-            Renderer.drawString(cls, x, y, true)
+const pfStuff = new RegisterGroup({
+    guiRender: register('guiRender', () => {
+        if (!partyList) return;
 
-            if (Settings.toggleHighlightPF && cls === data.player.dungeon.class.charAt(0)) {
-                let [x, y] = p.slotPos
-                Renderer.translate(0, 0, 1);
-                drawHollowRect(Renderer.color(0, 170, 0), x, y, 16, 16, 1)
-            }   
-        }
-    });
+        partyList.forEach(p => {
+            for (let i = 0; i < p.missing.length; i++) {
+                let cls = p.missing[i];
+                let [x, y] = p.position[i];
+                Renderer.translate(0, 0, 260);
+                Renderer.drawString(cls, x, y, true)
 
-    Renderer.drawString(`Most Wanted: ${mostWanted}\nLeast Wanted: ${leastWanted}`, 10, 10, true);
-}).unregister()
+                if (Settings.toggleHighlightPF && cls === data.player.dungeon.class.charAt(0)) {
+                    let [x, y] = p.slotPos
+                    Renderer.translate(0, 0, 1);
+                    drawHollowRect(Renderer.color(0, 170, 0), x, y, 16, 16, 1)
+                }   
+            }
+        });
 
-const guiClosed = register('guiClosed', () => {
-    partyList = []
-    mostWanted = "None"
-    leastWanted = "None"
-    guiRender.unregister();
-    guiClosed.unregister();
-}).unregister();
+        Renderer.drawString(`Most Wanted: ${mostWanted}\nLeast Wanted: ${leastWanted}`, 10, 10, true)
+    }).unregister(),
+
+    guiClosed: register('guiClosed', () => {
+        partyList = null
+        mostWanted = null
+        leastWanted = null
+        pfStuff.unregister();
+    }).unregister(),
+})
 
 Settings.registerListener("Party Finder Helper", v => v ? pfHelper.register() : pfHelper.unregister());
 
