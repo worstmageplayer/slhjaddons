@@ -67,6 +67,7 @@ export class PlayerStats {
             if (!container || container.getName() !== "Dungeon Classes") return;
 
             for (const item of container.getItems()) {
+                if (!item) continue;
                 const name = item.getName().removeFormatting();
                 const match = name.match(/\[\s*Lvl\s+(\d+)\]\s*(\w+)/);
                 if (!match) continue;
@@ -88,7 +89,7 @@ export class PlayerStats {
         };
 
         register('guiMouseClick', () => {
-            checkSelectedClass();
+            Client.scheduleTask(10, checkSelectedClass);
         });
 
         register('guiClosed', () => {
