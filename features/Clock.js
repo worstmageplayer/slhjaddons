@@ -51,11 +51,12 @@ function updateClockPosition() {
     screenWidth = Renderer.screen.getWidth();
     width = Renderer.getStringWidth(currentTime);
 
-    if (clockPosition === 0) {
-        xPos = clockPadding / clockScale;
-        yPos = clockPadding / clockScale;
-    } else if (clockPosition === 1) {
-        xPos = (screenWidth - width * clockScale - clockPadding) / clockScale;
-        yPos = clockPadding / clockScale;
-    }
+    const positions = [
+        { xPos: clockPadding / clockScale, yPos: clockPadding / clockScale },
+        { xPos: (screenWidth - width * clockScale - clockPadding) / clockScale, yPos: clockPadding / clockScale }
+    ];
+
+    const position = positions[clockPosition] || positions[0];
+    xPos = position.xPos;
+    yPos = position.yPos;
 }
