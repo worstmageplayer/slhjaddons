@@ -256,7 +256,6 @@ export class RadioButtons {
         this.selectedIndex = selectedIndex
         this.onColor = onColor
         this.offColor = offColor
-        this.hoveredIndex = -1
 
         guiManager.registerDraw(this.draw.bind(this))
         guiManager.registerClicked(this.click.bind(this))
@@ -281,14 +280,12 @@ export class RadioButtons {
 
             if (mx >= boxX && mx <= boxX + this.width && my >= boxY && my <= boxY + this.height) {
                 this.selectedIndex = i
-                this.hoveredIndex = i
                 break
-            }
+            }   
         }
     }
 
     release() {
-        this.hoveredIndex = -1
     }
 
     getSelectedIndex() {
