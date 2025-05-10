@@ -62,31 +62,37 @@ export class PlayerStats {
     }
 
     updateDungeonClass() {
-        register('guiMouseClick', () => {
-            Client.scheduleTask(10, () => {
-                const container = Player.getContainer();
-                if (!container || container.getName() !== "Dungeon Classes") return;
+        const checkSelectedClass = () => {
+            const container = Player.getContainer();
+            if (!container || container.getName() !== "Dungeon Classes") return;
 
-                for (const item of container.getItems()) {
-                    const name = item.getName().removeFormatting();
-                    const match = name.match(/\[\s*Lvl\s+(\d+)\]\s*(\w+)/);
-                    if (!match) continue;
+            for (const item of container.getItems()) {
+                const name = item.getName().removeFormatting();
+                const match = name.match(/\[\s*Lvl\s+(\d+)\]\s*(\w+)/);
+                if (!match) continue;
 
-                    const lore = item.getLore();
-                    if (!lore.some(line => line.removeFormatting() === 'SELECTED')) continue;
+                const lore = item.getLore();
+                if (!lore.some(line => line.removeFormatting() === 'SELECTED')) continue;
 
-                    const newLevel = +match[1];
-                    const newClass = match[2];
+                const newLevel = +match[1];
+                const newClass = match[2];
 
-                    if (newClass !== data.player.dungeon.class || newLevel !== data.player.dungeon.classLevel) {
-                        data.player.dungeon.class = newClass;
-                        data.player.dungeon.classLevel = newLevel;
-                        data.save();
-                        ChatLib.chat('SELECTED CLASS: ' + newClass);
-                    }
-                    break;
+                if (newClass !== data.player.dungeon.class || newLevel !== data.player.dungeon.classLevel) {
+                    data.player.dungeon.class = newClass;
+                    data.player.dungeon.classLevel = newLevel;
+                    data.save();
+                    ChatLib.chat(`§a§lSELECTED CLASS: §r§e§l${newClass}§r`);
                 }
-            });
+                break;
+            }
+        };
+
+        register('guiMouseClick', () => {
+            checkSelectedClass();
+        });
+
+        register('guiClosed', () => {
+            checkSelectedClass();
         });
     }
 
