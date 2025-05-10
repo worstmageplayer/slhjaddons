@@ -80,7 +80,7 @@ export class PlayerStats {
                     data.player.dungeon.class = newClass;
                     data.player.dungeon.classLevel = newLevel;
                     data.save();
-                    ChatLib.chat(`§a§lSELECTED CLASS: §r§e§l${newClass}§r`);
+                    ChatLib.chat(`§a§lSELECTED CLASS: §r§e§l${newClass} ${newLevel}§r`);
                 }
                 break;
             }
