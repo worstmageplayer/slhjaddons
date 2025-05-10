@@ -1,4 +1,3 @@
-import { WorldInfo } from "./WorldInfo";
 import { data } from "../data";
 
 const S02PacketChat = Java.type('net.minecraft.network.play.server.S02PacketChat');
@@ -7,7 +6,6 @@ const healthRegex = /([\d,]+)\/([\d,]+)❤/;
 const manaRegex = /([\d,]+)\/([\d,]+)✎/;
 const overflowRegex = /([\d,]+)ʬ/;
 const defenseRegex = /([\d,]+)❈ Defense/;
-const worldInfo = new WorldInfo
 let lastPacketTime = 0;
 
 export class PlayerStats {
@@ -64,33 +62,32 @@ export class PlayerStats {
     }
 
     updateDungeonClass() {
-        register('packetReceived', () => {
-            if (worldInfo.getArea() !== 'Dungeon Hub') return;
+        register('guiMouseClick', () => {
+            Client.scheduleTask(10, () => {
+                const container = Player.getContainer();
+                if (!container || container.getName() !== "Dungeon Classes") return;
 
-            const now = Date.now();
-            if (now - lastPacketTime < 200) return; // Ignore if it was too soon
+                for (const item of container.getItems()) {
+                    const name = item.getName().removeFormatting();
+                    const match = name.match(/\[\s*Lvl\s+(\d+)\]\s*(\w+)/);
+                    if (!match) continue;
 
-            lastPacketTime = now;
-            
-            const tblst = TabList.getNames();
-            const idx = tblst.findIndex(line => line.includes('Dungeons:'));
-            if (idx === -1 || idx + 2 >= tblst.length) return;
+                    const lore = item.getLore();
+                    if (!lore.some(line => line.removeFormatting() === 'SELECTED')) continue;
 
-            const levelLine = tblst[idx + 1].removeFormatting().trim();
-            const classLine = tblst[idx + 2].removeFormatting().trim();
+                    const newLevel = +match[1];
+                    const newClass = match[2];
 
-            const classMatch = classLine.match(/\b(Mage|Healer|Berserk|Archer|Tank)\b\s+(\d+)/);
-            const levelMatch = levelLine.match(/Catacombs\s+(\d+)/);
-
-            if (!classMatch || !levelMatch) return;
-
-            if (classMatch[1] !== data.player.dungeon.class || parseInt(levelMatch[1]) !== data.player.dungeon.level) {
-                data.player.dungeon.class = classMatch[1];
-                data.player.dungeon.classLevel = parseInt(classMatch[2]);
-                data.player.dungeon.level = parseInt(levelMatch[1]);
-                data.save();
-            }
-        }).setFilteredClass(S38PacketPlayerListItem);
+                    if (newClass !== data.player.dungeon.class || newLevel !== data.player.dungeon.classLevel) {
+                        data.player.dungeon.class = newClass;
+                        data.player.dungeon.classLevel = newLevel;
+                        data.save();
+                        ChatLib.chat('SELECTED CLASS: ' + newClass);
+                    }
+                    break;
+                }
+            });
+        });
     }
 
     worldUnload() {
