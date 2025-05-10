@@ -1,12 +1,10 @@
 import { data } from "../data";
 
 const S02PacketChat = Java.type('net.minecraft.network.play.server.S02PacketChat');
-const S38PacketPlayerListItem = Java.type('net.minecraft.network.play.server.S38PacketPlayerListItem')
 const healthRegex = /([\d,]+)\/([\d,]+)❤/;
 const manaRegex = /([\d,]+)\/([\d,]+)✎/;
 const overflowRegex = /([\d,]+)ʬ/;
 const defenseRegex = /([\d,]+)❈ Defense/;
-let lastPacketTime = 0;
 
 export class PlayerStats {
     constructor() {
