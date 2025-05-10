@@ -17,7 +17,6 @@ export const data = new PogObject("slhjaddons", {
         dungeon: {
             class: 'Mage',
             classLevel: 50,
-            level: 50
         }
     }
 }, "data.json")
