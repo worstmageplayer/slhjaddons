@@ -3,7 +3,6 @@ import Settings from "../config";
 import { RegisterGroup } from "../utils/RegisterStuff";
 import { drawHollowRect } from "../utils/RendererStuff";
 
-let slotHighlightColour = Renderer.color(255, 255, 255, 170)
 let renderCustomSlotHighlight = Settings.toggleCustomSlotHighlight;
 
 Settings.registerListener('Custom Slot Highlight', value => {
@@ -20,7 +19,7 @@ const cancelSlotHighlight = new RegisterGroup({
     
         const slotX = slot.field_75223_e;
         const slotY = slot.field_75221_f;
-        drawHollowRect(slotHighlightColour, slotX, slotY, 16, 16, 1.2);
+        drawHollowRect(Renderer.color(255, 255, 255, 170), slotX, slotY, 16, 16, 1.2);
     }).unregister()
 })
 
