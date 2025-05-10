@@ -1,7 +1,3 @@
-// Each element creates its own guiManager...
-// Will change it tomorrow
-// Also have to implement pogobject
-
 /**
  * Manages GUI event registration and dispatching for multiple components.
  * Use this to avoid conflicts when multiple GUI elements need to respond to the same events.
@@ -18,7 +14,7 @@ export class GuiManager {
         this.gui.registerDraw((mx, my) => this.draws.forEach(fn => fn(mx, my)))
         this.gui.registerClicked((mx, my, btn) => this.clicks.forEach(fn => fn(mx, my, btn)))
         this.gui.registerMouseReleased(() => this.releases.forEach(fn => fn()))
-        this.gui.registerMouseDragged((mx, my, btn) => this.drags.forEach(fn => fn(mx, my, btn)))
+        this.gui.registerMouseDragged((mx, my, btn, timeSinceLastClick) => this.drags.forEach(fn => fn(mx, my, btn, timeSinceLastClick)))
         this.gui.registerKeyTyped((char, keyCode) => this.keys.forEach(fn => fn(char, keyCode)))
     }
 
@@ -159,8 +155,9 @@ export class ToggleButton {
         }
     }
 
-    drag(mx, my) {
+    drag(mx, my, btn, timeSinceLastClick) {
         if (!this.clicked) return
+        if (timeSinceLastClick < 150) return
         this.state = (mx - this.x) >= this.width / 2
     }
 
@@ -227,8 +224,9 @@ export class MultiCheckbox {
         }
     }
 
-    drag(mx, my) {
+    drag(mx, my, btn, timeSinceLastClick) {
         if (!this.clicked) return
+        if (timeSinceLastClick < 50) return
 
         for (let i = 0; i < this.items.length; i++) {
             let boxX = this.x
