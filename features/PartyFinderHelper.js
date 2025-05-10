@@ -1,7 +1,10 @@
 // Party Finder Helper ------------------
 import Settings from "../config";
+import { PlayerStats } from "../utils/PlayerStats";
 import { data } from "../data";
 import { drawHollowRect } from "../utils/RendererStuff";
+
+const pStats = new PlayerStats()
 
 let partyList = []
 let mostWanted = "None"
@@ -11,17 +14,6 @@ const pfHelper = register('guiMouseClick', () => {
     Client.scheduleTask(10, () => {
         const container = Player.getContainer();
         if (!container || container.getName() !== "Party Finder") return; // Checks in Party Finder
-
-        const tblst = TabList.getNames();
-        const playerClassLine = tblst.find(line => line.includes('Dungeons:'));
-        if (playerClassLine) {
-            const classLine = tblst[tblst.indexOf(playerClassLine) + 2].removeFormatting().trim();
-            const playerClass = classLine.match(/^[A-Za-z]/)[0];
-            if (playerClass !== data.player.class) {
-                data.player.class = playerClass
-                data.save() // when change class in "Dungeon Classes" and leave world without opening pf, does not save
-            }
-        }
         
         const gui = Client.currentGui.get()
         const itemList = container.getItems();
@@ -53,7 +45,7 @@ const guiRender = register('guiRender', () => {
             Renderer.translate(0, 0, 260);
             Renderer.drawString(cls, x, y, true)
 
-            if (Settings.toggleHighlightPF && cls === data.player.class) {
+            if (Settings.toggleHighlightPF && cls === data.player.dungeon.class.charAt(0)) {
                 let [x, y] = p.slotPos
                 Renderer.translate(0, 0, 1);
                 drawHollowRect(Renderer.color(0, 170, 0), x, y, 16, 16, 1)
