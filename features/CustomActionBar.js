@@ -14,7 +14,7 @@ const customActionBar = new RegisterGroup({
         const x = (Renderer.screen.getWidth() - Renderer.getStringWidth(actionBarText)) / 2;
         const yPos = Renderer.screen.getHeight() - 72 + (isHealthCurrentlyHidden() ? 20 : 0);
         const y = currentY ? currentY : yPos
-        const yMove = move(y, yPos, 1.5)
+        const yMove = move(y, yPos, 10)
         currentY = Math.abs(yMove - yPos) < 0.1 ? yPos : yMove
         Renderer.drawStringWithShadow(actionBarText, x, y);
     }).unregister(),
@@ -33,8 +33,10 @@ const customActionBar = new RegisterGroup({
     }).unregister()
 })
 
-function move(start, end, amount) {
-    return start + (end - start) * amount;
+function move(start, end, distance) {
+    const delta = end - start;
+    if (Math.abs(delta) <= distance) return end;
+    return start + Math.sign(delta) * distance;
 }
 
 Settings.registerListener('Custom Action Bar', v => v ? customActionBar.register() : customActionBar.unregister());
