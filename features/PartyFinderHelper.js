@@ -4,8 +4,6 @@ import { PlayerStats } from "../utils/PlayerStats";
 import { data } from "../data";
 import { drawHollowRect } from "../utils/RendererStuff";
 
-const pStats = new PlayerStats()
-
 let partyList = []
 let mostWanted = "None"
 let leastWanted = "None"
