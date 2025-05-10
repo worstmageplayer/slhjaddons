@@ -281,7 +281,7 @@ export class RadioButtons {
             if (mx >= boxX && mx <= boxX + this.width && my >= boxY && my <= boxY + this.height) {
                 this.selectedIndex = i
                 break
-            }   
+            }
         }
     }
 
