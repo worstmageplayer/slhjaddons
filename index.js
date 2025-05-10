@@ -46,5 +46,5 @@ const multiCheckbox = new MultiCheckbox(guiManager, 100, 100, Settings.quickComm
 register('command', () => gui.open()).setName('guiinput')
 
 register('command', () => {
-    ChatLib.chat(data.player.dungeon.class + " " + data.player.dungeon.level)
+    ChatLib.chat(data.player.dungeon.class + " " + data.player.dungeon.classLevel + " " + data.player.dungeon.level)
 }).setName('test')

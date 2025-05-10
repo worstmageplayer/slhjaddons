@@ -8,6 +8,7 @@ const manaRegex = /([\d,]+)\/([\d,]+)✎/;
 const overflowRegex = /([\d,]+)ʬ/;
 const defenseRegex = /([\d,]+)❈ Defense/;
 const worldInfo = new WorldInfo
+let lastPacketTime = 0;
 
 export class PlayerStats {
     constructor() {
@@ -65,6 +66,11 @@ export class PlayerStats {
     updateDungeonClass() {
         register('packetReceived', () => {
             if (worldInfo.getArea() !== 'Dungeon Hub') return;
+
+            const now = Date.now();
+            if (now - lastPacketTime < 200) return; // Ignore if it was too soon
+
+            lastPacketTime = now;
             
             const tblst = TabList.getNames();
             const idx = tblst.findIndex(line => line.includes('Dungeons:'));
@@ -73,13 +79,14 @@ export class PlayerStats {
             const levelLine = tblst[idx + 1].removeFormatting().trim();
             const classLine = tblst[idx + 2].removeFormatting().trim();
 
-            const classMatch = classLine.match(/\b(Mage|Healer|Berserk|Archer|Tank)\b/);
+            const classMatch = classLine.match(/\b(Mage|Healer|Berserk|Archer|Tank)\b\s+(\d+)/);
             const levelMatch = levelLine.match(/Catacombs\s+(\d+)/);
 
             if (!classMatch || !levelMatch) return;
 
-            if (classMatch[0] !== data.player.dungeon.class || parseInt(levelMatch[1]) !== data.player.dungeon.level) {
-                data.player.dungeon.class = classMatch[0];
+            if (classMatch[1] !== data.player.dungeon.class || parseInt(levelMatch[1]) !== data.player.dungeon.level) {
+                data.player.dungeon.class = classMatch[1];
+                data.player.dungeon.classLevel = parseInt(classMatch[2]);
                 data.player.dungeon.level = parseInt(levelMatch[1]);
                 data.save();
             }
