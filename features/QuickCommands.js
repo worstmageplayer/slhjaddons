@@ -62,12 +62,7 @@ guiQuickCommands.registerDraw(() => {
     const dx = mouseX - screenWidth / 2, dy = mouseY - screenHeight / 2;
 
     deadZone = pointInPolygon(mouseX, mouseY, innerPoints);
-
-    if (!deadZone) {
-        hoveredSection = getMouseSection(dx, dy);
-    } else {
-        hoveredSection = -1;
-    }
+    hoveredSection = !deadZone ? getMouseSection(dx, dy) : -1;
 
     for (let i = 0; i < shapes.length; i++) {
         let colour = (i === hoveredSection) ? guiHoverColour : guiColour;
@@ -139,19 +134,25 @@ function getMouseSection(dx, dy) {
     return Math.floor(angle / sectionAngle);
 }
 
-function pointInPolygon(px, py, polygon) {
+function pointInPolygon(mx, my, polygon) {
     let inside = false;
     const len = polygon.length;
 
     for (let i = 0, j = len - 1; i < len; j = i++) {
-        let xi = polygon[i][0], yi = polygon[i][1];
-        let xj = polygon[j][0], yj = polygon[j][1];
+        let [xi, yi] = polygon[i];
+        let [xj, yj] = polygon[j];
 
-        if ((yi > py) !== (yj > py)) {
-            let slope = (xj - xi) / ((yj - yi) || 1e-9);
-            let xIntersect = slope * (py - yi) + xi;
-            if (px < xIntersect) inside = !inside;
-        }
+        if ((yi > my) === (yj > my)) continue;
+
+        let dy = yj - yi;
+        if (dy === 0) continue;
+
+        let dx = xj - xi;
+        let slope = dx / dy;
+        let xIntersect = xi + (my - yi) * slope;
+
+        if (mx < xIntersect) inside = !inside;
     }
+
     return inside;
 }
