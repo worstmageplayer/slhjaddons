@@ -199,13 +199,6 @@ export class MultiCheckbox {
             let boxY = this.y + (i * (this.height + 5))
 
             Renderer.drawRect(boxColor, boxX, boxY, this.width, this.height)
-
-            if (this.states[i]) {
-                const padding = 4
-                Renderer.drawLine(boxX + padding, boxY + padding, boxX + this.width - padding, boxY + this.height - padding, 2, Renderer.color(255, 255, 255))
-                Renderer.drawLine(boxX + this.width - padding, boxY + padding, boxX + padding, boxY + this.height - padding, 2, Renderer.color(255, 255, 255))
-            }
-
             Renderer.drawString(this.items[i], boxX + 5, boxY + (this.height / 2) - 4, true)
         }
     }
@@ -250,5 +243,65 @@ export class MultiCheckbox {
         if (newStates.length === this.items.length) {
             this.states = newStates
         }
+    }
+}
+
+export class RadioButtons {
+    constructor(guiManager, x, y, items = [], selectedIndex = 0, width = 100, height = 20, onColor = Renderer.color(255, 255, 255, 170), offColor = Renderer.color(0, 0, 0, 170)) {
+        this.x = x
+        this.y = y
+        this.width = width
+        this.height = height
+        this.items = items
+        this.selectedIndex = selectedIndex
+        this.onColor = onColor
+        this.offColor = offColor
+        this.hoveredIndex = -1
+
+        guiManager.registerDraw(this.draw.bind(this))
+        guiManager.registerClicked(this.click.bind(this))
+        guiManager.registerMouseReleased(this.release.bind(this))
+    }
+
+    draw(mx, my) {
+        for (let i = 0; i < this.items.length; i++) {
+            let boxColor = i === this.selectedIndex ? this.onColor : this.offColor
+            let boxX = this.x
+            let boxY = this.y + i * (this.height + 5)
+
+            Renderer.drawRect(boxColor, boxX, boxY, this.width, this.height)
+            Renderer.drawString(this.items[i], boxX + 5, boxY + (this.height / 2) - 4, true)
+        }
+    }
+
+    click(mx, my) {
+        for (let i = 0; i < this.items.length; i++) {
+            let boxX = this.x
+            let boxY = this.y + i * (this.height + 5)
+
+            if (mx >= boxX && mx <= boxX + this.width && my >= boxY && my <= boxY + this.height) {
+                this.selectedIndex = i
+                this.hoveredIndex = i
+                break
+            }
+        }
+    }
+
+    release() {
+        this.hoveredIndex = -1
+    }
+
+    getSelectedIndex() {
+        return this.selectedIndex
+    }
+
+    setSelectedIndex(index) {
+        if (index >= 0 && index < this.items.length) {
+            this.selectedIndex = index
+        }
+    }
+
+    getSelectedItem() {
+        return this.items[this.selectedIndex]
     }
 }
