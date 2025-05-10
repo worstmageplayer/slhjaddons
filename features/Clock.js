@@ -2,7 +2,6 @@
 import Settings from "../config";
 import { RegisterGroup } from "../utils/RegisterStuff";
 
-let screenWidth = Renderer.screen.getWidth();
 let clockColour = Settings.clockColor;
 
 let clockPadding = Settings.clockPadding;
@@ -13,7 +12,6 @@ let xPos;
 let yPos;
 let now = new Date();
 let currentTime = `${now.getHours()} : ${now.getMinutes().toString().padStart(2, '0')}`;
-let width = Renderer.getStringWidth(currentTime);
 
 updateClockPosition();
 
@@ -48,8 +46,8 @@ if (Settings.toggleClock) {
 }
 
 function updateClockPosition() {
-    screenWidth = Renderer.screen.getWidth();
-    width = Renderer.getStringWidth(currentTime);
+    const screenWidth = Renderer.screen.getWidth();
+    const width = Renderer.getStringWidth(currentTime);
 
     const positions = [
         { xPos: clockPadding / clockScale, yPos: clockPadding / clockScale },
