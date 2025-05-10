@@ -183,9 +183,16 @@ export class MultiCheckbox {
         this.states = states.length ? states : new Array(items.length).fill(false)
         this.onColor = onColor
         this.offColor = offColor
+        this.clicked = false
+        this.hoveredIndex = -1
 
         guiManager.registerDraw(this.draw.bind(this))
         guiManager.registerClicked(this.click.bind(this))
+        guiManager.registerMouseReleased(() => {
+            this.clicked = false
+            this.hoveredIndex = -1
+        })
+        guiManager.registerMouseDragged(this.drag.bind(this))
     }
 
     draw(mx, my) {
@@ -197,7 +204,7 @@ export class MultiCheckbox {
             Renderer.drawRect(boxColor, boxX, boxY, this.width, this.height)
 
             if (this.states[i]) {
-                let padding = 4
+                const padding = 4
                 Renderer.drawLine(boxX + padding, boxY + padding, boxX + this.width - padding, boxY + this.height - padding, 2, Renderer.color(255, 255, 255))
                 Renderer.drawLine(boxX + this.width - padding, boxY + padding, boxX + padding, boxY + this.height - padding, 2, Renderer.color(255, 255, 255))
             }
@@ -212,7 +219,27 @@ export class MultiCheckbox {
             let boxY = this.y + (i * (this.height + 5))
 
             if (mx >= boxX && mx <= boxX + this.width && my >= boxY && my <= boxY + this.height) {
+                this.clicked = true
                 this.states[i] = !this.states[i]
+                this.hoveredIndex = i
+                break
+            }
+        }
+    }
+
+    drag(mx, my) {
+        if (!this.clicked) return
+
+        for (let i = 0; i < this.items.length; i++) {
+            let boxX = this.x
+            let boxY = this.y + (i * (this.height + 5))
+
+            if (mx >= boxX && mx <= boxX + this.width && my >= boxY && my <= boxY + this.height) {
+                if (this.hoveredIndex !== i) {
+                    this.states[i] = !this.states[i]
+                    this.hoveredIndex = i
+                }
+                break
             }
         }
     }
