@@ -2,9 +2,7 @@
 import Settings from '../config';
 import { RegisterGroup } from '../utils/RegisterStuff';
 
-let scoreboardLines = [];
-let scoreboardFiltered = [];
-let scoreboardText = '';
+let scoreboardText = null;
 
 let scoreboardScale = Settings.scoreboardScale;
 let scoreboardShadow = Settings.toggleScoreboardShadow;
@@ -47,13 +45,13 @@ if (Settings.toggleCustomScoreboard) {
 }
 
 function updateScoreboardLines() {
-    scoreboardLines = Scoreboard.getLines();
+    const scoreboardLines = Scoreboard.getLines();
     if (scoreboardLines.length === 0) {
-        scoreboardText = '';
+        scoreboardText = null;
         return;
     }
 
-    scoreboardFiltered = scoreboardLines.map(line => line.getName().trim()).reverse().filter(line => line !== hiddenLine);
+    const scoreboardFiltered = scoreboardLines.map(line => line.getName().trim()).reverse().filter(line => line !== hiddenLine);
 
     const title = Scoreboard.getTitle().removeFormatting();
     const header = title.toLowerCase().includes('skyblock') ? Settings.scoreboardHeader : title;
