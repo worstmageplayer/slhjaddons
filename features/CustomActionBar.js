@@ -6,17 +6,31 @@ import { RegisterGroup } from "../utils/RegisterStuff";
 const S02PacketChat = Java.type('net.minecraft.network.play.server.S02PacketChat');
 
 let actionBarText = null;
-let currentY = null;
+let animStartTime = 0;
+let startY = 0;
+let targetY = 0;
+let currentY = Renderer.screen.getHeight() - 72;
 
 const customActionBar = new RegisterGroup({
     renderOverlay: register("renderOverlay", () => {
         if (!actionBarText) return;
+
+        const baseY = Renderer.screen.getHeight() - 72;
+        const dynamicOffset = isHealthCurrentlyHidden() ? 20 : 0;
+        const newTargetY = baseY + dynamicOffset;
+
+        if (newTargetY !== targetY) {
+            startY = currentY;
+            targetY = newTargetY;
+            animStartTime = Date.now();
+        }
+
+        const t = Math.min(1, (Date.now() - animStartTime) / 600);
+
+        currentY = startY + (targetY - startY) * easeOutExpo(t);
+
         const x = (Renderer.screen.getWidth() - Renderer.getStringWidth(actionBarText)) / 2;
-        const yPos = Renderer.screen.getHeight() - 72 + (isHealthCurrentlyHidden() ? 20 : 0);
-        const y = currentY ? currentY : yPos
-        const yMove = move(y, yPos, 10)
-        currentY = Math.abs(yMove - yPos) < 0.1 ? yPos : yMove
-        Renderer.drawStringWithShadow(actionBarText, x, y);
+        Renderer.drawStringWithShadow(actionBarText, x, currentY);
     }).unregister(),
 
     packetReceived: register('packetReceived', (packet, event) => {
@@ -31,16 +45,14 @@ const customActionBar = new RegisterGroup({
     worldUnload: register('worldUnload', () => {
         actionBarText = null;
     }).unregister()
-})
-
-function move(start, end, distance) {
-    const delta = end - start;
-    if (Math.abs(delta) <= distance) return end;
-    return start + Math.sign(delta) * distance;
-}
+});
 
 Settings.registerListener('Custom Action Bar', v => v ? customActionBar.register() : customActionBar.unregister());
 
 if (Settings.toggleCustomActionBar) {
     customActionBar.register();
+}
+
+function easeOutExpo(t) {
+    return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
 }
