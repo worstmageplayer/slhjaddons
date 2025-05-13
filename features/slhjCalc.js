@@ -38,6 +38,10 @@ const tokenize = (string) => {
                     suffix = string[i++];
                 }
                 result.push({ number: parseFloat(num), suffix });
+
+                if (i < string.length && string[i] === '(') {
+                    result.push('*');
+                }
                 break;
             }
 
@@ -293,13 +297,13 @@ const parseInputFunction = (tokens) => {
 
 export const calculator = (input) => {
     if (typeof input !== "string") return null;
-    console.log(input)
+    // console.log(input)
     const tokens = tokenize(input);
-    console.log("Tokens:", JSON.stringify(tokens, null, 2));
+    // console.log("Tokens:", JSON.stringify(tokens, null, 2));
     const ast = parse(tokens);
-    console.log("AST:", JSON.stringify(ast, null, 2));
+    // console.log("AST:", JSON.stringify(ast, null, 2));
     const result = evaluate(ast);
-    console.log("Result:", result);
+    // console.log("Result:", result);
     return result
 }
 
@@ -312,7 +316,7 @@ register('Command', (...args) => {
         const argsarray = [...args].join('').split('');
         const { name, params, body } = parseInputFunction(argsarray);
         defineFunction(name, params, body);
-        console.log('Defined Function:', JSON.stringify({ name, params, body }));
+        // console.log('Defined Function:', JSON.stringify({ name, params, body }));
         ChatLib.chat(`Defined function ${name}(${params.join(', ')}) = ${body}`);
     } catch (e) {
         console.log(e);
