@@ -1,6 +1,6 @@
 import Settings from "../config";
 import { RegisterGroup } from "../utils/RegisterStuff";
-import { calculator } from "./chatCalc";
+import { calculator } from "./slhjCalc";
 
 const GuiEditSign = Java.type("net.minecraft.client.gui.inventory.GuiEditSign");
 const tileSign = GuiEditSign.class.getDeclaredField("field_146848_f");
