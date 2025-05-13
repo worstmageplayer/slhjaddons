@@ -6,72 +6,69 @@ const knownConstants = {
 
 const userFunctions = {};
 
-/**
- * Converts a math expression string into an array of token objects.
- * Tokens include numbers, operators, parentheses, identifiers, and commas.
- * 
- * @param {string} input - The raw math expression as a string.
- * @returns {Array<Object>} An array of token objects, each with `type` and `value`.
- * 
- * Token types include:
- * - 'number' for numeric values (e.g. 3.14)
- * - 'identifier' for variables or function names (e.g. sin, x)
- * - 'operator' for math symbols (+, -, *, /, ^)
- * - 'paren' for open or close parentheses ('(', ')')
- * - 'comma' for separating function arguments
- */
 const tokenize = (string) => {
     const maxLength = string.length;
     const result = [];
     let i = 0;
 
     while (i < string.length) {
-        if (i >= maxLength) {
-            throw new Error(`Index out of bounds: i=${i}, maxLength=${maxLength}`);
-        }
-
         let char = string[i];
-        
+
         switch (true) {
             case char >= '0' && char <= '9': {
                 let num = '';
                 while (i < string.length && ((string[i] >= '0' && string[i] <= '9') || string[i] === '.')) {
                     num += string[i++];
                 }
-                let suffix = '';
-                if (i < string.length && Object.keys(suffixes).includes(string[i])) {
-                    suffix = string[i++];
-                }
-                result.push({ number: parseFloat(num), suffix });
 
+                // Optional suffix like 'k', 'm'
+                if (i < string.length && Object.keys(suffixes).includes(string[i])) {
+                    num += string[i++];
+                }
+
+                result.push({ type: 'number', value: parseFloat(num) });
+
+                // Implicit multiplication
                 if (i < string.length && string[i] === '(') {
-                    result.push('*');
+                    result.push({ type: 'operator', value: '*' });
                 }
                 break;
             }
 
-            case ['+', '-', '*', '/', '(', ')', '^', ','].includes(char):
-                result.push(char);
+            case char === ')': {
+                result.push({ type: 'paren', value: ')' });
                 i++;
                 break;
+            }
+
+            case char === '(': {
+                result.push({ type: 'paren', value: '(' });
+                i++;
+                break;
+            }
+
+            case ['+', '-', '*', '/', '^'].includes(char): {
+                result.push({ type: 'operator', value: char });
+                i++;
+                break;
+            }
+
+            case char === ',': {
+                result.push({ type: 'comma', value: ',' });
+                i++;
+                break;
+            }
 
             default: {
                 let str = '';
-                if (
-                    !['+', '-', '*', '/', '(', ')', '^', ',', '.', ...Object.keys(suffixes)].includes(char) &&
-                    !(char >= '0' && char <= '9')
+                while (
+                    i < string.length &&
+                    !['+', '-', '*', '/', '(', ')', '^', ',', '.', ...Object.keys(suffixes)].includes(string[i]) &&
+                    !(string[i] >= '0' && string[i] <= '9')
                 ) {
-                    while (
-                        i < string.length &&
-                        !['+', '-', '*', '/', '(', ')', '^', ',', '.', ...Object.keys(suffixes)].includes(string[i]) &&
-                        !(string[i] >= '0' && string[i] <= '9')
-                    ) {
-                        str += string[i++];
-                    }
-                    result.push(str);
-                } else {
-                    result.push(string[i++]);
+                    str += string[i++];
                 }
+                result.push({ type: 'identifier', value: str });
                 break;
             }
         }
@@ -80,20 +77,6 @@ const tokenize = (string) => {
     return result;
 };
 
-/**
- * Converts a list of tokens into an abstract syntax tree (AST).
- * The AST represents the structure of the mathematical expression.
- * 
- * @param {Array<Object>} tokens - Array of token objects produced by `tokenize()`.
- * @returns {Object} The root node of the generated AST.
- * 
- * AST node types include:
- * - 'NumberLiteral': { type, value }
- * - 'Identifier': { type, name }
- * - 'BinaryExpression': { type, operator, left, right }
- * - 'CallExpression': { type, name, args }
- * - 'UnaryExpression': { type, operator, argument }
- */
 const parse = (tokens) => {
     let i = 0;
 
@@ -101,119 +84,95 @@ const parse = (tokens) => {
     const peekNext = () => tokens[i + 1];
     const consume = () => tokens[i++];
 
-    const parsePrimary = () => {
-        const unaryStack = [];
-        while (peek() === '+' || peek() === '-') {
-            unaryStack.push(consume());
+    function parsePrimary() {
+        let token = consume();
+
+        if (!token) throw new Error("Unexpected end of input");
+
+        // Handle numbers (e.g., 2, 3.14)
+        if (token.type === "number") {
+            return { type: "NumberLiteral", value: token.value };
         }
 
-        const token = peek();
-
-        if (typeof token === 'string' && !['+', '-', '*', '/', '(', ')', '^', ','].includes(token)) {
-            const name = consume();
-
-            if (peek() === '(') {
+        // Handle function calls like sin(2)
+        if (token.type === "identifier") {
+            let next = peek();
+            if (next && next.type === "paren" && next.value === "(") {
                 consume(); // consume '('
-                const args = [];
-                while (peek() !== ')') {
-                    args.push(parseExpression());
-                    if (peek() === ',') consume();
+                let args = [];
+
+                // Parse arguments inside the function
+                if (peek() && !(peek().type === "paren" && peek().value === ")")) {
+                    do {
+                        args.push(parseExpression());
+                    } while (peek() && peek().type === "comma" && consume());
+                }
+
+                if (!peek() || peek().type !== "paren" || peek().value !== ")") {
+                    throw new Error("Expected ')' after function arguments");
                 }
                 consume(); // consume ')'
-                const node = { type: 'FunctionCall', name, arguments: args };
-                return applyUnaryStack(node, unaryStack);
+
+                return { type: "FunctionCall", name: token.value, args };
             }
 
-            if (knownConstants.hasOwnProperty(name)) {
-                const node = { type: 'Literal', value: knownConstants[name] };
-                return applyUnaryStack(node, unaryStack);
+            return { type: "Variable", name: token.value };
+        }
+
+        // Handle parentheses for grouping
+        if (token.type === "paren" && token.value === "(") {
+            let expr = parseExpression();
+            if (!peek() || peek().type !== "paren" || peek().value !== ")") {
+                throw new Error("Expected ')'");
             }
-
-            throw new Error("Unknown identifier: " + name);
+            consume(); // consume ')'
+            return expr;
         }
 
-        if (token === '(') {
-            consume();
-            const expr = parseExpression();
-            if (consume() !== ')') throw new Error("Expected ')'");
-            return applyUnaryStack(expr, unaryStack);
-        }
-
-        if (typeof token === 'object' && token.number !== undefined) {
-            const { number, suffix } = consume();
-            const multiplier = suffix ? suffixes[suffix] : 1;
-            const node = { type: 'Literal', value: number * multiplier };
-            return applyUnaryStack(node, unaryStack);
-        }
-
-        throw new Error("Unexpected token: " + token);
-    };
-
-    const applyUnaryStack = (node, stack) => {
-        for (let i = stack.length - 1; i >= 0; i--) {
-            node = {
-                type: 'UnaryExpression',
-                operator: stack[i],
-                argument: node
-            };
-        }
-        return node;
-    };
+        throw new Error("Unexpected token: " + token.value);
+    }
 
     const parseExponent = () => {
         let left = parsePrimary();
-        if (peek() === '^') {
-            consume();
+        while (peek() && peek().type === "operator" && peek().value === "^") {
+            consume(); // consume '^'
             const right = parseExponent();
-            left = { type: 'BinaryExpression', operator: '^', left, right };
+            left = { type: "BinaryExpression", operator: "^", left, right };
         }
         return left;
     };
 
     const parseTerm = () => {
         let left = parseExponent();
-        while (peek() === '*' || peek() === '/') {
-            let op = consume();
+        while (peek() && peek().type === "operator" && (peek().value === "*" || peek().value === "/")) {
+            let op = consume().value; // consume operator and get its value
             let right = parseExponent();
-            left = { type: 'BinaryExpression', operator: op, left, right };
+            left = { type: "BinaryExpression", operator: op, left, right };
         }
         return left;
     };
 
     const parseExpression = () => {
         let left = parseTerm();
-        while (peek() === '+' || peek() === '-') {
-            let op = consume();
+        while (peek() && peek().type === "operator" && (peek().value === "+" || peek().value === "-")) {
+            let op = consume().value; // consume operator and get its value
             let right = parseTerm();
-            left = { type: 'BinaryExpression', operator: op, left, right };
+            left = { type: "BinaryExpression", operator: op, left, right };
         }
         return left;
     };
 
     const ast = parseExpression();
-    if (i < tokens.length) throw new Error("Unexpected token at end: " + peek());
+    if (i < tokens.length) throw new Error("Unexpected token at end: " + peek().value);
     return ast;
 };
 
-/**
- * Recursively evaluates an abstract syntax tree (AST) to compute the final result.
- * Supports built-in math functions, constants, variables, and user-defined functions.
- * 
- * @param {Object} node - The root of the AST generated by `parse()`.
- * @param {Object} [context={}] - Optional evaluation context containing variable values or user-defined functions.
- * @returns {number|string} The result of evaluating the AST, or an error message.
- * 
- * The context object may contain:
- * - Named constants (e.g. { pi: Math.PI })
- * - Variables for custom function calls (e.g. { x: 5 })
- * - Functions (e.g. { sin: Math.sin })
- */
 const evaluate = (ast, context = {}) => {
     switch (ast.type) {
-        case 'Literal':
+        case 'NumberLiteral':  // Updated for parsed AST
             return ast.value;
 
-        case 'BinaryExpression':
+        case 'BinaryExpression':  // Binary operation
             const leftValue = evaluate(ast.left, context);
             const rightValue = evaluate(ast.right, context);
             switch (ast.operator) {
@@ -232,7 +191,7 @@ const evaluate = (ast, context = {}) => {
                     throw new Error(`Unknown operator: ${ast.operator}`);
             }
 
-        case 'UnaryExpression':
+        case 'UnaryExpression':  // Unary operation
             const val = evaluate(ast.argument, context);
             switch (ast.operator) {
                 case '+': return +val;
@@ -240,9 +199,10 @@ const evaluate = (ast, context = {}) => {
                 default: throw new Error(`Unknown unary operator: ${ast.operator}`);
             }
 
-        case 'FunctionCall': {
-            const args = ast.arguments.map(arg => evaluate(arg, context));
+        case 'FunctionCall':  // Function call handling
+            const args = ast.args.map(arg => evaluate(arg, context));  // Adjust for `args` in `FunctionCall`
 
+            // User-defined function evaluation
             if (userFunctions.hasOwnProperty(ast.name)) {
                 const func = userFunctions[ast.name];
 
@@ -262,29 +222,24 @@ const evaluate = (ast, context = {}) => {
                 return evaluate(subAst, context);
             }
 
+            // Built-in Math functions (e.g., Math.sin, Math.cos)
             if (typeof Math[ast.name] === 'function') {
                 return Math[ast.name](...args);
             }
 
             throw new Error(`Unknown function: ${ast.name}`);
-        }
+
+        case 'Variable':  // Variable lookup
+            if (context.hasOwnProperty(ast.name)) {
+                return context[ast.name];
+            }
+            throw new Error(`Undefined variable: ${ast.name}`);
 
         default:
             throw new Error(`Unknown AST node type: ${ast.type}`);
     }
 };
 
-/**
- * Defines a custom user function with a name, parameters, and a body expression.
- *
- * @param {string} name - The name of the function (e.g., "f" for f(x)).
- * @param {string[]} params - An array of parameter names (e.g., ["x", "y"]).
- * @param {string} body - A string representing the function's body expression, which can use parameters and other functions.
- *
- * @example
- * defineFunction("square", ["x"], "x * x");
- * defineFunction("add", ["a", "b"], "a + b");
- */
 const defineFunction = (name, params, body) => {
     userFunctions[name] = { params, body };
 }
@@ -309,13 +264,14 @@ const parseInputFunction = (tokens) => {
 
 export const calculator = (input) => {
     if (typeof input !== "string") return null;
-     console.log(input)
+     console.log("Input: ", input)
     const tokens = tokenize(input);
      console.log("Tokens:", JSON.stringify(tokens, null, 2));
     const ast = parse(tokens);
      console.log("AST:", JSON.stringify(ast, null, 2));
     const result = evaluate(ast);
      console.log("Result:", result);
+     console.log("\n");
     return result
 }
 
