@@ -21,12 +21,17 @@ const userFunctions = {};
  * - 'comma' for separating function arguments
  */
 const tokenize = (string) => {
+    const maxLength = string.length;
     const result = [];
     let i = 0;
 
     while (i < string.length) {
-        let char = string[i];
+        if (i >= maxLength) {
+            throw new Error(`Index out of bounds: i=${i}, maxLength=${maxLength}`);
+        }
 
+        let char = string[i];
+        
         switch (true) {
             case char >= '0' && char <= '9': {
                 let num = '';
@@ -52,14 +57,21 @@ const tokenize = (string) => {
 
             default: {
                 let str = '';
-                while (
-                    i < string.length &&
-                    !['+', '-', '*', '/', '(', ')', '^', ',', '.', ...Object.keys(suffixes)].includes(string[i]) &&
-                    !(string[i] >= '0' && string[i] <= '9')
+                if (
+                    !['+', '-', '*', '/', '(', ')', '^', ',', '.', ...Object.keys(suffixes)].includes(char) &&
+                    !(char >= '0' && char <= '9')
                 ) {
-                    str += string[i++];
+                    while (
+                        i < string.length &&
+                        !['+', '-', '*', '/', '(', ')', '^', ',', '.', ...Object.keys(suffixes)].includes(string[i]) &&
+                        !(string[i] >= '0' && string[i] <= '9')
+                    ) {
+                        str += string[i++];
+                    }
+                    result.push(str);
+                } else {
+                    result.push(string[i++]);
                 }
-                result.push(str);
                 break;
             }
         }
@@ -297,13 +309,13 @@ const parseInputFunction = (tokens) => {
 
 export const calculator = (input) => {
     if (typeof input !== "string") return null;
-    // console.log(input)
+     console.log(input)
     const tokens = tokenize(input);
-    // console.log("Tokens:", JSON.stringify(tokens, null, 2));
+     console.log("Tokens:", JSON.stringify(tokens, null, 2));
     const ast = parse(tokens);
-    // console.log("AST:", JSON.stringify(ast, null, 2));
+     console.log("AST:", JSON.stringify(ast, null, 2));
     const result = evaluate(ast);
-    // console.log("Result:", result);
+     console.log("Result:", result);
     return result
 }
 
