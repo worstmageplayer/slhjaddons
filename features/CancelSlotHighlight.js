@@ -3,17 +3,12 @@ import Settings from "../config";
 import { RegisterGroup } from "../utils/RegisterStuff";
 import { drawHollowRect } from "../utils/RendererStuff";
 
-let renderCustomSlotHighlight = Settings.toggleCustomSlotHighlight;
-
-Settings.registerListener('Custom Slot Highlight', value => {
-    renderCustomSlotHighlight = value;
-})
 Settings.registerListener('Hide Slot Highlight', v => v ? cancelSlotHighlight.register() : cancelSlotHighlight.unregister());
 
 const cancelSlotHighlight = new RegisterGroup({
     renderSlotHighlight: register('renderSlotHighlight', (mx, my, slot, container, event) => cancel(event)).unregister(),
     preItemRender: register('preItemRender', (mx, my, slot, container) => {
-        if (!renderCustomSlotHighlight) return;
+        if (!Settings.toggleCustomSlotHighlight) return;
         const itemName = slot?.func_75211_c()?.func_82833_r();
         if (itemName === ' ') return;
     
@@ -23,6 +18,4 @@ const cancelSlotHighlight = new RegisterGroup({
     }).unregister()
 })
 
-if (Settings.toggleCancelSlotHighlight) {
-    cancelSlotHighlight.register();
-}
+if (Settings.toggleCancelSlotHighlight) cancelSlotHighlight.register();
