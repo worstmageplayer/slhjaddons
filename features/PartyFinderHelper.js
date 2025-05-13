@@ -44,7 +44,7 @@ const pfStuff = new RegisterGroup({
                 Renderer.translate(0, 0, 260);
                 Renderer.drawString(cls, x, y, true)
 
-                if (Settings.toggleHighlightPF && cls === data.player.dungeon.class.charAt(0)) {
+                if (cls === data.player.dungeon.class.charAt(0)) {
                     let [x, y] = p.slotPos
                     Renderer.translate(0, 0, 1);
                     drawHollowRect(Renderer.color(0, 170, 0), x, y, 16, 16, 1)
