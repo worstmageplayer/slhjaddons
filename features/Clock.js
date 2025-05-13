@@ -2,27 +2,10 @@
 import Settings from "../config";
 import { RegisterGroup } from "../utils/RegisterStuff";
 
-let clockColour = Settings.clockColor;
-
-let clockPadding = Settings.clockPadding;
-let clockScale = Settings.clockScale;
-let clockPosition = Settings.clockPosition;
-
 let xPos;
 let yPos;
 let now = new Date();
 let currentTime = `${now.getHours()} : ${now.getMinutes().toString().padStart(2, '0')}`;
-
-updateClockPosition();
-
-// Update clock info
-Settings.registerListener('Clock Position', value => {
-    clockPosition = value;
-    updateClockPosition()
-})
-Settings.registerListener('Clock Scale', value => clockScale = value)
-Settings.registerListener('Clock Padding', value => clockPadding = value)
-Settings.registerListener('Clock Colour', value => clockColour = value)
 
 Settings.registerListener('Ingame Clock', v => v ? clock.register() : clock.unregister());
 
@@ -35,8 +18,8 @@ const clock = new RegisterGroup({
 
     renderOverlay: register('renderOverlay', () => {
         if (!currentTime || !xPos || !yPos) return;
-        const time = new Text(currentTime, xPos, yPos).setShadow(true).setColor(clockColour.getRGB())
-        Renderer.scale(clockScale);
+        const time = new Text(currentTime, xPos, yPos).setShadow(true).setColor(Settings.clockColor.getRGB())
+        Renderer.scale(Settings.clockScale);
         time.draw();
     }).unregister()
 })
@@ -48,13 +31,15 @@ if (Settings.toggleClock) {
 function updateClockPosition() {
     const screenWidth = Renderer.screen.getWidth();
     const width = Renderer.getStringWidth(currentTime);
+    const clockPadding = Settings.clockPadding;
+    const clockScale = Settings.clockScale;
 
     const positions = [
-        { xPos: clockPadding / clockScale, yPos: clockPadding / clockScale },
-        { xPos: (screenWidth - width * clockScale - clockPadding) / clockScale, yPos: clockPadding / clockScale }
+        { xPos: clockPadding , yPos: clockPadding },
+        { xPos: screenWidth - width * clockScale - clockPadding, yPos: clockPadding }
     ];
 
-    const position = positions[clockPosition] || positions[0];
-    xPos = position.xPos;
-    yPos = position.yPos;
+    const position = positions[Settings.clockPosition] || positions[0];
+    xPos = position.xPos / clockScale;
+    yPos = position.yPos / clockScale
 }
