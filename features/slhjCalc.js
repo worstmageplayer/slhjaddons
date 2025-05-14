@@ -131,9 +131,7 @@ class FunctionCall extends ASTNode {
         this.args = args;
     }
 }
-class Variable extends ASTNode {
-    constructor(name) { super('Variable'); this.name = name; }
-}
+class Variable extends ASTNode { constructor(name) { super('Variable'); this.name = name; } }
 
 // Parser
 const parseinator = (tokens) => {
