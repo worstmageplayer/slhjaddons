@@ -52,21 +52,22 @@ const tokeninator9000 = (str) => {
         let char = str[i];
         
         switch (true) {
-            case tokenTypes.number.includes(char):
-                let num = '', dotCount = 0, hasDigit = false;
+            case tokenTypes.number.includes(char): {
+                let num = '', dotCount = 0;
                 while (i < str.length && tokenTypes.number.includes(str[i])) {
-                    if (str[i] === '.') {
-                        if (++dotCount > 1) throw new Error(`Multiple dots in number at ${i}`);
-                    } else {
-                        hasDigit = true;
+                    if (str[i] === '.' && ++dotCount > 1) {
+                        throw new Error(`Multiple dots in number at ${i}`);
                     }
                     num += str[i++];
                 }
 
-                if (Number.isNaN(parseFloat(num))) throw new Error(`Invalid number '${num}'`);
+                if (Number.isNaN(parseFloat(num))) {
+                    throw new Error(`Invalid number '${num}'`);
+                }
 
                 tokens.push(new Token('number', num));
                 break;
+            }
 
             case tokenTypes.operator.includes(char):
                 tokens.push(new Token('operator', char));
