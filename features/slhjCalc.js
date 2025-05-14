@@ -144,8 +144,8 @@ const parseinator = (tokens) => {
     const parseExpression = () => {
         let node = parseTerm();
         while (peek()?.type === 'operator' && ['+', '-'].includes(peek().value)) {
-            const operator = consume().value;
-            const right = parseTerm();
+            let operator = consume().value;
+            let right = parseTerm();
             node = new BinaryOperation(node, operator, right);
         }
         return node;
@@ -154,8 +154,8 @@ const parseinator = (tokens) => {
     const parseTerm = () => {
         let node = parseUnary();
         while (peek()?.type === 'operator' && ['*', '/'].includes(peek().value)) {
-            const operator = consume().value;
-            const right = parseUnary();
+            let operator = consume().value;
+            let right = parseUnary();
             node = new BinaryOperation(node, operator, right);
         }
         return node;
@@ -288,9 +288,9 @@ const evaluateinator = (node) => {
 
 export const calculator = (input) => {
     const tokens = tokeninator9000(input);
-    // console.log(tokens)
+     console.log(JSON.stringify(tokens, null, 2))
     const tree = parseinator(tokens);
-    // console.log(tree)
+     console.log(JSON.stringify(tree, null, 2))
     return evaluateinator(tree);
 };
 
