@@ -161,7 +161,6 @@ const parseinator = (tokens) => {
         return node;
     };
 
-    // Exponentiation binds tighter than unary, so we handle it below unary
     const parseUnary = () => {
         const token = peek();
         if (token?.type === 'operator' && ['+', '-'].includes(token.value)) {
@@ -288,9 +287,9 @@ const evaluateinator = (node) => {
 
 export const calculator = (input) => {
     const tokens = tokeninator9000(input);
-     console.log(JSON.stringify(tokens, null, 2))
+    // console.log(JSON.stringify(tokens, null, 2))
     const tree = parseinator(tokens);
-     console.log(JSON.stringify(tree, null, 2))
+    // console.log(JSON.stringify(tree, null, 2))
     return evaluateinator(tree);
 };
 
