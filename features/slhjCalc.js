@@ -1,250 +1,300 @@
-const suffixes = { k: 1e3, m: 1e6, b: 1e9, t: 1e12 };
-const knownConstants = { 
-    pi: Math.PI, 
-    e: Math.E 
+const functions = [
+    { name: 'cube', params: ['x'], body: 'x^3' },
+    { name: 'sqrt', params: ['x'], body: 'x^0.5' },
+    { name: 'power', params: ['x', 'y'], body: 'x^y' },
+];
+
+const variables = {
+    one: 1, two: 2, three: 3, four: 4, five: 5,
+    six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+    pi: Math.PI, e: Math.E,
 };
 
-const userFunctions = {};
+const isFunction = name => functions.some(fn => fn.name === name);
+const getFunction = name => functions.find(fn => fn.name === name);
+const isVariable = name => Object.hasOwn(variables, name);
+const getVariableValue = name => variables[name];
 
-const tokenize = (string) => {
-    const maxLength = string.length;
-    const result = [];
+const tokenTypes = {
+    number: ['0','1','2','3','4','5','6','7','8','9','.'],
+    operator: ['+','-','*','/'],
+    exponent: ['^'],
+    parenthesis: ['(',')'],
+    comma: [','],
+    equals: ['='],
+};
+
+const nonIdentifierChars = [
+    ...tokenTypes.number,
+    ...tokenTypes.operator,
+    ...tokenTypes.exponent,
+    ...tokenTypes.parenthesis,
+    ...tokenTypes.comma,
+    ...tokenTypes.equals
+];
+
+class Token {
+    constructor(type, value) {
+        if (!type || value == null)
+            throw new Error(`Token requires type and value, got: ${type}, ${value}`);
+        this.type = type;
+        this.value = value;
+    }
+}
+
+// Tokenizer
+const tokeninator9000 = (str) => {
+    str = str.replace(/\s+/g, '');
+    const tokens = [];
     let i = 0;
 
-    while (i < string.length) {
-        let char = string[i];
-
+    while (i < str.length) {
+        let char = str[i];
+        
         switch (true) {
-            case char >= '0' && char <= '9': {
-                let num = '';
-                while (i < string.length && ((string[i] >= '0' && string[i] <= '9') || string[i] === '.')) {
-                    num += string[i++];
+            case tokenTypes.number.includes(char):
+                let num = '', dotCount = 0, hasDigit = false;
+                while (i < str.length && tokenTypes.number.includes(str[i])) {
+                    if (str[i] === '.') {
+                        if (++dotCount > 1) throw new Error(`Multiple dots in number at ${i}`);
+                    } else {
+                        hasDigit = true;
+                    }
+                    num += str[i++];
                 }
 
-                // Optional suffix like 'k', 'm'
-                if (i < string.length && Object.keys(suffixes).includes(string[i])) {
-                    num += string[i++];
+                if (Number.isNaN(parseFloat(num))) throw new Error(`Invalid number '${num}'`);
+
+                tokens.push(new Token('number', num));
+                break;
+
+            case tokenTypes.operator.includes(char):
+                tokens.push(new Token('operator', char));
+                i++;
+                break;
+
+            case tokenTypes.exponent.includes(char):
+                tokens.push(new Token('exponent', char));
+                i++;
+                break;
+
+            case tokenTypes.parenthesis.includes(char):
+                tokens.push(new Token('parenthesis', char));
+                i++;
+                break;
+
+            case tokenTypes.comma.includes(char):
+                tokens.push(new Token('comma', char));
+                i++;
+                break;
+
+            case tokenTypes.equals.includes(char):
+                tokens.push(new Token('equals', char));
+                i++;
+                break;
+
+            default:
+                let id = '';
+                while (i < str.length && !nonIdentifierChars.includes(str[i])) {
+                    id += str[i++];
                 }
-
-                result.push({ type: 'number', value: parseFloat(num) });
-
-                // Implicit multiplication
-                if (i < string.length && string[i] === '(') {
-                    result.push({ type: 'operator', value: '*' });
-                }
+                tokens.push(new Token('identifier', id));
                 break;
-            }
-
-            case char === ')': {
-                result.push({ type: 'paren', value: ')' });
-                i++;
-                break;
-            }
-
-            case char === '(': {
-                result.push({ type: 'paren', value: '(' });
-                i++;
-                break;
-            }
-
-            case ['+', '-', '*', '/', '^'].includes(char): {
-                result.push({ type: 'operator', value: char });
-                i++;
-                break;
-            }
-
-            case char === ',': {
-                result.push({ type: 'comma', value: ',' });
-                i++;
-                break;
-            }
-
-            default: {
-                let str = '';
-                while (
-                    i < string.length &&
-                    !['+', '-', '*', '/', '(', ')', '^', ',', '.', ...Object.keys(suffixes)].includes(string[i]) &&
-                    !(string[i] >= '0' && string[i] <= '9')
-                ) {
-                    str += string[i++];
-                }
-                result.push({ type: 'identifier', value: str });
-                break;
-            }
         }
+    }
+    return tokens;
+};
+
+// AST Nodes
+class ASTNode { constructor(type) { this.type = type; } }
+class Literal extends ASTNode { constructor(value) { super('Literal'); this.value = value; } }
+class BinaryOperation extends ASTNode {
+    constructor(left, operator, right) {
+        super('BinaryOperation');
+        this.left = left;
+        this.operator = operator;
+        this.right = right;
+    }
+}
+class UnaryOperation extends ASTNode {
+    constructor(operator, argument) {
+        super('UnaryOperation');
+        this.operator = operator;
+        this.argument = argument;
+    }
+}
+class FunctionCall extends ASTNode {
+    constructor(name, args) {
+        super('FunctionCall');
+        this.name = name;
+        this.args = args;
+    }
+}
+class Variable extends ASTNode {
+    constructor(name) { super('Variable'); this.name = name; }
+}
+
+// Parser
+const parseinator = (tokens) => {
+    let i = 0;
+
+    const peek = () => tokens[i];
+    const consume = () => tokens[i++];
+
+    const parseExpression = () => {
+        let node = parseTerm();
+        while (peek()?.type === 'operator' && ['+', '-'].includes(peek().value)) {
+            const operator = consume().value;
+            const right = parseTerm();
+            node = new BinaryOperation(node, operator, right);
+        }
+        return node;
+    };
+
+    const parseTerm = () => {
+        let node = parseUnary();
+        while (peek()?.type === 'operator' && ['*', '/'].includes(peek().value)) {
+            const operator = consume().value;
+            const right = parseUnary();
+            node = new BinaryOperation(node, operator, right);
+        }
+        return node;
+    };
+
+    // Exponentiation binds tighter than unary, so we handle it below unary
+    const parseUnary = () => {
+        const token = peek();
+        if (token?.type === 'operator' && ['+', '-'].includes(token.value)) {
+            const operator = consume().value;
+            const argument = parseUnary();
+            return new UnaryOperation(operator, argument);
+        }
+        return parseExponent();
+    };
+
+    const parseExponent = () => {
+        let node = parsePrimary();
+        if (peek()?.type === 'exponent') {
+            const operator = consume().value;
+            const right = parseUnary();
+            node = new BinaryOperation(node, operator, right);
+        }
+        return node;
+    };
+
+    const parsePrimary = () => {
+        const token = peek();
+        if (!token) throw new Error("Unexpected end of input");
+
+        if (token.type === 'number') {
+            return new Literal(parseFloat(consume().value));
+        }
+
+        if (token.type === 'parenthesis' && token.value === '(') {
+            consume(); // consume '('
+            const expr = parseExpression();
+            if (consume().value !== ')') throw new Error("Expected ')'");
+            return expr;
+        }
+
+        if (token.type === 'identifier') {
+            return parseVariableOrFunction();
+        }
+
+        throw new Error(`Unexpected token: ${token.type} (${token.value})`);
+    };
+
+    const parseVariableOrFunction = () => {
+        const name = consume().value;
+        const next = peek();
+
+        if (isFunction(name) && next?.type === 'parenthesis' && next.value === '(') {
+            consume(); // consume '('
+            const args = [];
+
+            while (peek() && peek().value !== ')') {
+                args.push(parseExpression());
+                if (peek()?.type === 'comma') consume();
+            }
+
+            if (consume().value !== ')') throw new Error("Expected ')'");
+            return new FunctionCall(name, args);
+        }
+
+        if (isVariable(name)) {
+            return new Variable(name);
+        }
+
+        throw new Error(`Unknown identifier: '${name}'`);
+    };
+
+    const result = parseExpression();
+    if (i < tokens.length) {
+        const leftover = tokens.slice(i).map(t => t.value).join('');
+        throw new Error(`Unexpected token(s): '${leftover}'`);
     }
 
     return result;
 };
 
-const parse = (tokens) => {
-    let i = 0;
+// Evaluator
+const evaluateinator = (node) => {
+    if (node instanceof Literal) return node.value;
 
-    const peek = () => tokens[i];
-    const peekNext = () => tokens[i + 1];
-    const consume = () => tokens[i++];
-
-    function parsePrimary() {
-        let token = consume();
-
-        if (!token) throw new Error("Unexpected end of input");
-
-        // Handle numbers (e.g., 2, 3.14)
-        if (token.type === "number") {
-            return { type: "NumberLiteral", value: token.value };
-        }
-
-        // Handle function calls like sin(2)
-        if (token.type === "identifier") {
-            let next = peek();
-            if (next && next.type === "paren" && next.value === "(") {
-                consume(); // consume '('
-                let args = [];
-
-                // Parse arguments inside the function
-                if (peek() && !(peek().type === "paren" && peek().value === ")")) {
-                    do {
-                        args.push(parseExpression());
-                    } while (peek() && peek().type === "comma" && consume());
-                }
-
-                if (!peek() || peek().type !== "paren" || peek().value !== ")") {
-                    throw new Error("Expected ')' after function arguments");
-                }
-                consume(); // consume ')'
-
-                return { type: "FunctionCall", name: token.value, args };
-            }
-
-            return { type: "Variable", name: token.value };
-        }
-
-        // Handle parentheses for grouping
-        if (token.type === "paren" && token.value === "(") {
-            let expr = parseExpression();
-            if (!peek() || peek().type !== "paren" || peek().value !== ")") {
-                throw new Error("Expected ')'");
-            }
-            consume(); // consume ')'
-            return expr;
-        }
-
-        throw new Error("Unexpected token: " + token.value);
+    if (node instanceof UnaryOperation) {
+        const val = evaluateinator(node.argument);
+        return node.operator === '-' ? -val : val;
     }
 
-    const parseExponent = () => {
-        let left = parsePrimary();
-        while (peek() && peek().type === "operator" && peek().value === "^") {
-            consume(); // consume '^'
-            const right = parseExponent();
-            left = { type: "BinaryExpression", operator: "^", left, right };
+    if (node instanceof BinaryOperation) {
+        const left = evaluateinator(node.left);
+        const right = evaluateinator(node.right);
+        switch (node.operator) {
+            case '+': return left + right;
+            case '-': return left - right;
+            case '*': return left * right;
+            case '/': if (right === 0) throw new Error('Division by zero'); return left / right;
+            case '^': return Math.pow(left, right);
+            default: throw new Error(`Unknown binary operator: ${node.operator}`);
         }
-        return left;
-    };
-
-    const parseTerm = () => {
-        let left = parseExponent();
-        while (peek() && peek().type === "operator" && (peek().value === "*" || peek().value === "/")) {
-            let op = consume().value; // consume operator and get its value
-            let right = parseExponent();
-            left = { type: "BinaryExpression", operator: op, left, right };
-        }
-        return left;
-    };
-
-    const parseExpression = () => {
-        let left = parseTerm();
-        while (peek() && peek().type === "operator" && (peek().value === "+" || peek().value === "-")) {
-            let op = consume().value; // consume operator and get its value
-            let right = parseTerm();
-            left = { type: "BinaryExpression", operator: op, left, right };
-        }
-        return left;
-    };
-
-    const ast = parseExpression();
-    if (i < tokens.length) throw new Error("Unexpected token at end: " + peek().value);
-    return ast;
-};
-
-const evaluate = (ast, context = {}) => {
-    switch (ast.type) {
-        case 'NumberLiteral':  // Updated for parsed AST
-            return ast.value;
-
-        case 'BinaryExpression':  // Binary operation
-            const leftValue = evaluate(ast.left, context);
-            const rightValue = evaluate(ast.right, context);
-            switch (ast.operator) {
-                case '+':
-                    return leftValue + rightValue;
-                case '-':
-                    return leftValue - rightValue;
-                case '*':
-                    return leftValue * rightValue;
-                case '/':
-                    if (rightValue === 0) throw new Error("Division by zero");
-                    return leftValue / rightValue;
-                case '^':
-                    return Math.pow(leftValue, rightValue);
-                default:
-                    throw new Error(`Unknown operator: ${ast.operator}`);
-            }
-
-        case 'UnaryExpression':  // Unary operation
-            const val = evaluate(ast.argument, context);
-            switch (ast.operator) {
-                case '+': return +val;
-                case '-': return -val;
-                default: throw new Error(`Unknown unary operator: ${ast.operator}`);
-            }
-
-        case 'FunctionCall':  // Function call handling
-            const args = ast.args.map(arg => evaluate(arg, context));  // Adjust for `args` in `FunctionCall`
-
-            // User-defined function evaluation
-            if (userFunctions.hasOwnProperty(ast.name)) {
-                const func = userFunctions[ast.name];
-
-                if (args.length !== func.params.length) {
-                    throw new Error(`Function '${ast.name}' expects ${func.params.length} arguments, got ${args.length}`);
-                }
-
-                let replaced = func.body;
-                for (let i = 0; i < func.params.length; i++) {
-                    const param = func.params[i];
-                    const value = args[i];
-                    replaced = replaced.replace(new RegExp(`\\b${param}\\b`, 'g'), value);
-                }
-
-                const tokens = tokenize(replaced);
-                const subAst = parse(tokens);
-                return evaluate(subAst, context);
-            }
-
-            // Built-in Math functions (e.g., Math.sin, Math.cos)
-            if (typeof Math[ast.name] === 'function') {
-                return Math[ast.name](...args);
-            }
-
-            throw new Error(`Unknown function: ${ast.name}`);
-
-        case 'Variable':  // Variable lookup
-            if (context.hasOwnProperty(ast.name)) {
-                return context[ast.name];
-            }
-            throw new Error(`Undefined variable: ${ast.name}`);
-
-        default:
-            throw new Error(`Unknown AST node type: ${ast.type}`);
     }
+
+    if (node instanceof FunctionCall) {
+        const fn = getFunction(node.name);
+        if (!fn) throw new Error(`Function '${node.name}' not found`);
+        if (fn.params.length !== node.args.length)
+            throw new Error(`Function '${fn.name}' expects ${fn.params.length} args`);
+
+        const argValues = node.args.map(arg => evaluateinator(arg));
+
+        let body = fn.body;
+        fn.params.forEach((param, j) => {
+            const re = new RegExp(`\\b${param}\\b`, 'g');
+            body = body.replace(re, argValues[j]);
+        });
+
+        const tokens = tokeninator9000(body);
+        const parsed = parseinator(tokens);
+        return evaluateinator(parsed);
+    }
+
+    if (node instanceof Variable) {
+        if (isVariable(node.name)) return getVariableValue(node.name);
+        throw new Error(`Unknown variable: ${node.name}`);
+    }
+
+    throw new Error(`Unknown AST node type: ${node.type}`);
 };
 
-const defineFunction = (name, params, body) => {
-    userFunctions[name] = { params, body };
-}
+export const calculator = (input) => {
+    const tokens = tokeninator9000(input);
+    // console.log(tokens)
+    const tree = parseinator(tokens);
+    // console.log(tree)
+    return evaluateinator(tree);
+};
 
-const parseInputFunction = (tokens) => {
+function parseInputFunction(tokens) {
     const eqIndex = tokens.indexOf('=');
     if (eqIndex === -1) throw new Error("Missing '=' in function definition");
 
@@ -262,23 +312,38 @@ const parseInputFunction = (tokens) => {
     return { name, params, body};
 }
 
-export const calculator = (input) => {
-    if (typeof input !== "string") return null;
-     console.log("Input: ", input)
-    const tokens = tokenize(input);
-     console.log("Tokens:", JSON.stringify(tokens, null, 2));
-    const ast = parse(tokens);
-     console.log("AST:", JSON.stringify(ast, null, 2));
-    const result = evaluate(ast);
-     console.log("Result:", result);
-     console.log("\n");
-    return result
+function defineFunction(name, params, body) {
+    const validParamRegex = /^[a-zA-Z_]\w*$/;
+    for (const param of params) {
+        if (!validParamRegex.test(param)) {
+            throw new Error(`Invalid parameter name: '${param}'`);
+        }
+    }
+
+    const existingIndex = functions.findIndex(fn => fn.name === name);
+
+    if (existingIndex !== -1) {
+        functions[existingIndex] = { name, params, body };
+    } else {
+        functions.push({ name, params, body });
+    }
 }
 
 register('Command', (...args) => {
     try {
         if (!args || args.join('').toLowerCase() === 'help') {
             ChatLib.chat(`Usage: /define name(params)=expression\nExample: /define f(x,y)=x^2+y^2\nDefines a custom function.`);
+            return;
+        }
+        if (args.join('').toLowerCase() === 'show') {
+            if (functions.length === 0) {
+                ChatLib.chat("No functions defined.");
+            } else {
+                ChatLib.chat("Defined functions:");
+                functions.forEach(fn => {
+                    ChatLib.chat(`${fn.name}(${fn.params.join(', ')}) = ${fn.body}`);
+                });
+            }
             return;
         }
         const argsarray = [...args].join('').split('');
