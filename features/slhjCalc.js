@@ -2,7 +2,6 @@ const functions = [
     { name: 'cube', params: ['x'], body: 'x^3' },
     { name: 'sqrt', params: ['x'], body: 'x^0.5' },
     { name: 'power', params: ['x', 'y'], body: 'x^y' },
-    { name: 'f', params: ['x', 'y'], body: 'x^2-y+3' },
 ];
 
 const variables = {
