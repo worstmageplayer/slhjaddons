@@ -325,10 +325,13 @@ export const evaluateinator = (node) => {
  */
 export const calculator = (input) => {
     const tokens = tokeninator9000(input);
-    // console.log(JSON.stringify(tokens, null, 2))
     const tree = parseinator(tokens);
-    // console.log(JSON.stringify(tree, null, 2))
-    return evaluateinator(tree);
+    const result = evaluateinator(tree);
+    if (Number.isInteger(parseFloat(result.toFixed(6)))) {
+        return Math.round(result);
+    } else {
+        return parseFloat(result.toFixed(2));
+    }
 };
 
 /**
