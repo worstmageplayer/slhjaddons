@@ -2,6 +2,7 @@ const functions = [
     { name: 'cube', params: ['x'], body: 'x^3' },
     { name: 'sqrt', params: ['x'], body: 'x^0.5' },
     { name: 'power', params: ['x', 'y'], body: 'x^y' },
+    { name: 'f', params: ['x', 'y'], body: 'x^2-y+3' },
 ];
 
 const variables = {
@@ -9,6 +10,13 @@ const variables = {
     six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
     pi: Math.PI, e: Math.E,
 };
+
+const suffixes = new Map([
+    ['k', 1_000],
+    ['m', 1_000_000],
+    ['b', 1_000_000_000],
+    ['t', 1_000_000_000_000],
+]);
 
 const isFunction = name => functions.some(fn => fn.name === name);
 const getFunction = name => functions.find(fn => fn.name === name);
@@ -69,12 +77,30 @@ export const tokeninator9000 = (str) => {
 
             if (num === '.') throw new Error(`Invalid number`);
             tokens.push({ type: 'number', value: num });
+
+            if (i < len && suffixes.has(str[i])) {
+                tokens.push({ type: 'suffix', value: str[i++] });
+            }
+
             continue;
         }
 
         if (type !== undefined) {
             tokens.push({ type, value: char });
             i++;
+
+            if (
+                i < len &&
+                suffixes.has(str[i]) &&
+                tokens.length > 0 &&
+                (
+                    tokens[tokens.length - 1].type === 'number' ||
+                    (tokens[tokens.length - 1].type === 'parenthesis' && tokens[tokens.length - 1].value === ')')
+                )
+            ) {
+                tokens.push({ type: 'suffix', value: str[i++] });
+            }
+
             continue;
         }
 
@@ -138,13 +164,23 @@ export const parseinator = (tokens) => {
 
     /** @returns {ASTNode} */
     const parseExponent = () => {
-        let node = parsePrimary();
+        let node = parseSuffix(parsePrimary());
         const token = tokens[i];
         if (token?.type === 'exponent') {
             const operator = tokens[i++].value;
             const right = parseUnary();
             /** @type {BinaryOperationNode} */
             node = { type: 'BinaryOperation', left: node, operator, right };
+        }
+        return node;
+    };
+
+    /** @param {ASTNode} node */
+    const parseSuffix = (node) => {
+        while (i < tokenLength && tokens[i]?.type === 'suffix') {
+            const suffix = tokens[i++].value;
+            /** @type {SuffixNode} */
+            node = { type: 'SuffixOperation', value: node, suffix };
         }
         return node;
     };
@@ -222,6 +258,11 @@ export const evaluateinator = (node) => {
             return node.operator === '-' ? -val : val;
         }
 
+        case 'SuffixOperation': {
+            const value = evaluateinator(node.value);
+            return value * suffixes.get(node.suffix);
+        }
+
         case 'BinaryOperation': {
             let left = evaluateinator(node.left);
             let right = evaluateinator(node.right);
@@ -266,9 +307,9 @@ export const evaluateinator = (node) => {
 
             tokens = tokens.map(token => {
                 if (token.type === 'identifier') {
-                    const idx = fn.params.indexOf(token.value);
-                    if (idx !== -1) {
-                        return { type: 'number', value: String(argValues[idx]) };
+                    const index = fn.params.indexOf(token.value);
+                    if (index !== -1) {
+                        return { type: 'number', value: String(argValues[index]) };
                     }
                 }
                 return token;
@@ -296,7 +337,8 @@ export const calculator = (input) => {
     // console.log(JSON.stringify(tokens, null, 2))
     const tree = parseinator(tokens);
     // console.log(JSON.stringify(tree, null, 2))
-    return evaluateinator(tree);
+    const rounded = Number(result.toFixed(6));
+    Number.isInteger(rounded) ? rounded : result.toFixed(2);
 };
 
 /**
@@ -323,8 +365,13 @@ export const calculator = (input) => {
  * @typedef {Object} VariableNode
  * @property {'Variable'} type
  * @property {string} name
+ * 
+ * @typedef {Object} SuffixNode
+ * @property {'SuffixOperation'} type
+ * @property {ASTNode} value
+ * @property {'k' | 'm' | 'b' | 't'} suffix
  *
- * @typedef {LiteralNode | UnaryOperationNode | BinaryOperationNode | FunctionCallNode | VariableNode} ASTNode
+ * @typedef { LiteralNode | UnaryOperationNode | BinaryOperationNode | FunctionCallNode | VariableNode | SuffixNode } ASTNode
  */
 
 function parseInputFunction(tokens) {
