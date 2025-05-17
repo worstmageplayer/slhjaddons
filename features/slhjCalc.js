@@ -337,8 +337,9 @@ export const calculator = (input) => {
     // console.log(JSON.stringify(tokens, null, 2))
     const tree = parseinator(tokens);
     // console.log(JSON.stringify(tree, null, 2))
+    const result = evaluateinator(tree);
     const rounded = Number(result.toFixed(6));
-    Number.isInteger(rounded) ? rounded : result.toFixed(2);
+    return Number.isInteger(rounded) ? rounded : result.toFixed(2);
 };
 
 /**
