@@ -40,7 +40,7 @@ export const tokeninator9000 = (str) => {
     let i = 0;
 
     while (i < str.length) {
-        const char = str[i];
+        let char = str[i];
 
         if (isNumber(char)) {
             let num = '';
@@ -121,10 +121,10 @@ export const parseinator = (tokens) => {
     const parseBinary = (parser, operators) => {
         let node = parser();
         while (i < tokenLength) {
-            const token = tokens[i];
+            let token = tokens[i];
             if (token.type !== 'operator' || !operators.has(token.value)) break;
-            const operator = tokens[i++].value;
-            const right = parser();
+            let operator = tokens[i++].value;
+            let right = parser();
             node = { type: 'BinaryOperation', left: node, operator, right };
         }
         return node;
@@ -166,7 +166,7 @@ export const parseinator = (tokens) => {
     /** @param {ASTNode} node */
     const parseSuffix = (node) => {
         while (i < tokenLength && tokens[i]?.type === 'suffix') {
-            const suffix = tokens[i++].value;
+            let suffix = tokens[i++].value;
             /** @type {SuffixNode} */
             node = { type: 'SuffixOperation', value: node, suffix };
         }
