@@ -327,10 +327,11 @@ export const calculator = (input) => {
     const tokens = tokeninator9000(input);
     const tree = parseinator(tokens);
     const result = evaluateinator(tree);
-    if (Number.isInteger(parseFloat(result.toFixed(6)))) {
+    const RANGE = 1e-7;
+    if (Math.abs(result - Math.round(result)) < RANGE) {
         return Math.round(result);
     } else {
-        return parseFloat(result.toFixed(2));
+        return +result.toFixed(2);
     }
 };
 
