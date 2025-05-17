@@ -23,11 +23,12 @@ const getFunction = name => functions.find(fn => fn.name === name);
 const isVariable = name => Object.hasOwn(variables, name);
 const getVariableValue = name => variables[name];
 
-const isDigit = c => c >= '0' && c <= '9';
-const isAlpha = c => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_';
-const isSuffix = c => c === 'k' || c === 'm' || c === 'b' || c === 't';
-const isOperator = c => '+-*/'.includes(c);
-const isParenthesis = c => c === '(' || c === ')';
+const isNumber = char => (char >= '0' && char <= '9') || char === '.';
+const isAlpha = char => (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || char === '_';
+const isSuffix = char => char === 'k' || char === 'm' || char === 'b' || char === 't';
+const isSymbol = (char) => '+-*/^=,()'.includes(char);
+const isOperator = char => '+-*/'.includes(char);
+const isParenthesis = char => char === '(' || char === ')';
 
 /**
  * @param {String} str
@@ -41,11 +42,11 @@ export const tokeninator9000 = (str) => {
     while (i < str.length) {
         const char = str[i];
 
-        if (isDigit(char) || char === '.') {
+        if (isNumber(char)) {
             let num = '';
             let dotCount = 0;
 
-            while (i < str.length && (isDigit(str[i]) || str[i] === '.')) {
+            while (i < str.length && isNumber(str[i])) {
                 if (str[i] === '.') {
                     if (++dotCount > 1) throw new Error(`Multiple dots in number at ${i}`);
                 }
@@ -62,7 +63,7 @@ export const tokeninator9000 = (str) => {
             continue;
         }
 
-        if (isOperator(char) || isParenthesis(char) || char === '^' || char === ',' || char === '=') {
+        if (isSymbol(char)) {
             tokens.push({
                 type: isOperator(char) ? 'operator' :
                       isParenthesis(char) ? 'parenthesis' :
@@ -72,15 +73,14 @@ export const tokeninator9000 = (str) => {
             });
             i++;
 
-            if (
-                i < str.length &&
-                isSuffix(str[i]) &&
-                tokens.length > 0 &&
-                (
-                    tokens[tokens.length - 1].type === 'number' ||
-                    (tokens[tokens.length - 1].type === 'parenthesis' && tokens[tokens.length - 1].value === ')')
-                )
-            ) {
+            const nextIsSuffix = i < str.length && isSuffix(str[i]);
+            const lastToken = tokens[tokens.length - 1];
+            const suffixAllowed = lastToken && (
+                lastToken.type === 'number' ||
+                (lastToken.type === 'parenthesis' && lastToken.value === ')')
+            );
+
+            if (nextIsSuffix && suffixAllowed) {
                 tokens.push({ type: 'suffix', value: str[i++] });
             }
 
@@ -122,7 +122,7 @@ export const parseinator = (tokens) => {
         let node = parser();
         while (i < tokenLength) {
             const token = tokens[i];
-            if (token?.type !== 'operator' || !operators.has(token.value)) break;
+            if (token.type !== 'operator' || !operators.has(token.value)) break;
             const operator = tokens[i++].value;
             const right = parser();
             node = { type: 'BinaryOperation', left: node, operator, right };
@@ -175,23 +175,26 @@ export const parseinator = (tokens) => {
 
     /** @returns {LiteralNode | VariableNode | FunctionCallNode | ASTNode} */
     const parsePrimary = () => {
+        if (i >= tokenLength) throw new Error("Unexpected end of input");
+        
         const token = tokens[i];
-        if (i >= tokenLength) throw new Error("Unexpected end of input")
 
-        if (token.type === 'number') {
-            /** @type {LiteralNode} */
-            return { type: 'Literal', value: +tokens[i++].value };
-        }
+        switch (token.type) {
+            case 'number':
+                /** @type {LiteralNode} */
+                return { type: 'Literal', value: +tokens[i++].value };
 
-        if (token.type === 'parenthesis' && token.value === '(') {
-            i++;
-            const expr = parseExpression();
-            if (tokens[i++]?.value !== ')') throw new Error("Expected ')'");
-            return expr;
-        }
+            case 'parenthesis':
+                if (token.value === '(') {
+                    i++;
+                    const expr = parseExpression();
+                    if (tokens[i++]?.value !== ')') throw new Error("Expected ')'");
+                    return expr;
+                }
+                break;
 
-        if (token.type === 'identifier') {
-            return parseVariableOrFunction();
+            case 'identifier':
+                return parseVariableOrFunction();
         }
 
         throw new Error(`Unexpected token: ${token.type} (${token.value})`);
