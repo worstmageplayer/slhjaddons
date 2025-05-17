@@ -23,33 +23,11 @@ const getFunction = name => functions.find(fn => fn.name === name);
 const isVariable = name => Object.hasOwn(variables, name);
 const getVariableValue = name => variables[name];
 
-const charTypes = {
-    '0': 'number',
-    '1': 'number',
-    '2': 'number',
-    '3': 'number',
-    '4': 'number',
-    '5': 'number',
-    '6': 'number',
-    '7': 'number',
-    '8': 'number',
-    '9': 'number',
-    '.': 'number',
-
-    '+': 'operator',
-    '-': 'operator',
-    '*': 'operator',
-    '/': 'operator',
-
-    '^': 'exponent',
-
-    '(': 'parenthesis',
-    ')': 'parenthesis',
-
-    ',': 'comma',
-
-    '=': 'equals'
-};
+const isDigit = c => c >= '0' && c <= '9';
+const isAlpha = c => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_';
+const isSuffix = c => c === 'k' || c === 'm' || c === 'b' || c === 't';
+const isOperator = c => '+-*/'.includes(c);
+const isParenthesis = c => c === '(' || c === ')';
 
 /**
  * @param {String} str
@@ -57,41 +35,46 @@ const charTypes = {
  */
 export const tokeninator9000 = (str) => {
     str = str.replace(/\s+/g, '');
-
     const tokens = [];
     let i = 0;
-    const len = str.length;
 
-    while (i < len) {
-        let char = str[i];
-        let type = charTypes[char];
+    while (i < str.length) {
+        const char = str[i];
 
-        if (type === 'number') {
+        if (isDigit(char) || char === '.') {
             let num = '';
             let dotCount = 0;
 
-            do {
-                if (str[i] === '.' && ++dotCount > 1) throw new Error(`Multiple dots in number at ${i}`);
+            while (i < str.length && (isDigit(str[i]) || str[i] === '.')) {
+                if (str[i] === '.') {
+                    if (++dotCount > 1) throw new Error(`Multiple dots in number at ${i}`);
+                }
                 num += str[i++];
-            } while (i < len && charTypes[str[i]] === 'number');
+            }
 
             if (num === '.') throw new Error(`Invalid number`);
             tokens.push({ type: 'number', value: num });
 
-            if (i < len && suffixes.has(str[i])) {
+            if (i < str.length && isSuffix(str[i])) {
                 tokens.push({ type: 'suffix', value: str[i++] });
             }
 
             continue;
         }
 
-        if (type !== undefined) {
-            tokens.push({ type, value: char });
+        if (isOperator(char) || isParenthesis(char) || char === '^' || char === ',' || char === '=') {
+            tokens.push({
+                type: isOperator(char) ? 'operator' :
+                      isParenthesis(char) ? 'parenthesis' :
+                      char === '^' ? 'exponent' :
+                      char === ',' ? 'comma' : 'equals',
+                value: char
+            });
             i++;
 
             if (
-                i < len &&
-                suffixes.has(str[i]) &&
+                i < str.length &&
+                isSuffix(str[i]) &&
                 tokens.length > 0 &&
                 (
                     tokens[tokens.length - 1].type === 'number' ||
@@ -104,11 +87,16 @@ export const tokeninator9000 = (str) => {
             continue;
         }
 
-        let identifier = '';
-        while (i < len && charTypes[str[i]] === undefined) {
-            identifier += str[i++];
+        if (isAlpha(char)) {
+            let identifier = '';
+            while (i < str.length && isAlpha(str[i])) {
+                identifier += str[i++];
+            }
+            tokens.push({ type: 'identifier', value: identifier });
+            continue;
         }
-        tokens.push({ type: 'identifier', value: identifier });
+
+        throw new Error(`Unknown character: '${char}' at position ${i}`);
     }
 
     return tokens;
@@ -337,9 +325,7 @@ export const calculator = (input) => {
     // console.log(JSON.stringify(tokens, null, 2))
     const tree = parseinator(tokens);
     // console.log(JSON.stringify(tree, null, 2))
-    const result = evaluateinator(tree);
-    const rounded = Number(result.toFixed(6));
-    return Number.isInteger(rounded) ? rounded : result.toFixed(2);
+    return evaluateinator(tree);
 };
 
 /**
