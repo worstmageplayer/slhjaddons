@@ -54,6 +54,7 @@ const petRuleRender = register('renderOverlay', () => {
 
     if (fadeAlpha <= 0) {
         petRuleRender.unregister();
+        pet = null;
         rendering = false;
         return;
     }
