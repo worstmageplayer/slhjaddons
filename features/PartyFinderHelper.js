@@ -19,7 +19,7 @@ const pfHelper = register('guiMouseClick', () => {
 
         const classCounts = { A: 0, B: 0, M: 0, H: 0, T: 0 };
 
-        partyList.forEach(p => p.missing.forEach(cls => classCounts[cls]++));
+        partyList.forEach(party => party.missing.forEach(cls => classCounts[cls]++));
 
         const max = Math.max(...Object.values(classCounts));
         const min = Math.min(...Object.values(classCounts));
@@ -37,15 +37,17 @@ const pfStuff = new RegisterGroup({
     guiRender: register('guiRender', () => {
         if (!partyList) return;
 
-        partyList.forEach(p => {
-            for (let i = 0; i < p.missing.length; i++) {
-                let cls = p.missing[i];
-                let [x, y] = p.position[i];
+        partyList.forEach(party => {
+            const partyMissingLength = party.missing.length;
+
+            for (let i = 0; i < partyMissingLength; i++) {
+                let cls = party.missing[i];
+                let [x, y] = party.position[i];
                 Renderer.translate(0, 0, 260);
                 Renderer.drawString(cls, x, y, true)
 
                 if (cls === data.player.dungeon.class.charAt(0)) {
-                    let [x, y] = p.slotPos
+                    let [x, y] = party.slotPos
                     Renderer.translate(0, 0, 1);
                     drawHollowRect(Renderer.color(0, 170, 0), x, y, 16, 16, 1)
                 }   
@@ -71,8 +73,8 @@ if (Settings.togglePartyFinderHelper) {
 
 const getPartyList = (itemList, gui) => {
     const partyList = [];
-    const guiLeft = gui?.getGuiLeft() ?? 0;
-    const guiTop = gui?.getGuiTop() ?? 0;
+    const guiLeft = gui.getGuiLeft() ?? 0;
+    const guiTop = gui.getGuiTop() ?? 0;
 
     itemList.forEach((item, i) => {
         const name = item?.getName();
