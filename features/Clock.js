@@ -2,10 +2,10 @@
 import Settings from "../config";
 import { RegisterGroup } from "../utils/RegisterStuff";
 
-let xPos;
-let yPos;
+let xPos, yPos;
 let now = new Date();
 let currentTime = `${now.getHours()} : ${now.getMinutes().toString().padStart(2, '0')}`;
+const time = new Text('', 0, 0).setShadow(true);
 
 Settings.registerListener('Ingame Clock', v => v ? clock.register() : clock.unregister());
 
@@ -14,19 +14,17 @@ const clock = new RegisterGroup({
         const now = new Date();
         currentTime = `${now.getHours()} : ${now.getMinutes().toString().padStart(2, '0')}`;
         updateClockPosition();
-    }).setFps(2).unregister(),
+        time.setString(currentTime).setX(xPos).setY(yPos).setColor(Settings.clockColor.getRGB());
+    }).setFps(5).unregister(),
 
     renderOverlay: register('renderOverlay', () => {
         if (!currentTime || !xPos || !yPos) return;
-        const time = new Text(currentTime, xPos, yPos).setShadow(true).setColor(Settings.clockColor.getRGB())
         Renderer.scale(Settings.clockScale);
         time.draw();
     }).unregister()
 })
 
-if (Settings.toggleClock) {
-    clock.register();
-}
+if (Settings.toggleClock) clock.register();
 
 function updateClockPosition() {
     const screenWidth = Renderer.screen.getWidth();
