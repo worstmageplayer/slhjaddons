@@ -60,16 +60,17 @@ const quickRelease = register('tick', () => {
 guiQuickCommands.registerDraw(() => {
     const mouseX = Client.getMouseX(), mouseY = Client.getMouseY();
     const dx = mouseX - screenWidth / 2, dy = mouseY - screenHeight / 2;
+    const shapesLength = shapes.length;
 
     deadZone = pointInPolygon(mouseX, mouseY, innerPoints);
     hoveredSection = !deadZone ? getMouseSection(dx, dy) : -1;
 
-    for (let i = 0; i < shapes.length; i++) {
-        let colour = (i === hoveredSection) ? guiHoverColour : guiColour;
+    for (let shapeSection = 0; shapeSection < shapesLength; shapeSection++) {
+        let colour = (shapeSection === hoveredSection) ? guiHoverColour : guiColour;
 
         let shape = new Shape(colour);
-        for (let j = 0; j < 4; j++) {
-            shape.addVertex(shapes[i][j][0], shapes[i][j][1]);
+        for (var [x, y] of shapes[shapeSection]) {
+            shape.addVertex(x, y);
         }
         shape.draw();
     }
@@ -106,16 +107,16 @@ function generateShapesVertex(screenWidth, screenHeight, innerRadius, outerRadiu
         let avgAngle = (angle1 + angle2) / 2;
         let offsetX = Math.cos(avgAngle) * sectionOffset;
         let offsetY = Math.sin(avgAngle) * sectionOffset;
-        let cx = centerX + offsetX, cy = centerY + offsetY;
+        let sectionCenterX = centerX + offsetX, sectionCenterY= centerY + offsetY;
 
         let cos1 = Math.cos(angle1), sin1 = Math.sin(angle1);
         let cos2 = Math.cos(angle2), sin2 = Math.sin(angle2);
 
         shapes.push([
-            [cx + cos1 * innerRadius, cy + sin1 * innerRadius],
-            [cx + cos2 * innerRadius, cy + sin2 * innerRadius],
-            [cx + cos2 * outerRadius, cy + sin2 * outerRadius],
-            [cx + cos1 * outerRadius, cy + sin1 * outerRadius]
+            [sectionCenterX + cos1 * innerRadius, sectionCenterY+ sin1 * innerRadius],
+            [sectionCenterX + cos2 * innerRadius, sectionCenterY+ sin2 * innerRadius],
+            [sectionCenterX + cos2 * outerRadius, sectionCenterY+ sin2 * outerRadius],
+            [sectionCenterX + cos1 * outerRadius, sectionCenterY+ sin1 * outerRadius]
         ]);
 
         innerPoints.push([
