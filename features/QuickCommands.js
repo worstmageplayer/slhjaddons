@@ -49,7 +49,7 @@ quickCommandsKeyBind.registerKeyPress(() => {
 const quickRelease = register('tick', () => {
     const isDown = Keyboard.isKeyDown(quickCommandsKeyBind.getKeyCode());
     if (isDown) return;
-    if (!deadZone) quickCommands(hoveredSection);
+    !deadZone && quickCommands(hoveredSection);
     guiQuickCommands.close();
     quickRelease.unregister();
     deadZone = true;
