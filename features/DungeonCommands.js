@@ -38,17 +38,13 @@ const dungeonCommands = new RegisterGroup({
     }).setName('d').unregister(),
 
     chat: register('chat', (rank, name, dungeontype, number) => {
-        if (name === Player.getName()) {
-            timerStart = Date.now();
-        }   
+        if (name === Player.getName()) timerStart = Date.now();
     }).setCriteria('${*}[${rank}] ${name} entered ${dungeontype} Catacombs, Floor ${number}${*}').unregister(),
 })
 
 Settings.registerListener('Dungeon Commands', v => v ? dungeonCommands.register() : dungeonCommands.unregister());
 
-if (Settings.toggleDcmd) {
-    dungeonCommands.register();
-}
+if (Settings.toggleDcmd) dungeonCommands.register();
 
 function enterUndersized() {
     if (!Settings.toggleUndersizedEntry) return;
