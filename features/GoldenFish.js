@@ -7,6 +7,7 @@ const goldenFishAlert = register("Chat", (message, event) => {
 }).setCriteria('You spot a Golden Fish surface from beneath the lava!').unregister();
 
 const renderOverlay = register('renderOverlay', () => {
+    Renderer.scale(5);
     Renderer.drawString(
         '&6Golden Fish&r', 
         Renderer.screen.getWidth()/2 - Renderer.getStringWidth('&6Golden Fish&r')/2, 
