@@ -26,7 +26,7 @@ const getVariableValue = name => variables[name];
 const isNumber = char => (char >= '0' && char <= '9') || char === '.';
 const isAlpha = char => (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || char === '_';
 const isSuffix = char => char === 'k' || char === 'm' || char === 'b' || char === 't';
-const isSymbol = (char) => '+-*/^=,()'.includes(char);
+const isSymbol = char => '+-*/^=,()'.includes(char);
 const isOperator = char => '+-*/'.includes(char);
 const isParenthesis = char => char === '(' || char === ')';
 
@@ -245,8 +245,8 @@ export const evaluateinator = (node) => {
             return node.value;
 
         case 'UnaryOperation': {
-            const val = evaluateinator(node.argument);
-            return node.operator === '-' ? -val : val;
+            const value = evaluateinator(node.argument);
+            return node.operator === '-' ? -value : value;
         }
 
         case 'SuffixOperation': {
