@@ -52,6 +52,21 @@ if (Settings.toggleSignHelper) guiOpened.register();
 function addCommas(input) {
     const num = Number(input);
     if (isNaN(num)) return "0";
-    const [intPart, decPart] = num.toString().split(".");
-    return intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + (decPart ? `.${decPart}` : "");
+
+    const isNegative = num < 0;
+    const [intPart, decPart] = Math.abs(num).toString().split(".");
+    const digits = intPart.split("");
+    const result = [];
+
+    let count = 0;
+    for (let i = digits.length - 1; i >= 0; i--) {
+        result.unshift(digits[i]);
+        count++;
+        if (count === 3 && i !== 0) {
+            result.unshift(",");
+            count = 0;
+        }
+    }
+
+    return (isNegative ? "-" : "") + result.join("") + (decPart ? "." + decPart : "");
 }
