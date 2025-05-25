@@ -3,8 +3,10 @@ import Settings from "../config";
 import { data } from "../data"
 import { GuiHandler } from "../utils/GuiHandler";
 
-let pet;
+const DURATION = 5000;
+let pet = null;
 let rendering = false;
+let text = null;
 
 const moveGui = new GuiHandler(data.moveAutoPetRuleDisplay);
 
@@ -39,6 +41,7 @@ const petRule = register('chat', (event) => {
     };
     fadeAlpha = 255;
     fadeStartTime = Date.now();
+    text = new Text(pet.name, data.moveAutoPetRuleDisplay.x, data.moveAutoPetRuleDisplay.y).setShadow(true).setColor(Renderer.color(255, 255, 255, fadeAlpha))
     petRuleRender.register();
     
 }).setCriteria('Autopet equipped your ${*} VIEW RULE').setParameter('contains').unregister();
@@ -48,18 +51,17 @@ const petRuleRender = register('renderOverlay', () => {
     rendering = true;
 
     const elapsed = Date.now() - fadeStartTime;
-    const duration = 5000;
-    const t = Math.min(1, elapsed / duration);
-    fadeAlpha = 255 * (1 - fadeOut(t));
+    const time = Math.min(1, elapsed / DURATION);
+    fadeAlpha = 255 * (1 - fadeOut(time));
 
     if (fadeAlpha <= 0) {
-        petRuleRender.unregister();
         pet = null;
         rendering = false;
+        text = null;
+        petRuleRender.unregister();
         return;
     }
     
-    text = new Text(pet.name, data.moveAutoPetRuleDisplay.x, data.moveAutoPetRuleDisplay.y).setShadow(true).setColor(Renderer.color(255, 255, 255, fadeAlpha))
     Renderer.scale(data.moveAutoPetRuleDisplay.scale);
     text.draw();
 }).unregister(); 
@@ -69,6 +71,4 @@ function fadeOut(t) {
     return Math.pow((t - 0.7) / 0.3, 5);
 }
 
-if (Settings.toggleAutoPetRuleDisplay) {
-    petRule.register();
-}
+if (Settings.toggleAutoPetRuleDisplay) petRule.register();
