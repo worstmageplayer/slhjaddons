@@ -20,7 +20,7 @@ const suffixes = new Map([
 
 const isFunction = name => functions.some(fn => fn.name === name);
 const getFunction = name => functions.find(fn => fn.name === name);
-const isVariable = name => Object.hasOwn(variables, name);
+const isVariable = name => Object.prototype.hasOwnProperty.call(variables, name);
 const getVariableValue = name => variables[name];
 
 const isNumber = char => (char >= '0' && char <= '9') || char === '.';
@@ -48,7 +48,7 @@ export const tokeninator9000 = (str) => {
 
             while (i < str.length && isNumber(str[i])) {
                 if (str[i] === '.') {
-                    if (++dotCount > 1) throw new Error(`Multiple dots in number at ${i}`);
+                    if (++dotCount > 1) throw new Error(`Multiple dots in number`);
                 }
                 num += str[i++];
             }
@@ -427,18 +427,28 @@ register('Command', (...args) => {
 }).setName('define').setAliases('let');
 
 register('Command', (...args) => {
+    args = args || [];
+    const expression = args.join('');
+    
+    if (expression.length === 0 || expression.toLowerCase() === 'help') {
+        ChatLib.chat(`Usage: /calc expression\nExample: /calc 2^3+4`);
+        return;
+    }
+
+    let resultText = '';
+    let hoverText = '';
+
     try {
-        if (!args || args.join('').toLowerCase() === 'help') {
-            ChatLib.chat(`Usage: /calc expression\nExample: /calc 2^3+4`);
-            return;
-        }
-        let expression = args.join('');
         const result = calculator(expression);
-        const text = new TextComponent(result);
-        text.setHover('show_text', `${expression} = ${result}`);
-        ChatLib.chat(text);
+        resultText = String(result);
+        hoverText = `${expression} = ${result}`;
     } catch (e) {
         console.log(e);
-        ChatLib.chat("Invalid Input");
+        resultText = 'Invalid Input';
+        hoverText = `Expression: ${expression}\nError: ${e.message}`;
     }
+
+    const text = new TextComponent(resultText);
+    text.setHover('show_text', hoverText);
+    ChatLib.chat(text);
 }).setName('calc');
