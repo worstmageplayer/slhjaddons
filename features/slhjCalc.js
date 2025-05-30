@@ -9,6 +9,7 @@ const variables = {
     one: 1, two: 2, three: 3, four: 4, five: 5,
     six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
     pi: Math.PI, e: Math.E,
+    ans: 0,
 };
 
 const suffixes = new Map([
@@ -440,6 +441,7 @@ register('Command', (...args) => {
 
     try {
         const result = calculator(expression);
+        variables.ans = result;
         resultText = String(result);
         hoverText = `${expression} = ${result}`;
     } catch (e) {
