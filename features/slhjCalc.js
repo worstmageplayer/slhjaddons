@@ -33,7 +33,7 @@ const isParenthesis = char => char === '(' || char === ')';
 
 /**
  * @param {String} str
- * @returns {{ type: string, value: string }[]}
+ * @returns {Token[]}
  */
 export const tokeninator9000 = (str) => {
     str = str.replace(/\s+/g, '');
@@ -108,7 +108,7 @@ const MUL_DIV = new Set(['*', '/']);
 const UNARY_OPERATORS = new Set(['+', '-']);
 
 /**
- * @param {{ type: string, value: string }[]} tokens
+ * @param {Token[]} tokens
  * @returns {ASTNode}
  */
 export const parseinator = (tokens) => {
@@ -322,6 +322,10 @@ export const calculator = (input) => {
 };
 
 /**
+ * @typedef {Object} Token
+ * @property {string} type - The type of the token (e.g., 'number', 'operator', 'identifier', etc.)
+ * @property {string} value - The string value of the token
+ * 
  * @typedef {Object} LiteralNode
  * @property {'Literal'} type
  * @property {number} value
