@@ -3,25 +3,27 @@ import Settings from "../config";
 import { data } from "../data"
 import { GuiHandler } from "../utils/GuiHandler";
 
+const settingsGui = Settings.moveAutoPetRuleDisplay;
+const dataGui = data.moveAutoPetRuleDisplay;
+const moveGui = new GuiHandler(data.moveAutoPetRuleDisplay);
+
 const DURATION = 5000;
 let pet = null;
 let rendering = false;
 let text = null;
 
-const moveGui = new GuiHandler(data.moveAutoPetRuleDisplay);
-
-Settings.moveAutoPetRuleDisplay.registerDraw(() => {
+settingsGui.registerDraw(() => {
     Renderer.drawString('Editing Gui', Renderer.screen.getWidth()/2 - Renderer.getStringWidth('Editing Gui')/2, 10, true)
-    Renderer.scale(data.moveAutoPetRuleDisplay.scale)
-    Renderer.drawString('§6PET NAME', data.moveAutoPetRuleDisplay.x, data.moveAutoPetRuleDisplay.y, true);
+    Renderer.scale(dataGui.scale)
+    Renderer.drawString('§6PET NAME', dataGui.x, dataGui.y, true);
 })
 
-Settings.moveAutoPetRuleDisplay.registerOpened(() => {
+settingsGui.registerOpened(() => {
     moveGui.register();
     petRuleRender.unregister();
 });
 
-Settings.moveAutoPetRuleDisplay.registerClosed(() => {
+settingsGui.registerClosed(() => {
     moveGui.unregister();
     data.save();
     if (rendering) petRuleRender.register();
@@ -41,7 +43,7 @@ const petRule = register('chat', (event) => {
     };
     fadeAlpha = 255;
     fadeStartTime = Date.now();
-    text = new Text(pet.name, data.moveAutoPetRuleDisplay.x, data.moveAutoPetRuleDisplay.y).setShadow(true).setColor(Renderer.color(255, 255, 255, fadeAlpha))
+    text = new Text(pet.name, dataGui.x, dataGui.y).setShadow(true).setColor(Renderer.color(255, 255, 255, fadeAlpha))
     petRuleRender.register();
     
 }).setCriteria('Autopet equipped your ${*} VIEW RULE').setParameter('contains').unregister();
@@ -62,7 +64,7 @@ const petRuleRender = register('renderOverlay', () => {
         return;
     }
     
-    Renderer.scale(data.moveAutoPetRuleDisplay.scale);
+    Renderer.scale(dataGui.scale);
     text.draw();
 }).unregister(); 
 
