@@ -4,25 +4,27 @@ import { GuiHandler } from "../utils/GuiHandler";
 import { getCooldownMultiplier } from "../utils/MageCooldownMultiplier";
 
 const baseCooldown = 20000;
+const settingsGui = Settings.moveRagnarockCooldownGui;
+const dataGui = data.moveRagnarockCooldownGui;
+const moveGui = new GuiHandler(data.moveRagnarockCooldownGui);
+
 let ragnarockCooldown = baseCooldown;
 let timeOfCast = 0;
 let startCast = false;
 let inCooldown = false;
 
-const moveGui = new GuiHandler(data.moveRagnarockCooldownGui);
-
-Settings.moveRagnarockCooldownGui.registerDraw(() => {
+settingsGui.registerDraw(() => {
     Renderer.drawString('Editing Gui', Renderer.screen.getWidth()/2 - Renderer.getStringWidth('Editing Gui')/2, 10, true)
-    Renderer.scale(data.moveRagnarockCooldownGui.scale)
-    Renderer.drawString('20.0', data.moveRagnarockCooldownGui.x, data.moveRagnarockCooldownGui.y, true);
+    Renderer.scale(dataGui.scale)
+    Renderer.drawString('20.0', dataGui.x, dataGui.y, true);
 })
 
-Settings.moveRagnarockCooldownGui.registerOpened(() => {
+settingsGui.registerOpened(() => {
     moveGui.register()
     registers.renderCooldown.unregister();
 });
 
-Settings.moveRagnarockCooldownGui.registerClosed(() => {
+settingsGui.registerClosed(() => {
     moveGui.unregister()
     data.save();
     if (startCast) {registers.renderCooldown.register()}
@@ -40,8 +42,8 @@ const registers = {
 
     renderCooldown: register("renderOverlay", () => {
         const timeLeft = ((ragnarockCooldown - Date.now() + timeOfCast) / 1000).toFixed(1);
-        Renderer.scale(data.moveRagnarockCooldownGui.scale)
-        Renderer.drawString(timeLeft, data.moveRagnarockCooldownGui.x, data.moveRagnarockCooldownGui.y, true);
+        Renderer.scale(dataGui.scale)
+        Renderer.drawString(timeLeft, dataGui.x, dataGui.y, true);
     }).unregister()
 };
 
