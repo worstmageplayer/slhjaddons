@@ -32,10 +32,7 @@ if (Settings.toggleCustomScoreboard) scoreboard.register();
 
 function updateScoreboardLines() {
     const scoreboardLines = Scoreboard.getLines();
-    if (scoreboardLines.length === 0) {
-        scoreboardText = null;
-        return;
-    }
+    if (scoreboardLines.length === 0) return scoreboardText = null;
 
     const scoreboardFiltered = scoreboardLines.map(line => line.getName().trim()).reverse().filter(line => line !== hiddenLine);
 
@@ -62,8 +59,10 @@ function updateScoreboardPosition() {
     
     xPos = (screenWidth - Settings.scoreboardOffset) / Settings.scoreboardScale - width;
     yPos = (screenHeight / Settings.scoreboardScale - height) / 2;
-    bgxPos = xPos - Settings.scoreboardPadding;
-    bgyPos = yPos - Settings.scoreboardPadding;
-    bgWidth = width + 2 * Settings.scoreboardPadding + Settings.scoreboardOffset;
-    bgHeight = height + 2 * Settings.scoreboardPadding;
+
+    const pad = Settings.scoreboardPadding;
+    bgxPos = xPos - pad;
+    bgyPos = yPos - pad;
+    bgWidth = width + 2 * pad + Settings.scoreboardOffset;
+    bgHeight = height + 2 * pad;
 }
