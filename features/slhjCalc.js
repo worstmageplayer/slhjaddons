@@ -265,17 +265,7 @@ export const evaluateinator = (node) => {
                 case '/':
                     if (right === 0) throw new Error('Division by zero');
                     return left / right;
-                case '^': 
-                    if (right < 0 || right % 1 !== 0) return left ** right;
-                    else {
-                        let result = 1;
-                        while (right > 0) {
-                            if (right % 2 === 1) result *= left;
-                            left *= left;
-                            right = (right / 2) | 0;
-                        }
-                        return result;
-                    }
+                case '^': return left ** right;
                 default: throw new Error(`Unknown binary operator: ${node.operator}`);
             }
         }
