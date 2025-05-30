@@ -135,30 +135,25 @@ function getMouseSection(dx, dy) {
     return Math.floor(angle / sectionAngle);
 }
 
-function pointInPolygon(mouseX, mouseY, polygonPoints) {
-    let isInside = false;
-    const pointCount = polygonPoints.length;
+function pointInPolygon(mx, my, polygon) {
+    let inside = false;
+    const len = polygon.length;
 
-    for (let current = 0, previous = pointCount - 1; current < pointCount; previous = current++) {
-        const [currentX, currentY] = polygonPoints[current];
-        const [previousX, previousY] = polygonPoints[previous];
+    for (let current = 0, previous = len - 1; current < len; previous = current++) {
+        let [currentX, currentY] = polygon[current];
+        let [previousX, previousY] = polygon[previous];
 
-        const currentAbove = currentY > mouseY;
-        const previousAbove = previousY > mouseY;
+        if ((currentY > my) === (previousY > my)) continue;
 
-        if (currentAbove === previousAbove) continue;
+        let dy = previousY - currentY;
+        if (dy === 0) continue;
 
-        const verticalChange = previousY - currentY;
-        if (verticalChange === 0) continue;
+        let dx = previousX - currentX;
+        let slope = dx / dy;
+        let currentXntersect = currentX + (my - currentY) * slope;
 
-        const horizontalChange = previousX - currentX;
-        const slope = horizontalChange / verticalChange;
-        const xAtMouseY = currentX + (mouseY - currentY) * slope;
-
-        if (mouseX < xAtMouseY) {
-            isInside = !isInside;
-        }
+        if (mx < currentXntersect) inside = !inside;
     }
 
-    return isInside;
+    return inside;
 }
