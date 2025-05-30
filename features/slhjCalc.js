@@ -400,12 +400,13 @@ function defineFunction(name, params, body) {
 }
 
 register('Command', (...args) => {
-    try {
-        if (!args || args.join('').toLowerCase() === 'help') {
+    const expression = args?.join('');
+    if (!expression || expression.toLowerCase() === 'help') {
             ChatLib.chat(`Usage: /define name(params)=expression\nExample: /define f(x,y)=x^2+y^2\nDefines a custom function.`);
             return;
-        }
-        if (args.join('').toLowerCase() === 'show') {
+    }
+
+    if (expression.toLowerCase() === 'show') {
             if (functions.length === 0) {
                 ChatLib.chat("No functions defined.");
             } else {
@@ -415,8 +416,10 @@ register('Command', (...args) => {
                 });
             }
             return;
-        }
-        const argsarray = [...args].join('').split('');
+    }
+
+    try {
+        const argsarray = expression.split('');
         const { name, params, body } = parseInputFunction(argsarray);
         defineFunction(name, params, body);
         // console.log('Defined Function:', JSON.stringify({ name, params, body }));
@@ -428,10 +431,8 @@ register('Command', (...args) => {
 }).setName('define').setAliases('let');
 
 register('Command', (...args) => {
-    args = args || [];
-    const expression = args.join('');
-    
-    if (expression.length === 0 || expression.toLowerCase() === 'help') {
+    const expression = args?.join('');
+    if (!expression || expression.toLowerCase() === 'help') {
         ChatLib.chat(`Usage: /calc expression\nExample: /calc 2^3+4`);
         return;
     }
