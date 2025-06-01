@@ -241,19 +241,19 @@ export const parseinator = (tokens) => {
     return result;
 };
 
+const binaryOperators = {
+    '+': (a, b) => a + b,
+    '-': (a, b) => a - b,
+    '*': (a, b) => a * b,
+    '/': (a, b) => a / b,
+    '^': (a, b) => a ** b
+};
+
 /**
  * @param {ASTNode} node
  * @returns {number}
  */
 export const evaluateinator = (node) => {
-    const binaryOperators = {
-        '+': (a, b) => a + b,
-        '-': (a, b) => a - b,
-        '*': (a, b) => a * b,
-        '/': (a, b) => a / b,
-        '^': (a, b) => a ** b
-    };
-
     switch (node.type) {
         case 'Literal':
             return node.value;
