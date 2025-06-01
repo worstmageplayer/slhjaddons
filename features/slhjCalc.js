@@ -37,17 +37,18 @@ const isParenthesis = char => char === '(' || char === ')';
  */
 export const tokeninator9000 = (str) => {
     str = str.replace(/\s+/g, '');
+    const strLength = str.length;
     const tokens = [];
     let i = 0;
 
-    while (i < str.length) {
+    while (i < strLength) {
         let char = str[i];
 
         if (isNumber(char)) {
             let num = '';
             let dotCount = 0;
 
-            while (i < str.length && isNumber(str[i])) {
+            while (i < strLength && isNumber(str[i])) {
                 if (str[i] === '.') {
                     if (++dotCount > 1) throw new Error(`Multiple dots in number`);
                 }
@@ -57,7 +58,7 @@ export const tokeninator9000 = (str) => {
             if (num === '.') throw new Error(`Invalid number`);
             tokens.push({ type: 'number', value: num });
 
-            if (i < str.length && isSuffix(str[i])) {
+            if (i < strLength && isSuffix(str[i])) {
                 tokens.push({ type: 'suffix', value: str[i++] });
             }
 
@@ -74,7 +75,7 @@ export const tokeninator9000 = (str) => {
             });
             i++;
 
-            const nextIsSuffix = i < str.length && isSuffix(str[i]);
+            const nextIsSuffix = i < strLength && isSuffix(str[i]);
             const lastToken = tokens[tokens.length - 1];
             const suffixAllowed = lastToken && (
                 lastToken.type === 'number' ||
@@ -90,7 +91,7 @@ export const tokeninator9000 = (str) => {
 
         if (isAlpha(char)) {
             let identifier = '';
-            while (i < str.length && isAlpha(str[i])) {
+            while (i < strLength && isAlpha(str[i])) {
                 identifier += str[i++];
             }
             tokens.push({ type: 'identifier', value: identifier });
@@ -131,12 +132,12 @@ export const parseinator = (tokens) => {
         return node;
     };
 
-    // Unary > MUL_DIV > ADD_SUB
+    // Primary > Suffix > Unary > Exponent > MUL_DIV > ADD_SUB
     /** @returns {ASTNode} */
-    const parseExpression = () => parseBinary(parseTerm, ADD_SUB);
+    const parseAddSub = () => parseBinary(parseMulDiv, ADD_SUB);
 
     /** @returns {ASTNode} */
-    const parseTerm = () => parseBinary(parseUnary, MUL_DIV);
+    const parseMulDiv = () => parseBinary(parseUnary, MUL_DIV);
 
     /** @returns {ASTNode} */
     const parseUnary = () => {
@@ -174,7 +175,7 @@ export const parseinator = (tokens) => {
         return node;
     };
 
-    /** @returns {LiteralNode | VariableNode | FunctionCallNode | ASTNode} */
+    /** @returns { LiteralNode | VariableNode | FunctionCallNode | ASTNode } */
     const parsePrimary = () => {
         if (i >= tokenLength) throw new Error("Unexpected end of input");
         
@@ -188,7 +189,7 @@ export const parseinator = (tokens) => {
             case 'parenthesis':
                 if (token.value === '(') {
                     i++;
-                    const expr = parseExpression();
+                    const expr = parseAddSub();
                     if (tokens[i++]?.value !== ')') throw new Error("Expected ')'");
                     return expr;
                 }
@@ -211,7 +212,7 @@ export const parseinator = (tokens) => {
             /** @type {ASTNode[]} */
             const args = [];
             while (i < tokenLength && tokens[i].value !== ')') {
-                args.push(parseExpression());
+                args.push(parseAddSub());
                 if (tokens[i]?.type === 'comma') i++;
             }
             if (tokens[i++]?.value !== ')') throw new Error("Expected ')'");
@@ -227,7 +228,8 @@ export const parseinator = (tokens) => {
         throw new Error(`Unknown identifier: '${name}'`);
     };
 
-    const result = parseExpression();
+    const result = parseAddSub();
+
     if (i < tokenLength) {
         const leftover = tokens.slice(i).map(t => `${t.type}(${t.value})`).join(', ');
         throw new Error(`Unexpected token(s): '${leftover}'`);
