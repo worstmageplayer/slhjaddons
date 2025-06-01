@@ -246,6 +246,14 @@ export const parseinator = (tokens) => {
  * @returns {number}
  */
 export const evaluateinator = (node) => {
+    const binaryOperators = {
+        '+': (a, b) => a + b,
+        '-': (a, b) => a - b,
+        '*': (a, b) => a * b,
+        '/': (a, b) => a / b,
+        '^': (a, b) => a ** b
+    };
+
     switch (node.type) {
         case 'Literal':
             return node.value;
@@ -264,14 +272,10 @@ export const evaluateinator = (node) => {
             const left = evaluateinator(node.left);
             const right = evaluateinator(node.right);
 
-            switch (node.operator) {
-                case '+': return left + right;
-                case '-': return left - right;
-                case '*': return left * right;
-                case '/': return left / right;
-                case '^': return left ** right;
-                default: throw new Error(`Unknown binary operator: ${node.operator}`);
-            }
+            const fn = binaryOperators[node.operator];
+            if (!fn) throw new Error(`Unknown binary operator: ${node.operator}`);
+
+            return fn(left, right);
         }
 
         case 'FunctionCall': {
