@@ -272,10 +272,10 @@ export const evaluateinator = (node) => {
             const left = evaluateinator(node.left);
             const right = evaluateinator(node.right);
 
-            const fn = binaryOperators[node.operator];
-            if (!fn) throw new Error(`Unknown binary operator: ${node.operator}`);
+            const operation = binaryOperators[node.operator];
+            if (!operation) throw new Error(`Unknown binary operator: ${node.operator}`);
 
-            return fn(left, right);
+            return operation(left, right);
         }
 
         case 'FunctionCall': {
