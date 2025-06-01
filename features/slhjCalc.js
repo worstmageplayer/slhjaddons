@@ -125,8 +125,11 @@ export const parseinator = (tokens) => {
         while (i < tokenLength) {
             let token = tokens[i];
             if (token.type !== 'operator' || !operators.has(token.value)) break;
+
             let operator = tokens[i++].value;
             let right = parser();
+            if (operator == '/' && right.value === 0) throw new Error('Division by zero');
+
             node = { type: 'BinaryOperation', left: node, operator, right };
         }
         return node;
@@ -258,15 +261,14 @@ export const evaluateinator = (node) => {
         }
 
         case 'BinaryOperation': {
-            let left = evaluateinator(node.left);
-            let right = evaluateinator(node.right);
+            const left = evaluateinator(node.left);
+            const right = evaluateinator(node.right);
+
             switch (node.operator) {
                 case '+': return left + right;
                 case '-': return left - right;
                 case '*': return left * right;
-                case '/':
-                    if (right === 0) throw new Error('Division by zero');
-                    return left / right;
+                case '/': return left / right;
                 case '^': return left ** right;
                 default: throw new Error(`Unknown binary operator: ${node.operator}`);
             }
@@ -320,7 +322,7 @@ export const calculator = (input) => {
     const tokens = tokeninator9000(input);
     const tree = parseinator(tokens);
     const result = evaluateinator(tree);
-    return +result.toFixed(5)
+    return +result.toFixed(5);
 };
 
 /**
@@ -366,6 +368,7 @@ function parseInputFunction(tokens) {
 
     const header = tokens.slice(0, eqIndex);
     const body = tokens.slice(eqIndex + 1).join('');
+    if (!body || body.length === 0) throw new Error("Undefined expression");
 
     if (header.length < 4 || header[1] !== '(' || header[header.length - 1] !== ')') {
         throw new Error("Invalid function header format");
@@ -422,7 +425,7 @@ register('Command', (...args) => {
         ChatLib.chat(`Defined function ${name}(${params.join(', ')}) = ${body}`);
     } catch (e) {
         console.log(e);
-        ChatLib.chat("Invalid Input");
+        ChatLib.chat(`Invalid Input: ${e}`);
     }
 }).setName('define').setAliases('let');
 
