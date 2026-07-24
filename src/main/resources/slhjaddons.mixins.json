@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "dev.slhj.slhjaddons.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "GuiHudMixin",
+    "ContainerScreenMixin",
+    "SignEditScreenMixin",
+    "HurtMixin"
+  ],
+  "injectors": { "defaultRequire": 1 }
+}

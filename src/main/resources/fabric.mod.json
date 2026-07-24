@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "slhjaddons",
+  "version": "${version}",
+  "name": "slhjaddons",
+  "description": "Hypixel SkyBlock Mod.",
+  "authors": ["slhj"],
+  "contact": { "sources": "https://github.com/worstmageplayer/slhjaddons" },
+  "license": "GPL",
+  "icon": "assets/slhjaddons/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.slhj.slhjaddons.SlhjAddons"]
+  },
+  "mixins": ["slhjaddons.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.18.4",
+    "minecraft": "~26.1",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}

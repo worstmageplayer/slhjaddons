@@ -1,0 +1,69 @@
+package dev.slhj.slhjaddons.features;
+
+import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.core.Setting;
+import dev.slhj.slhjaddons.util.ClientUtils;
+import dev.slhj.slhjaddons.util.McUtils;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.item.Items;
+
+import java.util.regex.Pattern;
+
+public final class AutoFishFeature extends Feature {
+
+    private static final Pattern TIMER = Pattern.compile("^\\d\\.\\d$");
+    private boolean armed = false;
+    private int tickCounter = 0;
+    private int recastAt = -1;
+    private final int DEFAULT_DELAY = 20;
+
+    private final Setting.SliderSetting delaySetting;
+
+    public AutoFishFeature() {
+        category(Category.FISHING);
+        setLabel("Auto Fish");
+        delaySetting = intSlider("auto_fish.delay", "Auto Fish Delay (ticks)", 0, 50, DEFAULT_DELAY);
+    }
+
+    @Override public String id() { return "auto_fish"; }
+
+    @Override
+    public void init() {
+        ClientTickEvents.END_CLIENT_TICK.register(mc -> tick());
+    }
+
+    private void tick() {
+        if (recastAt >= 0 && ++tickCounter >= recastAt) {
+            use();
+            recastAt = -1;
+        }
+
+        if (!isEnabled() || ClientUtils.inGui()) return;
+        if (tickCounter % 4 != 0) return;
+
+        LocalPlayer p = ClientUtils.player();
+        if (p == null || !p.getMainHandItem().is(Items.FISHING_ROD)) return;
+
+        var box = p.getBoundingBox().inflate(8.0);
+        for (ArmorStand stand : p.level().getEntitiesOfClass(ArmorStand.class, box)) {
+            String name = ChatFormatting.stripFormatting(stand.getName().getString());
+            if (!armed && TIMER.matcher(name).matches()) {
+                armed = true;
+            } else if (armed && name.equals("!!!")) {
+                use();
+                recastAt = tickCounter + delaySetting.value().get().intValue();
+                armed = false;
+            }
+        }
+    }
+
+    private void use() {
+        LocalPlayer p = ClientUtils.player();
+        if (p == null) return;
+        McUtils.MC.gameMode.useItem(p, InteractionHand.MAIN_HAND);
+    }
+}
