@@ -15,13 +15,15 @@ import java.util.regex.Pattern;
 public final class AutoPetRulesFeature extends Feature implements HudRenderer {
 
     private static final Pattern PET_PATTERN =
-            Pattern.compile("Autopet equipped your \\[Lvl (\\d+)\\] (.+?)! VIEW RULE");
+            Pattern.compile("Autopet equipped your (\\[Lvl (\\d+)\\]) (.+?)! VIEW RULE");
     private static final int DURATION_MS = 5000;
     private static final double FADE_START = 0.7;
 
+    private static final String PREVIEW_LABEL = "§7[Lvl 100] §r§dBlack Cat";
+
     private final HudElement hud = new HudElement("auto_pet_rules", "Auto Pet Rules", 10, 100);
-    private String petName = null;
-    private String petLevel = null;
+
+    private String label = null;
     private long fadeStartTime = 0;
 
     public AutoPetRulesFeature() {
@@ -35,12 +37,15 @@ public final class AutoPetRulesFeature extends Feature implements HudRenderer {
     public void init() {
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (!isEnabled() || overlay) return;
-            String text = ChatFormatting.stripFormatting(message.getString());
+            String raw = message.getString();
+            String stripped = ChatFormatting.stripFormatting(raw);
 
-            var matcher = PET_PATTERN.matcher(text);
+            var matcher = PET_PATTERN.matcher(stripped);
             if (matcher.find()) {
-                petLevel = matcher.group(1);
-                petName = matcher.group(2).trim();
+                int[] rawIndex = strippedToRawIndex(raw);
+                int rawStart = rawIndex[matcher.start(1)];
+                int rawEnd = rawIndex[matcher.end(3)];
+                label = raw.substring(rawStart, rawEnd);
                 fadeStartTime = System.currentTimeMillis();
             }
         });
@@ -50,13 +55,29 @@ public final class AutoPetRulesFeature extends Feature implements HudRenderer {
                 (graphics, delta) -> render(graphics));
     }
 
+    private static int[] strippedToRawIndex(String raw) {
+        int[] map = new int[raw.length() + 1];
+        int stripped = 0;
+        int i = 0;
+        while (i < raw.length()) {
+            char c = raw.charAt(i);
+            if (c == '§' && i + 1 < raw.length() && ChatFormatting.getByCode(raw.charAt(i + 1)) != null) {
+                i += 2;
+                continue;
+            }
+            map[stripped++] = i;
+            i++;
+        }
+        map[stripped] = raw.length();
+        return map;
+    }
+
     private void render(GuiGraphicsExtractor g) {
-        if (!isEnabled() || petName == null) return;
+        if (!isEnabled() || label == null) return;
 
         long elapsed = System.currentTimeMillis() - fadeStartTime;
         if (elapsed > DURATION_MS) {
-            petName = null;
-            petLevel = null;
+            label = null;
             return;
         }
 
@@ -64,11 +85,10 @@ public final class AutoPetRulesFeature extends Feature implements HudRenderer {
         int alpha = (int) (255 * (1 - fadeOut(progress)));
         if (alpha <= 0) return;
 
-        String label = String.format("%s [%s]", petName, petLevel);
         int color = (alpha << 24) | 0xFFFFFF;
 
         RenderUtils.pushScale(g, hud.scale());
-        RenderUtils.text(g, label, (int)(hud.x() / hud.scale()), (int)(hud.y() / hud.scale()), color, true);
+        RenderUtils.text(g, label, (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), color, true);
         RenderUtils.pop(g);
     }
 
@@ -85,13 +105,13 @@ public final class AutoPetRulesFeature extends Feature implements HudRenderer {
 
     @Override
     public String hudPreviewText() {
-        return "Pet [Lvl 100]";
+        return PREVIEW_LABEL;
     }
 
     @Override
     public void renderHudPreview(GuiGraphicsExtractor g) {
         RenderUtils.pushScale(g, hud.scale());
-        RenderUtils.text(g, hudPreviewText(), (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), 0xFFFFFFFF, true);
+        RenderUtils.text(g, PREVIEW_LABEL, (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), 0xFFFFFFFF, true);
         RenderUtils.pop(g);
     }
 }
