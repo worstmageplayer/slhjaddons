@@ -33,6 +33,10 @@ public final class BloodWarpTimerFeature extends Feature {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             bloodOpenTime = 0;
         });
+
+        HudElementRegistry.addLast(
+                Identifier.fromNamespaceAndPath("slhjaddons", "blood_warp_timer"),
+                (graphics, delta) -> render(graphics));
     }
 
     private void render(GuiGraphicsExtractor g) {
