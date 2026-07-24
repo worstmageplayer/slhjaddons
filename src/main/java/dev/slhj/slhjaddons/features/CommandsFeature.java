@@ -30,18 +30,18 @@ public final class CommandsFeature extends Feature {
                         .then(ClientCommands.literal("list")
                                 .executes(ctx -> { list(); return 1; }))
                         .then(ClientCommands.literal("component_custom_data")
-                                        .executes(ctx -> copyNBT()))
+                                .executes(ctx -> copyNBT()))
                         .then(ClientCommands.literal("hud")
                                 .executes(ctx -> {
                                     HudEditorScreen.openHudEditor();
                                     return 1;
-                                })
+                                }))
                         .then(ClientCommands.literal("toggle")
                                 .then(ClientCommands.argument("id", StringArgumentType.word())
                                         .executes(ctx -> {
                                             toggle(StringArgumentType.getString(ctx, "id"));
                                             return 1;
-                                        }))))));
+                                        })))));
     }
 
     private int copyNBT() {
