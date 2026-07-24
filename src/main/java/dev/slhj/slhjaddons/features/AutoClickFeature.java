@@ -47,8 +47,16 @@ public final class AutoClickFeature extends Feature {
         int interval = Math.max(1, 20 / Math.max(1, cps));
 
         if (tickCounter++ % interval == 0) {
-            McUtils.leftClick(true);
+            if (isMouse2Down()) {
+                McUtils.rightClick();
+            } else {
+                McUtils.leftClick(true);
+            }
         }
+    }
+
+    private boolean isMouse2Down() {
+        return GLFW.glfwGetMouseButton(McUtils.MC.getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_2) == GLFW.GLFW_PRESS;
     }
 
     @Override
