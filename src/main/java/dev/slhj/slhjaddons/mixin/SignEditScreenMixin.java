@@ -44,6 +44,8 @@ public abstract class SignEditScreenMixin {
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void slhj$extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
-
+        if (!SlhjAddons.config().isFeatureEnabled("sign_helper")) return;
+        SignHelperFeature feature = SlhjAddons.features().get(SignHelperFeature.class);
+        if (feature != null) feature.render(graphics);
     }
 }

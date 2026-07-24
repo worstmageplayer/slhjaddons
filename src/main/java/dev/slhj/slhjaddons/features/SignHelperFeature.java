@@ -19,13 +19,9 @@ public final class SignHelperFeature extends Feature {
     @Override public String id() { return "sign_helper"; }
 
     @Override
-    public void init() {
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath("slhjaddons", "sign_helper"),
-                (graphics, delta) -> render(graphics));
-    }
+    public void init() {}
 
-    private void render(GuiGraphicsExtractor g) {
+    public void render(GuiGraphicsExtractor g) {
         if (!isEnabled() || displayFormula == null || displayFormula.isEmpty()) return;
 
         int screenWidth = g.guiWidth();
