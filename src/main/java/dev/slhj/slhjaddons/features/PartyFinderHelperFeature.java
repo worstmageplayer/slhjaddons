@@ -31,7 +31,7 @@ public final class PartyFinderHelperFeature extends Feature {
     private boolean inPartyFinder = false;
 
     public PartyFinderHelperFeature() {
-        setLabel("Public Finder Helper");
+        setLabel("Party Finder Helper");
         category(Category.DUNGEONS);
     }
 
