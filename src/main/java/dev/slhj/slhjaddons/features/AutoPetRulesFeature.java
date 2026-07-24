@@ -2,6 +2,7 @@ package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.hud.HudElement;
+import dev.slhj.slhjaddons.hud.HudRenderer;
 import dev.slhj.slhjaddons.util.RenderUtils;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -11,7 +12,7 @@ import net.minecraft.resources.Identifier;
 
 import java.util.regex.Pattern;
 
-public final class AutoPetRulesFeature extends Feature {
+public final class AutoPetRulesFeature extends Feature implements HudRenderer {
 
     private static final Pattern PET_PATTERN =
             Pattern.compile("Autopet equipped your \\[Lvl (\\d+)\\] (.+?)! VIEW RULE");
@@ -75,5 +76,22 @@ public final class AutoPetRulesFeature extends Feature {
         if (t < FADE_START) return 0;
         double phase = (t - FADE_START) / (1 - FADE_START);
         return Math.pow(phase, 5);
+    }
+
+    @Override
+    public HudElement hudElement() {
+        return hud;
+    }
+
+    @Override
+    public String hudPreviewText() {
+        return "Pet [Lvl 100]";
+    }
+
+    @Override
+    public void renderHudPreview(GuiGraphicsExtractor g) {
+        RenderUtils.pushScale(g, hud.scale());
+        RenderUtils.text(g, hudPreviewText(), (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), 0xFFFFFFFF, true);
+        RenderUtils.pop(g);
     }
 }

@@ -3,6 +3,7 @@ package dev.slhj.slhjaddons.features;
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.hud.HudElement;
+import dev.slhj.slhjaddons.hud.HudRenderer;
 import dev.slhj.slhjaddons.util.ClientUtils;
 import dev.slhj.slhjaddons.util.CooldownUtils;
 import dev.slhj.slhjaddons.util.McUtils;
@@ -14,7 +15,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
-public final class RagnarockCooldownFeature extends Feature {
+public final class RagnarockCooldownFeature extends Feature implements HudRenderer {
 
     private static final long BASE_COOLDOWN_MS = 20_000L;
 
@@ -74,6 +75,23 @@ public final class RagnarockCooldownFeature extends Feature {
         String label = "Rag Axe: " + String.format("%.1f", remaining / 1000.0);
         RenderUtils.pushScale(g, hud.scale());
         RenderUtils.text(g, label, (int)(hud.x() / hud.scale()), (int)(hud.y() / hud.scale()), 0xFFFFFFFF, true);
+        RenderUtils.pop(g);
+    }
+
+    @Override
+    public HudElement hudElement() {
+        return hud;
+    }
+
+    @Override
+    public String hudPreviewText() {
+        return "Rag Axe: 12.3";
+    }
+
+    @Override
+    public void renderHudPreview(GuiGraphicsExtractor g) {
+        RenderUtils.pushScale(g, hud.scale());
+        RenderUtils.text(g, hudPreviewText(), (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), 0xFFFFFFFF, true);
         RenderUtils.pop(g);
     }
 }

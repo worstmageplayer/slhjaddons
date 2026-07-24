@@ -3,13 +3,7 @@ package dev.slhj.slhjaddons.hud;
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.config.SlhjConfig;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 public class HudElement {
-
-    public static final List<HudElement> ALL = new ArrayList<>();
 
     private final String id;
     private final String label;
@@ -19,7 +13,6 @@ public class HudElement {
         this.id = id;
         this.label = label;
         this.pos = SlhjAddons.config().hud(id, defaultX, defaultY);
-        ALL.add(this);
     }
 
     public String id()    { return id; }

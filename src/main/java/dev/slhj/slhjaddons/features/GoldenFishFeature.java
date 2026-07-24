@@ -3,6 +3,7 @@ package dev.slhj.slhjaddons.features;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.hud.HudElement;
+import dev.slhj.slhjaddons.hud.HudRenderer;
 import dev.slhj.slhjaddons.util.RenderUtils;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -11,7 +12,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
-public final class GoldenFishFeature extends Feature {
+public final class GoldenFishFeature extends Feature implements HudRenderer {
 
     private final HudElement hud = new HudElement("golden_fish_alert", "Golden Fish Alert", 10, 10);
     private long alertShowTime = 0;
@@ -58,15 +59,28 @@ public final class GoldenFishFeature extends Feature {
         }
 
         String text = "Golden Fish!";
-        int screenWidth = g.guiWidth();
-        int screenHeight = g.guiHeight();
-        int textWidth = RenderUtils.stringWidth(text);
-        int x = (screenWidth - textWidth) / 2;
-        int y = (screenHeight / 2);
         int color = colorSetting.value().get();
 
-        RenderUtils.pushScale(g, 5.0f);
-        RenderUtils.text(g, text, x / 5, y / 5, color, true);
+        RenderUtils.pushScale(g, hud.scale());
+        RenderUtils.text(g, text, (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), color, true);
+        RenderUtils.pop(g);
+    }
+
+    @Override
+    public HudElement hudElement() {
+        return hud;
+    }
+
+    @Override
+    public String hudPreviewText() {
+        return "Golden Fish!";
+    }
+
+    @Override
+    public void renderHudPreview(GuiGraphicsExtractor g) {
+        int color = colorSetting.value().get();
+        RenderUtils.pushScale(g, hud.scale());
+        RenderUtils.text(g, hudPreviewText(), (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), color, true);
         RenderUtils.pop(g);
     }
 }
