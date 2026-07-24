@@ -3,6 +3,7 @@ package dev.slhj.slhjaddons.features;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.util.ClientUtils;
 import dev.slhj.slhjaddons.util.KeyBindingUtils;
 import dev.slhj.slhjaddons.util.McUtils;
@@ -26,16 +27,24 @@ public final class QuickCommandsFeature extends Feature {
     private int hoveredSection = -1;
     private boolean inDeadZone = true;
     private final List<String> commandsList = new ArrayList<>();
-    private int innerRadius = 40;
-    private int outerRadius = 80;
-    private int sectionOffset = 10;
-    private int guiColour = 0xFF8B8B8B;
-    private int guiHoverColour = 0xFFFFFF00;
     private boolean showCommandString = true;
+
+    private final Setting.TextSetting commandsString;
+    private final Setting.SliderSetting innerRadius;
+    private final Setting.SliderSetting outerRadius;
+    private final Setting.SliderSetting sectionOffset;
+    private final Setting.HexSetting guiColor;
+    private final Setting.HexSetting guiHoverColor;
 
     public QuickCommandsFeature() {
         setLabel("Quick Commands");
         category(Category.MISC);
+        commandsString = text("quick_commands.commands", "Commands", "");
+        innerRadius = intSlider("quick_commands.inner_radius", "Inner Radius", 0, 255, 30);
+        outerRadius = intSlider("quick_commands.outer_radius", "Outer Radius", 0, 255, 90);
+        sectionOffset = intSlider("quick_commands.section_offset", "Section Offset", 0, 255, 10);
+        guiColor = hex("quick_commands.color", "Color", 0xFF8B8B8B);
+        guiHoverColor = hex("quick_commands.color", "Hover Color", 0xFFFFFF00);
     }
 
     @Override public String id() { return "quick_commands"; }
@@ -61,7 +70,7 @@ public final class QuickCommandsFeature extends Feature {
     private void loadConfig() {
         var cfg = SlhjAddons.config();
 
-        String commandsStr = cfg.getString("quick_commands.commands", "");
+        String commandsStr = commandsString.value().get();
         commandsList.clear();
         if (!commandsStr.isEmpty()) {
             String[] commands = commandsStr.split(",");
@@ -73,11 +82,6 @@ public final class QuickCommandsFeature extends Feature {
             }
         }
 
-        innerRadius = cfg.getInt("quick_commands.inner_radius", 30);
-        outerRadius = cfg.getInt("quick_commands.outer_radius", 90);
-        sectionOffset = cfg.getInt("quick_commands.section_offset", 10);
-        guiColour = cfg.getInt("quick_commands.colour", 0xFF8B8B8B);
-        guiHoverColour = cfg.getInt("quick_commands.hover_colour", 0xFFFFFF00);
         showCommandString = "true".equals(cfg.getString("quick_commands.show_string", "true"));
     }
 
@@ -128,9 +132,18 @@ public final class QuickCommandsFeature extends Feature {
         double dx = mouseX - centerX;
         double dy = mouseY - centerY;
 
+        int innerRad = innerRadius.value().get().intValue();
+        int outerRad = outerRadius.value().get().intValue();
+        int sectionOff = sectionOffset.value().get().intValue();
+
         // Update dead zone and hovered section
         List<int[]> innerPoints = new ArrayList<>();
-        generateRadialMenuShapes(centerX, centerY, innerRadius, outerRadius, sectionOffset, innerPoints);
+        generateRadialMenuShapes(
+                centerX, centerY,
+                innerRad,
+                outerRad,
+                sectionOff,
+                innerPoints);
 
         inDeadZone = pointInPolygon(mouseX, mouseY, innerPoints);
         if (!inDeadZone) {
@@ -150,8 +163,8 @@ public final class QuickCommandsFeature extends Feature {
             double angle2 = sectionAngle * (i + 1) + angleOffset;
             double avgAngle = (angle1 + angle2) / 2;
 
-            double offsetX = Math.cos(avgAngle) * sectionOffset;
-            double offsetY = Math.sin(avgAngle) * sectionOffset;
+            double offsetX = Math.cos(avgAngle) * sectionOff;
+            double offsetY = Math.sin(avgAngle) * sectionOff;
 
             int sectionCenterX = centerX + (int) offsetX;
             int sectionCenterY = centerY + (int) offsetY;
@@ -161,12 +174,12 @@ public final class QuickCommandsFeature extends Feature {
             double cos2 = Math.cos(angle2);
             double sin2 = Math.sin(angle2);
 
-            int[] p1 = {(int) (sectionCenterX + cos1 * innerRadius), (int) (sectionCenterY + sin1 * innerRadius)};
-            int[] p2 = {(int) (sectionCenterX + cos2 * innerRadius), (int) (sectionCenterY + sin2 * innerRadius)};
-            int[] p3 = {(int) (sectionCenterX + cos2 * outerRadius), (int) (sectionCenterY + sin2 * outerRadius)};
-            int[] p4 = {(int) (sectionCenterX + cos1 * outerRadius), (int) (sectionCenterY + sin1 * outerRadius)};
+            int[] p1 = {(int) (sectionCenterX + cos1 * innerRad), (int) (sectionCenterY + sin1 * innerRad)};
+            int[] p2 = {(int) (sectionCenterX + cos2 * innerRad), (int) (sectionCenterY + sin2 * innerRad)};
+            int[] p3 = {(int) (sectionCenterX + cos2 * outerRad), (int) (sectionCenterY + sin2 * outerRad)};
+            int[] p4 = {(int) (sectionCenterX + cos1 * outerRad), (int) (sectionCenterY + sin1 * outerRad)};
 
-            int colour = (i == hoveredSection) ? guiHoverColour : guiColour;
+            int colour = (i == hoveredSection) ? guiHoverColor.value().get() : guiColor.value().get();
 
             // Draw filled quad
             drawFilledQuad(g, p1, p2, p3, p4, colour);
