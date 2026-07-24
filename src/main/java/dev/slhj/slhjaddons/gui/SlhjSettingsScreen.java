@@ -173,7 +173,7 @@ public final class SlhjSettingsScreen extends Screen {
             curY += CATEGORY_GAP;
         }
 
-        addRenderableWidget(Button.builder(Component.literal("Edit HUD"), b -> openHudEditor())
+        addRenderableWidget(Button.builder(Component.literal("Edit HUD"), b -> HudEditorScreen.openHudEditor())
                 .bounds(this.width / 2 - 159, this.height - 28, 78, 20)
                 .build());
         addRenderableWidget(Button.builder(Component.literal("Done"), b -> this.onClose())
@@ -328,11 +328,6 @@ public final class SlhjSettingsScreen extends Screen {
             graphics.fill(sbX, top, sbX + SCROLLBAR_WIDTH, top + trackHeight, 0x55000000);
             graphics.fill(sbX, thumbY, sbX + SCROLLBAR_WIDTH, thumbY + thumbHeight, 0xFFAAAAAA);
         }
-    }
-
-    private void openHudEditor() {
-        SlhjAddons.config().save();
-        minecraft.execute(() -> minecraft.setScreen(new HudEditorScreen()));
     }
 
     @Override

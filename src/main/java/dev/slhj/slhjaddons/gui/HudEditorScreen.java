@@ -4,6 +4,7 @@ import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -171,4 +172,10 @@ public final class HudEditorScreen extends Screen {
     }
 
     @Override public boolean isPauseScreen() { return false; }
+
+    public static void openHudEditor() {
+        SlhjAddons.config().save();
+        Minecraft mc = Minecraft.getInstance();
+        mc.execute(() -> mc.setScreen(new HudEditorScreen()));
+    }
 }

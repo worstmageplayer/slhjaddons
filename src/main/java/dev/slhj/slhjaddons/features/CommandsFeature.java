@@ -3,6 +3,7 @@ package dev.slhj.slhjaddons.features;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.gui.HudEditorScreen;
 import dev.slhj.slhjaddons.gui.SlhjSettingsScreen;
 import dev.slhj.slhjaddons.util.McUtils;
 import dev.slhj.slhjaddons.util.SkyblockItemUtils;
@@ -28,14 +29,19 @@ public final class CommandsFeature extends Feature {
                         .executes(ctx -> { openGui(); return 1; })
                         .then(ClientCommands.literal("list")
                                 .executes(ctx -> { list(); return 1; }))
-                                .then(ClientCommands.literal("component_custom_data")
+                        .then(ClientCommands.literal("component_custom_data")
                                         .executes(ctx -> copyNBT()))
+                        .then(ClientCommands.literal("hud")
+                                .executes(ctx -> {
+                                    HudEditorScreen.openHudEditor();
+                                    return 1;
+                                })
                         .then(ClientCommands.literal("toggle")
                                 .then(ClientCommands.argument("id", StringArgumentType.word())
                                         .executes(ctx -> {
                                             toggle(StringArgumentType.getString(ctx, "id"));
                                             return 1;
-                                        })))));
+                                        }))))));
     }
 
     private int copyNBT() {
