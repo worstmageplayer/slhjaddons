@@ -5,7 +5,7 @@
   "client": [
     "GuiHudMixin",
     "ContainerScreenMixin",
-    "SignEditScreenMixin",
+    "AbstractSignEditScreenMixin",
     "HurtMixin"
   ],
   "injectors": { "defaultRequire": 1 }

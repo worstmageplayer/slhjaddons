@@ -2,7 +2,6 @@ package dev.slhj.slhjaddons.mixin;
 
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.features.SignHelperFeature;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.input.CharacterEvent;
@@ -15,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(AbstractSignEditScreen.class)
-public abstract class SignEditScreenMixin {
+public abstract class AbstractSignEditScreenMixin {
 
     @Shadow private String[] messages;
 
@@ -30,12 +29,27 @@ public abstract class SignEditScreenMixin {
     }
 
     @Unique
+    private String INPUT_SIGN_MARKER = "^^^^^^^^^^^^^^^";
+
+    @Inject(method = "onDone", at = @At("HEAD"))
+    private void slhj$onDone(CallbackInfo ci) {
+        if (!SlhjAddons.config().isFeatureEnabled("sign_helper")) return;
+        if (messages == null || messages.length == 0) return;
+        if (messages.length < 2 || !INPUT_SIGN_MARKER.equals(messages[1])) return;
+
+        SignHelperFeature feature = SlhjAddons.features().get(SignHelperFeature.class);
+        if (feature == null) return;
+
+        messages[0] = feature.getResult();
+    }
+
+    @Unique
     private void pushToFeature() {
         if (!SlhjAddons.config().isFeatureEnabled("sign_helper")) return;
         SignHelperFeature feature = SlhjAddons.features().get(SignHelperFeature.class);
         if (feature == null || messages == null || messages.length == 0) return;
 
-        if (messages.length < 2 || !"^^^^^^^^^^^^^^^".equals(messages[1])) {
+        if (messages.length < 2 || !INPUT_SIGN_MARKER.equals(messages[1])) {
             feature.setDisplayFormula(null);
             return;
         }
