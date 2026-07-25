@@ -1,9 +1,12 @@
 package dev.slhj.slhjaddons.features;
 
-import dev.slhj.slhjaddons.SlhjAddons;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.util.ClientUtils;
 import dev.slhj.slhjaddons.util.McUtils;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
@@ -15,19 +18,38 @@ public final class DungeonCommandsFeature extends Feature {
     private static final Pattern FLOOR_PATTERN = Pattern.compile("^([mf])([1-7])$", Pattern.CASE_INSENSITIVE);
     private static final long COOLDOWN_MS = 30_000;
 
+    private static final String[] FLOOR_NAMES = {"", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN"};
+
+    private final Setting.ToggleSetting enterUndersizedSetting;
+
     private long cooldownEnd = 0;
     private boolean addedToQueue = false;
 
     public DungeonCommandsFeature() {
         setLabel("Dungeon Commands");
         category(Category.DUNGEONS);
+        enterUndersizedSetting = toggle("dungeon_commands.enter_undersized", "Auto-Enter Undersized", false);
     }
 
     @Override public String id() { return "dungeon_commands"; }
 
     @Override
     public void init() {
-        // Command registration would happen through CommandsFeature
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) ->
+                dispatcher.register(ClientCommands.literal("d")
+                        .then(ClientCommands.literal("help")
+                                .executes(ctx -> { help(); return 1; }))
+                        .executes(ctx -> { handleDungeonCommand(""); return 1; })
+                        .then(ClientCommands.argument("floor", StringArgumentType.word())
+                                .executes(ctx -> {
+                                    handleDungeonCommand(StringArgumentType.getString(ctx, "floor"));
+                                    return 1;
+                                }))));
+    }
+
+    private void help() {
+        McUtils.chat("&7Usage: /d [f1-f7 | m1-m7]");
+        McUtils.chat("&7  /d f7");
     }
 
     public void handleDungeonCommand(String arg) {
@@ -37,15 +59,14 @@ public final class DungeonCommandsFeature extends Feature {
         }
 
         var matcher = FLOOR_PATTERN.matcher(arg);
-        if (!matcher.matches()) return;
+        if (!matcher.matches()) {
+            McUtils.chat("&cInvalid floor: " + arg + ". /dungeon help for usage.");
+            return;
+        }
 
         String prefix = matcher.group(1).toLowerCase();
         int floorNum = Integer.parseInt(matcher.group(2));
-
-        String[] floorNames = {"", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN"};
         String instanceType = prefix.equals("m") ? "MASTER_CATACOMBS" : "CATACOMBS";
-
-        if (floorNum < 1 || floorNum > 7) return;
 
         long now = System.currentTimeMillis();
         long timeLeft = Math.max(0, cooldownEnd - now);
@@ -61,14 +82,16 @@ public final class DungeonCommandsFeature extends Feature {
 
         long delay = timeLeft + 100;
         McUtils.scheduleTask(() -> {
-            McUtils.runCommand(String.format("joininstance %s_FLOOR_%s", instanceType, floorNames[floorNum]));
+            McUtils.runCommand(String.format("joininstance %s_FLOOR_%s", instanceType, FLOOR_NAMES[floorNum]));
             enterUndersized();
         }, delay);
+
+        cooldownEnd = System.currentTimeMillis() + COOLDOWN_MS;
     }
 
     private void enterUndersized() {
         addedToQueue = false;
-        if (!SlhjAddons.config().isFeatureEnabled("enter_undersized")) return;
+        if (!enterUndersizedSetting.value().get()) return;
 
         LocalPlayer player = ClientUtils.player();
         if (player == null) return;
