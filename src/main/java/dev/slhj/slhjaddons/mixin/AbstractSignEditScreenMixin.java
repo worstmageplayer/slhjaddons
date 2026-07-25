@@ -18,7 +18,7 @@ public abstract class AbstractSignEditScreenMixin {
 
     @Shadow private String[] messages;
 
-    @Inject(method = "keyPressed", at = @At("TAIL"))
+    @Inject(method = "keyPressed", at = @At("RETURN"))
     private void slhj$onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
         pushToFeature();
     }
