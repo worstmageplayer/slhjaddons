@@ -65,19 +65,16 @@ public final class McUtils {
         LocalPlayer p = ClientUtils.player();
         if (p == null || MC.gameMode == null) return;
 
-        HitResult hit = MC.hitResult;
-        if (hit instanceof EntityHitResult entityHit) {
-            Entity target = entityHit.getEntity();
-            MC.gameMode.attack(p, target);
+        if (requireEntityInRange) {
+            HitResult hit = MC.hitResult;
+            if (hit instanceof EntityHitResult entityHit) {
+                Entity target = entityHit.getEntity();
+                MC.gameMode.attack(p, target);
+                p.swing(InteractionHand.MAIN_HAND);
+            }
+        } else {
             p.swing(InteractionHand.MAIN_HAND);
         }
-    }
-
-    public static void leftClick() {
-        LocalPlayer p = ClientUtils.player();
-        if (p == null || MC.gameMode == null) return;
-
-        p.swing(InteractionHand.MAIN_HAND);
     }
 
     public static void scheduleTask(Runnable task) {
