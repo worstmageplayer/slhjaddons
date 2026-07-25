@@ -29,7 +29,7 @@ public final class RagnarockCooldownFeature extends Feature implements HudRender
     private final Setting.ToggleSetting playSoundOnReady;
 
     public RagnarockCooldownFeature() {
-        setLabel("Ragnarok Cooldown Timer");
+        setLabel("Ragnarock Cooldown Timer");
         category(Category.SKYBLOCK);
         readyMessage = text("rag_cooldown.message", "Ready Message", "&r&5&lRagnarock &aReady!");
         playSoundOnReady = toggle("rag_cooldown.play_sound", "Play Sound On Ready", false);
