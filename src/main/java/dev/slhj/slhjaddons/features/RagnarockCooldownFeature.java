@@ -2,6 +2,7 @@ package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudRenderer;
 import dev.slhj.slhjaddons.util.ClientUtils;
@@ -24,9 +25,14 @@ public final class RagnarockCooldownFeature extends Feature implements HudRender
     private long cooldownMs = BASE_COOLDOWN_MS;
     private boolean onCooldown = false;
 
+    private final Setting.TextSetting readyMessage;
+    private final Setting.ToggleSetting playSoundOnReady;
+
     public RagnarockCooldownFeature() {
         setLabel("Ragnarok Cooldown Timer");
         category(Category.SKYBLOCK);
+        readyMessage = text("rag_cooldown.message", "Ready Message", "&r&5&lRagnarock &aReady!");
+        playSoundOnReady = toggle("rag_cooldown.play_sound", "Play Sound On Ready", false);
     }
 
     @Override public String id() { return "rag_cooldown"; }
@@ -64,11 +70,10 @@ public final class RagnarockCooldownFeature extends Feature implements HudRender
         long remaining = cooldownMs - (System.currentTimeMillis() - castTime);
         if (remaining <= 0) {
             onCooldown = false;
-            var cfg = SlhjAddons.config();
-            if (cfg.isFeatureEnabled("rag_cooldown_sound") && ClientUtils.player() != null) {
+            if (playSoundOnReady.value().get() && ClientUtils.player() != null) {
                 // World.playSound('random.successful_hit') -> level.playLocalSound(...)
             }
-            McUtils.chat(cfg.getString("rag_cooldown.message", "&r&5&lRagnarock &aReady!"));
+            McUtils.chat(readyMessage.value().get());
             return;
         }
 
