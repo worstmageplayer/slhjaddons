@@ -44,7 +44,7 @@ public final class QuickCommandsFeature extends Feature {
         outerRadius = intSlider("quick_commands.outer_radius", "Outer Radius", 0, 255, 90);
         sectionOffset = intSlider("quick_commands.section_offset", "Section Offset", 0, 255, 10);
         guiColor = hex("quick_commands.color", "Color", 0xFF8B8B8B);
-        guiHoverColor = hex("quick_commands.color", "Hover Color", 0xFFFFFF00);
+        guiHoverColor = hex("quick_commands.hover_color", "Hover Color", 0xFFFFFF00);
     }
 
     @Override public String id() { return "quick_commands"; }
