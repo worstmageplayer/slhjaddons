@@ -1,6 +1,5 @@
 package dev.slhj.slhjaddons.features;
 
-import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.hud.HudElement;
@@ -71,7 +70,7 @@ public final class RagnarockCooldownFeature extends Feature implements HudRender
         if (remaining <= 0) {
             onCooldown = false;
             if (playSoundOnReady.value().get() && ClientUtils.player() != null) {
-                // World.playSound('random.successful_hit') -> level.playLocalSound(...)
+                //net.minecraft.world.level.Level.playLocalSound()
             }
             McUtils.chat(readyMessage.value().get());
             return;
