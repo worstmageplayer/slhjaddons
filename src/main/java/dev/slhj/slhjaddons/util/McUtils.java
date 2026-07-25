@@ -12,6 +12,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public final class McUtils {
     private McUtils() {}
@@ -78,20 +81,18 @@ public final class McUtils {
     }
 
     public static void scheduleTask(Runnable task) {
-        // Use the client runner for immediate scheduling
         MC.executeBlocking(task);
     }
 
+    private static final ScheduledExecutorService SCHEDULER =
+            Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r, "slhjaddons-scheduler");
+                t.setDaemon(true);
+                return t;
+            });
+
     public static void scheduleTask(Runnable task, long delayMs) {
-        // Delayed task - run on a separate thread with delay
-        new Thread(() -> {
-            try {
-                Thread.sleep(delayMs);
-                MC.executeBlocking(task);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }).start();
+        SCHEDULER.schedule(() -> MC.executeBlocking(task), delayMs, TimeUnit.MILLISECONDS);
     }
 
     public static boolean itemNameContains(ItemStack item, String text) {
