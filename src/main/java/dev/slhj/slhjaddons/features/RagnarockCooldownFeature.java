@@ -4,6 +4,7 @@ import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudRenderer;
+import dev.slhj.slhjaddons.hud.TimedHudAlert;
 import dev.slhj.slhjaddons.util.ClientUtils;
 import dev.slhj.slhjaddons.util.CooldownUtils;
 import dev.slhj.slhjaddons.util.McUtils;
@@ -20,7 +21,8 @@ public final class RagnarockCooldownFeature extends Feature implements HudRender
     private static final long BASE_COOLDOWN_MS = 20_000L;
 
     private final HudElement hud = new HudElement("rag_cooldown", "Rag Cooldown", 10, 10);
-    private long castTime = 0;
+
+    private final TimedHudAlert alert = new TimedHudAlert();
     private long cooldownMs = BASE_COOLDOWN_MS;
     private boolean onCooldown = false;
 
@@ -53,24 +55,25 @@ public final class RagnarockCooldownFeature extends Feature implements HudRender
     }
 
     private void startCooldown() {
-        castTime = System.currentTimeMillis();
         cooldownMs = (long) (BASE_COOLDOWN_MS * CooldownUtils.getCooldownMultiplier());
+        alert.show();
         onCooldown = true;
     }
 
     private void reset() {
         onCooldown = false;
         cooldownMs = BASE_COOLDOWN_MS;
+        alert.reset();
     }
 
     private void render(GuiGraphicsExtractor g) {
         if (!isEnabled() || !onCooldown) return;
 
-        long remaining = cooldownMs - (System.currentTimeMillis() - castTime);
+        long remaining = alert.remainingMs(cooldownMs);
         if (remaining <= 0) {
             onCooldown = false;
             if (playSoundOnReady.value().get() && ClientUtils.player() != null) {
-                //net.minecraft.world.level.Level.playLocalSound()
+                // level.playLocalSound(...)
             }
             McUtils.chat(readyMessage.value().get());
             return;
@@ -78,7 +81,7 @@ public final class RagnarockCooldownFeature extends Feature implements HudRender
 
         String label = "Rag Axe: " + String.format("%.1f", remaining / 1000.0);
         RenderUtils.pushScale(g, hud.scale());
-        RenderUtils.text(g, label, (int)(hud.x() / hud.scale()), (int)(hud.y() / hud.scale()), 0xFFFFFFFF, true);
+        RenderUtils.text(g, label, (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), 0xFFFFFFFF, true);
         RenderUtils.pop(g);
     }
 

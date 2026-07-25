@@ -3,6 +3,7 @@ package dev.slhj.slhjaddons.features;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudRenderer;
+import dev.slhj.slhjaddons.hud.TimedHudAlert;
 import dev.slhj.slhjaddons.util.RenderUtils;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -16,15 +17,15 @@ public final class AutoPetRulesFeature extends Feature implements HudRenderer {
 
     private static final Pattern PET_PATTERN =
             Pattern.compile("Autopet equipped your (\\[Lvl (\\d+)\\]) (.+?)! VIEW RULE");
-    private static final int DURATION_MS = 5000;
+    private static final long DURATION_MS = 5000;
     private static final double FADE_START = 0.7;
+
+    private final TimedHudAlert alert = new TimedHudAlert();
+    private String label = null;
 
     private static final String PREVIEW_LABEL = "§7[Lvl 100] §r§dBlack Cat";
 
     private final HudElement hud = new HudElement("auto_pet_rules", "Auto Pet Rules", 10, 100);
-
-    private String label = null;
-    private long fadeStartTime = 0;
 
     public AutoPetRulesFeature() {
         setLabel("Auto Pet Rules");
@@ -46,7 +47,7 @@ public final class AutoPetRulesFeature extends Feature implements HudRenderer {
                 int rawStart = rawIndex[matcher.start(1)];
                 int rawEnd = rawIndex[matcher.end(3)];
                 label = raw.substring(rawStart, rawEnd);
-                fadeStartTime = System.currentTimeMillis();
+                alert.show();
             }
         });
 
@@ -74,19 +75,12 @@ public final class AutoPetRulesFeature extends Feature implements HudRenderer {
 
     private void render(GuiGraphicsExtractor g) {
         if (!isEnabled() || label == null) return;
+        if (!alert.isActive(DURATION_MS)) { label = null; return; }
 
-        long elapsed = System.currentTimeMillis() - fadeStartTime;
-        if (elapsed > DURATION_MS) {
-            label = null;
-            return;
-        }
-
-        double progress = (double) elapsed / DURATION_MS;
-        int alpha = (int) (255 * (1 - fadeOut(progress)));
+        int alpha = alert.alpha(DURATION_MS, FADE_START);
         if (alpha <= 0) return;
 
         int color = (alpha << 24) | 0xFFFFFF;
-
         RenderUtils.pushScale(g, hud.scale());
         RenderUtils.text(g, label, (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), color, true);
         RenderUtils.pop(g);

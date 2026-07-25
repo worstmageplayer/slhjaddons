@@ -1,6 +1,7 @@
 package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.hud.TimedHudAlert;
 import dev.slhj.slhjaddons.util.RenderUtils;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -11,7 +12,8 @@ import net.minecraft.resources.Identifier;
 
 public final class BloodWarpTimerFeature extends Feature {
 
-    private long bloodOpenTime = 0;
+    private static final long DOOR_TIMER_MS = 20_000;
+    private final TimedHudAlert alert = new TimedHudAlert();
 
     public BloodWarpTimerFeature() {
         setLabel("Blood Warp Timer");
@@ -26,13 +28,11 @@ public final class BloodWarpTimerFeature extends Feature {
             if (!isEnabled()) return;
             String text = ChatFormatting.stripFormatting(message.getString());
             if (text.contains("The BLOOD DOOR has been opened!")) {
-                bloodOpenTime = System.currentTimeMillis();
+                alert.show();
             }
         });
 
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-            bloodOpenTime = 0;
-        });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> alert.reset());
 
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath("slhjaddons", "blood_warp_timer"),
@@ -40,25 +40,11 @@ public final class BloodWarpTimerFeature extends Feature {
     }
 
     private void render(GuiGraphicsExtractor g) {
-        if (!isEnabled() || bloodOpenTime == 0) return;
+        if (!isEnabled() || !alert.isActive(DOOR_TIMER_MS)) return;
 
-        long elapsed = System.currentTimeMillis() - bloodOpenTime;
-        double seconds = elapsed / 1000.0;
-
-        if (seconds > 20) {
-            bloodOpenTime = 0;
-            return;
-        }
-
+        double seconds = alert.elapsedMs() / 1000.0;
         String text = String.format("%.1f", seconds);
-        int color;
-        if (seconds < 5) {
-            color = 0xFF00AA00;
-        } else if (seconds < 7.5) {
-            color = 0xFFFFAA00;
-        } else {
-            color = 0xFFAA0000;
-        }
+        int color = seconds < 5 ? 0xFF00AA00 : seconds < 7.5 ? 0xFFFFAA00 : 0xFFAA0000;
 
         int screenWidth = g.guiWidth();
         int screenHeight = g.guiHeight();

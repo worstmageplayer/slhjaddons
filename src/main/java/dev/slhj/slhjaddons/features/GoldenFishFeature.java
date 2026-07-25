@@ -4,6 +4,7 @@ import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudRenderer;
+import dev.slhj.slhjaddons.hud.TimedHudAlert;
 import dev.slhj.slhjaddons.util.RenderUtils;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -14,12 +15,13 @@ import net.minecraft.resources.Identifier;
 
 public final class GoldenFishFeature extends Feature implements HudRenderer {
 
-    private final HudElement hud = new HudElement("golden_fish_alert", "Golden Fish Alert", 10, 10);
-    private long alertShowTime = 0;
     private static final long DEFAULT_ALERT_DURATION_MS = 3000;
 
     private final Setting.HexSetting colorSetting;
     private final Setting.SliderSetting durationSetting;
+
+    private final HudElement hud = new HudElement("golden_fish_alert", "Golden Fish Alert", 10, 10);
+    private final TimedHudAlert alert = new TimedHudAlert();
 
     public GoldenFishFeature() {
         setLabel("Golden Fish Alert");
@@ -36,13 +38,11 @@ public final class GoldenFishFeature extends Feature implements HudRenderer {
             if (!isEnabled() || overlay) return;
             String text = ChatFormatting.stripFormatting(message.getString());
             if (text.contains("You spot a Golden Fish surface from beneath the lava!")) {
-                alertShowTime = System.currentTimeMillis();
+                alert.show();
             }
         });
 
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-            alertShowTime = 0;
-        });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> alert.reset());
 
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath("slhjaddons", "golden_fish_alert"),
@@ -50,17 +50,11 @@ public final class GoldenFishFeature extends Feature implements HudRenderer {
     }
 
     private void render(GuiGraphicsExtractor g) {
-        if (!isEnabled() || alertShowTime == 0) return;
-
-        long elapsed = System.currentTimeMillis() - alertShowTime;
-        if (elapsed > durationSetting.value().get().intValue()) {
-            alertShowTime = 0;
-            return;
-        }
+        long duration = durationSetting.value().get().intValue();
+        if (!isEnabled() || !alert.isActive(duration)) return;
 
         String text = "Golden Fish!";
         int color = colorSetting.value().get();
-
         RenderUtils.pushScale(g, hud.scale());
         RenderUtils.text(g, text, (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), color, true);
         RenderUtils.pop(g);
