@@ -15,13 +15,11 @@ public final class SignHelperFeature extends Feature {
     private String lastResult = null;
 
     private final Setting.SliderSetting yPos;
-    private final Setting.ToggleSetting requireEquals;
 
     public SignHelperFeature() {
         setLabel("Sign Helper");
         category(Category.SKYBLOCK);
-        yPos = slider("sign_helper.ypos", "Y-Pos", 0.0, 100, 55);
-        requireEquals = toggle("sign_helper.require_equals", "Require '=' prefix", false);
+        yPos = intSlider("sign_helper.ypos", "Y-Pos", 0, 100, 55);
     }
 
     @Override public String id() { return "sign_helper"; }
@@ -50,13 +48,6 @@ public final class SignHelperFeature extends Feature {
         }
 
         String trimmed = raw.trim();
-
-        if (requireEquals.value().get() && !trimmed.startsWith("=")) {
-            displayFormula = null;
-            lastRawInput = raw;
-            lastResult = null;
-            return;
-        }
         String expression = trimmed.startsWith("=") ? trimmed.substring(1) : trimmed;
 
         if (raw.equals(lastRawInput)) return;
