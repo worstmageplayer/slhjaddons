@@ -44,6 +44,7 @@ public final class SlhjAddons implements ClientModInitializer {
         FEATURES.register(new SignHelperFeature());
         FEATURES.register(new ChatCalcFeature());
         FEATURES.register(new AutoClickFeature());
+        FEATURES.register(new NoBobHurtFeature());
 
         FEATURES.bootstrap();
 
