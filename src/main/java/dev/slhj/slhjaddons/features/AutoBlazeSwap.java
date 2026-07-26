@@ -42,7 +42,8 @@ public final class AutoBlazeSwap extends Feature {
         category(Category.SLAYERS);
     }
 
-    @Override public String id() { return "blaze_auto_swap"; }
+    public static final String id = "blaze_auto_swap";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

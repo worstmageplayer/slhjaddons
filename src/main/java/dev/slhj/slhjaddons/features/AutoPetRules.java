@@ -32,7 +32,8 @@ public final class AutoPetRules extends Feature implements HudRenderer {
         category(Category.PETS);
     }
 
-    @Override public String id() { return "auto_pet_rules"; }
+    public static final String id = "auto_pet_rules";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

@@ -9,7 +9,8 @@ public final class CancelSlotHighlight extends Feature {
         category(Category.SKYBLOCK);
     }
 
-    @Override public String id() { return "cancel_slot_highlight"; }
+    public static final String id = "cancel_slot_highlight";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

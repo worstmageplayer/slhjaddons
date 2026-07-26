@@ -27,7 +27,9 @@ public final class AutoClick extends Feature {
         entityInRange = toggle("auto_click.entity_in_range", "Auto Click Requires Entity In Range", true);
     }
 
-    @Override public String id() { return "auto_click"; }
+
+    public static final String id = "auto_click";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

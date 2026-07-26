@@ -33,7 +33,8 @@ public final class Clock extends Feature {
         rightAlignedSetting = toggle("clock.right_aligned", "Right Aligned", DEFAULT_RIGHT_ALIGNED);
     }
 
-    @Override public String id() { return "clock"; }
+    public static final String id = "clock";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

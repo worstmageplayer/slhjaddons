@@ -43,7 +43,8 @@ public final class CustomScoreboard extends Feature {
         shadowSetting = toggle("scoreboard.shadow", "Text Shadow", DEFAULT_SHADOW);
     }
 
-    @Override public String id() { return "custom_scoreboard"; }
+    public static final String id = "custom_scoreboard";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

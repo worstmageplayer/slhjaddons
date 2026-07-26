@@ -7,6 +7,9 @@ public final class NoBobHurt extends Feature {
         setLabel("No Bob Hurt");
         category(Category.MISC);
     }
-    @Override public String id() { return "no_bob_hurt"; }
+    
+    public static final String id = "no_bob_hurt";
+    @Override public String id() { return id; }
+
     @Override public void init() {}
 }

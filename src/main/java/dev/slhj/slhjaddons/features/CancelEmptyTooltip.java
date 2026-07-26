@@ -13,7 +13,8 @@ public final class CancelEmptyTooltip extends Feature {
         category(Category.SKYBLOCK);
     }
 
-    @Override public String id() { return "cancel_empty_tooltip"; }
+    public static final String id = "cancel_empty_tooltip";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

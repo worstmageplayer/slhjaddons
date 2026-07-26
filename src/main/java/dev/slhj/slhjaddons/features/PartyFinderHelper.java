@@ -35,7 +35,8 @@ public final class PartyFinderHelper extends Feature {
         category(Category.DUNGEONS);
     }
 
-    @Override public String id() { return "party_finder_helper"; }
+    public static final String id = "party_finder_helper";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

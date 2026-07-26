@@ -30,7 +30,8 @@ public final class GoldenFishAlert extends Feature implements HudRenderer {
         durationSetting = intSlider("golden_fish_alert.duration", "Alert Duration (ms)", 500, 8000, (int) DEFAULT_ALERT_DURATION_MS);
     }
 
-    @Override public String id() { return "golden_fish_alert"; }
+    public static final String id = "golden_fish_alert";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

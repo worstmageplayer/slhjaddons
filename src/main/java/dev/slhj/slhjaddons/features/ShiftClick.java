@@ -10,7 +10,9 @@ public final class ShiftClick extends Feature {
         setLabel("Shift Click");
         category(Category.SKYBLOCK);
     }
-    @Override public String id() { return "shift_click"; }
+
+    public static final String id = "shift_click";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

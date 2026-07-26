@@ -1,6 +1,7 @@
 package dev.slhj.slhjaddons.mixin;
 
 import dev.slhj.slhjaddons.SlhjAddons;
+import dev.slhj.slhjaddons.features.CustomScoreboard;
 import net.minecraft.client.gui.Gui;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class GuiHudMixin {
     @Inject(method = "displayScoreboardSidebar", at = @At("HEAD"), cancellable = true)
     private void slhj$hideVanillaScoreboard(CallbackInfo ci) {
-        if (SlhjAddons.config().isFeatureEnabled("custom_scoreboard")) ci.cancel();
+        if (SlhjAddons.config().isFeatureEnabled(CustomScoreboard.id)) ci.cancel();
     }
 }

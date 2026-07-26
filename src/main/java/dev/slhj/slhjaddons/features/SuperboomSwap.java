@@ -16,7 +16,9 @@ public final class SuperboomSwap extends Feature {
         setLabel("SuperBoom Auto Swap");
         category(Category.DUNGEONS);
     }
-    @Override public String id() { return "superboom_swap"; }
+
+    public static final String id = "superboom_swap";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

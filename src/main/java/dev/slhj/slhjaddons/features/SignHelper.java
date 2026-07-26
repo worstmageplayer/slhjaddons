@@ -22,7 +22,8 @@ public final class SignHelper extends Feature {
         yPos = intSlider("sign_helper.ypos", "Y-Pos", 0, 100, 55);
     }
 
-    @Override public String id() { return "sign_helper"; }
+    public static final String id = "sign_helper";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {}

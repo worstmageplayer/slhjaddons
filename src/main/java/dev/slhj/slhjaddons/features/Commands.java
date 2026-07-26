@@ -18,7 +18,8 @@ import net.minecraft.world.item.component.CustomData;
 
 public final class Commands extends Feature {
 
-    @Override public String id() { return "commands"; }
+    public static final String id = "commands";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

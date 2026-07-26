@@ -36,7 +36,8 @@ public final class RagnarockCooldown extends Feature implements HudRenderer {
         playSoundOnReady = toggle("rag_cooldown.play_sound", "Play Sound On Ready", false);
     }
 
-    @Override public String id() { return "rag_cooldown"; }
+    public static final String id = "rag_cooldown";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

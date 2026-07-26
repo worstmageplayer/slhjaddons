@@ -20,7 +20,8 @@ public final class BloodWarpTimer extends Feature {
         category(Category.DUNGEONS);
     }
 
-    @Override public String id() { return "blood_warp_timer"; }
+    public static final String id = "blood_warp_timer";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

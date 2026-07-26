@@ -47,7 +47,8 @@ public final class QuickCommands extends Feature {
         guiHoverColor = hex("quick_commands.hover_color", "Hover Color", 0xFFFFFF00);
     }
 
-    @Override public String id() { return "quick_commands"; }
+    public static final String id = "quick_commands";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

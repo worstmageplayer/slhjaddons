@@ -18,16 +18,21 @@ public final class AutoFish extends Feature {
 
     private final int DEFAULT_DELAY = 20;
     private final Setting.SliderSetting delaySetting;
+
     public AutoFish() {
         category(Category.FISHING);
         setLabel("Auto Fish");
         delaySetting = intSlider("auto_fish.delay", "Auto Fish Delay (ticks)", 0, 50, DEFAULT_DELAY);
     }
-    @Override public String id() { return "auto_fish"; }
+
+    public static final String id = "auto_fish";
+    @Override public String id() { return id; }
+
     @Override
     public void init() {
         ClientTickEvents.END_CLIENT_TICK.register(mc -> tick());
     }
+
     private void tick() {
         frameCounter++;
 

@@ -14,7 +14,8 @@ public final class AutoZombieShootout extends Feature {
     private static final long CLICK_COOLDOWN = 200;
     private long lastClick = 0;
 
-    @Override public String id() { return "auto_zombie_shootout"; }
+    public static final String id = "auto_zombie_shootout";
+    @Override public String id() { return id; }
 
     public AutoZombieShootout() {
         setLabel("Auto Zombie Shootout");

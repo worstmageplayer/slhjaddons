@@ -17,7 +17,8 @@ public final class ChatCalc extends Feature {
     private static final Pattern DEFINE_PATTERN =
             Pattern.compile("^([a-zA-Z_]\\w*)\\(([^()=]*)\\)=(.+)$");
 
-    @Override public String id() { return "chat_calc"; }
+    public static final String id = "chat_calc";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {

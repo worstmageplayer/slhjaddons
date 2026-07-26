@@ -1,6 +1,8 @@
 package dev.slhj.slhjaddons.mixin;
 
 import dev.slhj.slhjaddons.SlhjAddons;
+import dev.slhj.slhjaddons.features.CancelSlotHighlight;
+import dev.slhj.slhjaddons.features.ShiftClick;
 import dev.slhj.slhjaddons.util.ClientUtils;
 import dev.slhj.slhjaddons.util.McUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -28,7 +30,7 @@ public abstract class ContainerScreenMixin {
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void slhj$shiftClick(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
-        if (!SlhjAddons.config().isFeatureEnabled("shift_click")) return;
+        if (!SlhjAddons.config().isFeatureEnabled(ShiftClick.id)) return;
         if (event.button() != 0 || hoveredSlot == null) return;
 
         Object self = this;
@@ -51,7 +53,7 @@ public abstract class ContainerScreenMixin {
 
     @Inject(method = "extractSlotHighlightFront", at = @At("HEAD"), cancellable = true)
     private void slhj$extractSlotHighlightFront(GuiGraphicsExtractor graphics, CallbackInfo ci) {
-        if (!SlhjAddons.config().isFeatureEnabled("cancel_slot_highlight")) return;
+        if (!SlhjAddons.config().isFeatureEnabled(CancelSlotHighlight.id)) return;
         ci.cancel();
     }
 }

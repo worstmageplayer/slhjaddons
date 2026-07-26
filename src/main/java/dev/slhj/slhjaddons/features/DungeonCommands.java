@@ -31,7 +31,8 @@ public final class DungeonCommands extends Feature {
         enterUndersizedSetting = toggle("dungeon_commands.enter_undersized", "Auto-Enter Undersized", false);
     }
 
-    @Override public String id() { return "dungeon_commands"; }
+    public static final String id = "dungeon_commands";
+    @Override public String id() { return id; }
 
     @Override
     public void init() {
