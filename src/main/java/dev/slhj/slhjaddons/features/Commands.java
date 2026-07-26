@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
-public final class CommandsFeature extends Feature {
+public final class Commands extends Feature {
 
     @Override public String id() { return "commands"; }
 

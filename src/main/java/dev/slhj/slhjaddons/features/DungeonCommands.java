@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.ContainerInput;
 
 import java.util.regex.Pattern;
 
-public final class DungeonCommandsFeature extends Feature {
+public final class DungeonCommands extends Feature {
 
     private static final Pattern FLOOR_PATTERN = Pattern.compile("^([mf])([1-7])$", Pattern.CASE_INSENSITIVE);
     private static final long COOLDOWN_MS = 30_000;
@@ -25,7 +25,7 @@ public final class DungeonCommandsFeature extends Feature {
     private long cooldownEnd = 0;
     private boolean addedToQueue = false;
 
-    public DungeonCommandsFeature() {
+    public DungeonCommands() {
         setLabel("Dungeon Commands");
         category(Category.DUNGEONS);
         enterUndersizedSetting = toggle("dungeon_commands.enter_undersized", "Auto-Enter Undersized", false);

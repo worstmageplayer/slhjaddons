@@ -2,11 +2,11 @@ package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
 
-public final class ShiftClickFeature extends Feature {
+public final class ShiftClick extends Feature {
 
     private static final String[] ALLOWED_CONTAINERS = {"Trades", "Your Equipment and Stats"};
 
-    public ShiftClickFeature() {
+    public ShiftClick() {
         setLabel("Shift Click");
         category(Category.SKYBLOCK);
     }

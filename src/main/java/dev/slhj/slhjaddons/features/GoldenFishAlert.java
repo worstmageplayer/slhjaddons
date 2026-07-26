@@ -13,7 +13,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
-public final class GoldenFishFeature extends Feature implements HudRenderer {
+public final class GoldenFishAlert extends Feature implements HudRenderer {
 
     private static final long DEFAULT_ALERT_DURATION_MS = 3000;
 
@@ -23,7 +23,7 @@ public final class GoldenFishFeature extends Feature implements HudRenderer {
     private final HudElement hud = new HudElement("golden_fish_alert", "Golden Fish Alert", 10, 10);
     private final TimedHudAlert alert = new TimedHudAlert();
 
-    public GoldenFishFeature() {
+    public GoldenFishAlert() {
         setLabel("Golden Fish Alert");
         category(Category.FISHING);
         colorSetting = hex("golden_fish_alert.color", "Alert Color", 0xFFFFAA00);

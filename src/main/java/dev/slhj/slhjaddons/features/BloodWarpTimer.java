@@ -10,12 +10,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
-public final class BloodWarpTimerFeature extends Feature {
+public final class BloodWarpTimer extends Feature {
 
     private static final long DOOR_TIMER_MS = 20_000;
     private final TimedHudAlert alert = new TimedHudAlert();
 
-    public BloodWarpTimerFeature() {
+    public BloodWarpTimer() {
         setLabel("Blood Warp Timer");
         category(Category.DUNGEONS);
     }

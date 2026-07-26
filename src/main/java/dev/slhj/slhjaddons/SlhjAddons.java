@@ -24,27 +24,27 @@ public final class SlhjAddons implements ClientModInitializer {
     public void onInitializeClient() {
         config = SlhjConfig.load();
 
-        FEATURES.register(new CommandsFeature());
-        FEATURES.register(new ClockFeature());
-        FEATURES.register(new CustomScoreboardFeature());
-        FEATURES.register(new RagnarockCooldownFeature());
-        FEATURES.register(new AutoFishFeature());
-        FEATURES.register(new SuperboomSwapFeature());
-        FEATURES.register(new QuickCommandsFeature());
-        FEATURES.register(new AutoPetRulesFeature());
-        FEATURES.register(new AutoZombieShootoutFeature());
-        FEATURES.register(new BlazeSwapFeature());
-        FEATURES.register(new BloodWarpTimerFeature());
-        FEATURES.register(new CancelEmptyTooltipFeature());
-        FEATURES.register(new CancelSlotHighlightFeature());
-        FEATURES.register(new DungeonCommandsFeature());
-        FEATURES.register(new GoldenFishFeature());
-        FEATURES.register(new PartyFinderHelperFeature());
-        FEATURES.register(new ShiftClickFeature());
-        FEATURES.register(new SignHelperFeature());
-        FEATURES.register(new ChatCalcFeature());
-        FEATURES.register(new AutoClickFeature());
-        FEATURES.register(new NoBobHurtFeature());
+        FEATURES.register(new Commands());
+        FEATURES.register(new Clock());
+        FEATURES.register(new CustomScoreboard());
+        FEATURES.register(new RagnarockCooldown());
+        FEATURES.register(new AutoFish());
+        FEATURES.register(new SuperboomSwap());
+        FEATURES.register(new QuickCommands());
+        FEATURES.register(new AutoPetRules());
+        FEATURES.register(new AutoZombieShootout());
+        FEATURES.register(new AutoBlazeSwap());
+        FEATURES.register(new BloodWarpTimer());
+        FEATURES.register(new CancelEmptyTooltip());
+        FEATURES.register(new CancelSlotHighlight());
+        FEATURES.register(new DungeonCommands());
+        FEATURES.register(new GoldenFishAlert());
+        FEATURES.register(new PartyFinderHelper());
+        FEATURES.register(new ShiftClick());
+        FEATURES.register(new SignHelper());
+        FEATURES.register(new ChatCalc());
+        FEATURES.register(new AutoClick());
+        FEATURES.register(new NoBobHurt());
 
         FEATURES.bootstrap();
 

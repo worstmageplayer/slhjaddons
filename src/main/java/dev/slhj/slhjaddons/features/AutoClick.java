@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 
-public final class AutoClickFeature extends Feature {
+public final class AutoClick extends Feature {
 
     private KeyMapping key;
     private int tickCounter = 0;
@@ -19,7 +19,7 @@ public final class AutoClickFeature extends Feature {
 
     private final Setting.SliderSetting cpsSetting;
 
-    public AutoClickFeature() {
+    public AutoClick() {
         category(Category.MISC);
         setLabel("Auto Click");
         cpsSetting = intSlider("auto_click.cps", "Auto Click CPS", 0, 40, DEFAULT_CPS);

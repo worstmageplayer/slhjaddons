@@ -19,7 +19,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class QuickCommandsFeature extends Feature {
+public final class QuickCommands extends Feature {
 
     private KeyMapping key;
     private boolean wasDown = false;
@@ -36,7 +36,7 @@ public final class QuickCommandsFeature extends Feature {
     private final Setting.HexSetting guiColor;
     private final Setting.HexSetting guiHoverColor;
 
-    public QuickCommandsFeature() {
+    public QuickCommands() {
         setLabel("Quick Commands");
         category(Category.MISC);
         commandsString = text("quick_commands.commands", "Commands", "");

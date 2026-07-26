@@ -9,14 +9,14 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
-public final class AutoZombieShootoutFeature extends Feature {
+public final class AutoZombieShootout extends Feature {
 
     private static final long CLICK_COOLDOWN = 200;
     private long lastClick = 0;
 
     @Override public String id() { return "auto_zombie_shootout"; }
 
-    public AutoZombieShootoutFeature() {
+    public AutoZombieShootout() {
         setLabel("Auto Zombie Shootout");
         category(Category.EVENTS);
     }

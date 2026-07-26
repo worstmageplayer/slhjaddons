@@ -6,11 +6,10 @@ import dev.slhj.slhjaddons.util.McUtils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Items;
 import java.util.regex.Pattern;
-public final class AutoFishFeature extends Feature {
+public final class AutoFish extends Feature {
     private static final Pattern TIMER = Pattern.compile("^\\d\\.\\d$");
     private boolean armed = false;
 
@@ -19,7 +18,7 @@ public final class AutoFishFeature extends Feature {
 
     private final int DEFAULT_DELAY = 20;
     private final Setting.SliderSetting delaySetting;
-    public AutoFishFeature() {
+    public AutoFish() {
         category(Category.FISHING);
         setLabel("Auto Fish");
         delaySetting = intSlider("auto_fish.delay", "Auto Fish Delay (ticks)", 0, 50, DEFAULT_DELAY);

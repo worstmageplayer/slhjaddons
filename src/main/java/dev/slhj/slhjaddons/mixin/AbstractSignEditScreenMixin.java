@@ -1,7 +1,7 @@
 package dev.slhj.slhjaddons.mixin;
 
 import dev.slhj.slhjaddons.SlhjAddons;
-import dev.slhj.slhjaddons.features.SignHelperFeature;
+import dev.slhj.slhjaddons.features.SignHelper;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.input.CharacterEvent;
@@ -37,7 +37,7 @@ public abstract class AbstractSignEditScreenMixin {
         if (messages == null || messages.length == 0) return;
         if (messages.length < 2 || !INPUT_SIGN_MARKER.equals(messages[1])) return;
 
-        SignHelperFeature feature = SlhjAddons.features().get(SignHelperFeature.class);
+        SignHelper feature = SlhjAddons.features().get(SignHelper.class);
         if (feature == null) return;
 
         messages[0] = feature.getResult();
@@ -46,7 +46,7 @@ public abstract class AbstractSignEditScreenMixin {
     @Unique
     private void pushToFeature() {
         if (!SlhjAddons.config().isFeatureEnabled("sign_helper")) return;
-        SignHelperFeature feature = SlhjAddons.features().get(SignHelperFeature.class);
+        SignHelper feature = SlhjAddons.features().get(SignHelper.class);
         if (feature == null || messages == null || messages.length == 0) return;
 
         if (messages.length < 2 || !INPUT_SIGN_MARKER.equals(messages[1])) {
@@ -59,7 +59,7 @@ public abstract class AbstractSignEditScreenMixin {
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void slhj$extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
         if (!SlhjAddons.config().isFeatureEnabled("sign_helper")) return;
-        SignHelperFeature feature = SlhjAddons.features().get(SignHelperFeature.class);
+        SignHelper feature = SlhjAddons.features().get(SignHelper.class);
         if (feature != null) feature.render(graphics);
     }
 }

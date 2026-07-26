@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class ChatCalcFeature extends Feature {
+public final class ChatCalc extends Feature {
 
     private static final Pattern DEFINE_PATTERN =
             Pattern.compile("^([a-zA-Z_]\\w*)\\(([^()=]*)\\)=(.+)$");

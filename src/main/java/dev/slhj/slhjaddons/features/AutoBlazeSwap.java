@@ -17,7 +17,7 @@ import java.util.Map;
 
 import static dev.slhj.slhjaddons.util.SlayerUtils.isSlayerActive;
 
-public final class BlazeSwapFeature extends Feature {
+public final class AutoBlazeSwap extends Feature {
 
     private static final long COOLDOWN_MS = 500;
     private static final Map<String, Integer> ATTUNEMENT_NUMBERS = Map.of(
@@ -37,7 +37,7 @@ public final class BlazeSwapFeature extends Feature {
     private long lastExecutionTime = 0;
     private static final int INVENTORY_OFFSET = 36;
 
-    public BlazeSwapFeature() {
+    public AutoBlazeSwap() {
         setLabel("Blaze Slayer Attunement Auto Swap");
         category(Category.SLAYERS);
     }

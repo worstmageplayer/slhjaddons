@@ -13,7 +13,7 @@ import net.minecraft.resources.Identifier;
 
 import java.util.regex.Pattern;
 
-public final class AutoPetRulesFeature extends Feature implements HudRenderer {
+public final class AutoPetRules extends Feature implements HudRenderer {
 
     private static final Pattern PET_PATTERN =
             Pattern.compile("Autopet equipped your (\\[Lvl (\\d+)\\]) (.+?)! VIEW RULE");
@@ -27,7 +27,7 @@ public final class AutoPetRulesFeature extends Feature implements HudRenderer {
 
     private final HudElement hud = new HudElement("auto_pet_rules", "Auto Pet Rules", 10, 100);
 
-    public AutoPetRulesFeature() {
+    public AutoPetRules() {
         setLabel("Auto Pet Rules");
         category(Category.PETS);
     }

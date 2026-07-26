@@ -10,7 +10,7 @@ import net.minecraft.resources.Identifier;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-public final class ClockFeature extends Feature {
+public final class Clock extends Feature {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("H : mm");
 
@@ -24,7 +24,7 @@ public final class ClockFeature extends Feature {
     private final Setting.HexSetting colorSetting;
     private final Setting.ToggleSetting rightAlignedSetting;
 
-    public ClockFeature() {
+    public Clock() {
         setLabel("Clock");
         category(Category.MISC);
         scaleSetting = slider("clock.scale", "Clock Scale", 0, 10, DEFAULT_SCALE);

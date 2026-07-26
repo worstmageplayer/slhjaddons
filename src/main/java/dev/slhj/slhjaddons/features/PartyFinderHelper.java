@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class PartyFinderHelperFeature extends Feature {
+public final class PartyFinderHelper extends Feature {
 
     private static final Pattern CLASS_LINE = Pattern.compile(": ?\\(?([ABMHT])\\)?");
     private static final List<String> REQUIRED = List.of("A", "B", "M", "H", "T");
@@ -30,7 +30,7 @@ public final class PartyFinderHelperFeature extends Feature {
     private String leastWanted = "None";
     private boolean inPartyFinder = false;
 
-    public PartyFinderHelperFeature() {
+    public PartyFinderHelper() {
         setLabel("Party Finder Helper");
         category(Category.DUNGEONS);
     }

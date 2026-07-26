@@ -2,9 +2,9 @@ package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
 
-public final class CancelSlotHighlightFeature extends Feature {
+public final class CancelSlotHighlight extends Feature {
 
-    public CancelSlotHighlightFeature() {
+    public CancelSlotHighlight() {
         setLabel("Cancel Slot Highlight");
         category(Category.SKYBLOCK);
     }

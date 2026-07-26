@@ -4,11 +4,11 @@ import dev.slhj.slhjaddons.core.Feature;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 
-public final class CancelEmptyTooltipFeature extends Feature {
+public final class CancelEmptyTooltip extends Feature {
 
     private static final String[] BLACKLIST = {"Spirit Leap", "Teleport to Player"};
 
-    public CancelEmptyTooltipFeature() {
+    public CancelEmptyTooltip() {
         setLabel("Cancel Empty Tooltip");
         category(Category.SKYBLOCK);
     }

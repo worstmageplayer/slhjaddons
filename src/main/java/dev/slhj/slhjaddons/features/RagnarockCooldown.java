@@ -16,7 +16,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 
-public final class RagnarockCooldownFeature extends Feature implements HudRenderer {
+public final class RagnarockCooldown extends Feature implements HudRenderer {
 
     private static final long BASE_COOLDOWN_MS = 20_000L;
 
@@ -29,7 +29,7 @@ public final class RagnarockCooldownFeature extends Feature implements HudRender
     private final Setting.TextSetting readyMessage;
     private final Setting.ToggleSetting playSoundOnReady;
 
-    public RagnarockCooldownFeature() {
+    public RagnarockCooldown() {
         setLabel("Ragnarock Cooldown Timer");
         category(Category.SKYBLOCK);
         readyMessage = text("rag_cooldown.message", "Ready Message", "&r&5&lRagnarock &aReady!");

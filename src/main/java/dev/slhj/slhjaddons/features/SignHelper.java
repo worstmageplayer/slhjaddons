@@ -6,7 +6,7 @@ import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.util.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
-public final class SignHelperFeature extends Feature {
+public final class SignHelper extends Feature {
 
     private static final int MAX_SIGN_LINE_LENGTH = 15;
 
@@ -16,7 +16,7 @@ public final class SignHelperFeature extends Feature {
 
     private final Setting.SliderSetting yPos;
 
-    public SignHelperFeature() {
+    public SignHelper() {
         setLabel("Sign Helper");
         category(Category.SKYBLOCK);
         yPos = intSlider("sign_helper.ypos", "Y-Pos", 0, 100, 55);

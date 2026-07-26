@@ -10,9 +10,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-public final class SuperboomSwapFeature extends Feature {
+public final class SuperboomSwap extends Feature {
 
-    public SuperboomSwapFeature() {
+    public SuperboomSwap() {
         setLabel("SuperBoom Auto Swap");
         category(Category.DUNGEONS);
     }

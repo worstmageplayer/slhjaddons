@@ -11,7 +11,7 @@ import net.minecraft.resources.Identifier;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class CustomScoreboardFeature extends Feature {
+public final class CustomScoreboard extends Feature {
 
     private static final String HIDDEN = "\u00a7ewww.hypixel.ne\ud83c\udf82\u00a7et"; // the promo line CT filtered
 
@@ -31,7 +31,7 @@ public final class CustomScoreboardFeature extends Feature {
     private final Setting.HexSetting colorSetting;
     private final Setting.ToggleSetting shadowSetting;
 
-    public CustomScoreboardFeature() {
+    public CustomScoreboard() {
         setLabel("Custom Scoreboard");
         category(Category.SKYBLOCK);
         headerSetting = text("scoreboard.header", "Scoreboard Header", DEFAULT_HEADER);
