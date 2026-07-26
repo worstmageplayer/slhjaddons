@@ -18,11 +18,13 @@ public final class AutoClick extends Feature {
     private final int DEFAULT_CPS = 10;
 
     private final Setting.SliderSetting cpsSetting;
+    private final Setting.ToggleSetting entityInRange;
 
     public AutoClick() {
         category(Category.MISC);
         setLabel("Auto Click");
         cpsSetting = intSlider("auto_click.cps", "Auto Click CPS", 0, 40, DEFAULT_CPS);
+        entityInRange = toggle("auto_click.entity_in_range", "Auto Click Requires Entity In Range", true);
     }
 
     @Override public String id() { return "auto_click"; }
@@ -50,7 +52,7 @@ public final class AutoClick extends Feature {
             if (isMouse2Down()) {
                 McUtils.rightClick();
             } else {
-                McUtils.leftClick(true);
+                McUtils.leftClick(entityInRange.value().get());
             }
         }
     }

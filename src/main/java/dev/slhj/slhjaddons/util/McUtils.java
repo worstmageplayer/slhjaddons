@@ -65,14 +65,12 @@ public final class McUtils {
         LocalPlayer p = ClientUtils.player();
         if (p == null || MC.gameMode == null) return;
 
-        if (requireEntityInRange) {
-            HitResult hit = MC.hitResult;
-            if (hit instanceof EntityHitResult entityHit) {
-                Entity target = entityHit.getEntity();
-                MC.gameMode.attack(p, target);
-                p.swing(InteractionHand.MAIN_HAND);
-            }
-        } else {
+        HitResult hit = MC.hitResult;
+        if (hit instanceof EntityHitResult entityHit) {
+            Entity target = entityHit.getEntity();
+            MC.gameMode.attack(p, target);
+            p.swing(InteractionHand.MAIN_HAND);
+        } else if (!requireEntityInRange) {
             p.swing(InteractionHand.MAIN_HAND);
         }
     }
