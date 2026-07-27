@@ -6,7 +6,7 @@
     "GuiHudMixin",
     "ContainerScreenMixin",
     "AbstractSignEditScreenMixin",
-    "HurtMixin"
+    "GameRendererMixin"
   ],
   "injectors": { "defaultRequire": 1 }
 }
