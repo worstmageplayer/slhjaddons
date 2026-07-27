@@ -19,10 +19,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.List;
-
 @Mixin(AbstractContainerScreen.class)
-public abstract class ContainerScreenMixin {
+public abstract class AbstractContainerScreenMixin {
 
     @Shadow protected Slot hoveredSlot;
     @Shadow public abstract AbstractContainerMenu getMenu();
