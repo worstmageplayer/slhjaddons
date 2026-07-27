@@ -2,7 +2,7 @@ package dev.slhj.slhjaddons.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.slhj.slhjaddons.SlhjAddons;
-import dev.slhj.slhjaddons.features.NoBobHurt;
+import dev.slhj.slhjaddons.features.misc.NoBobHurt;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import org.spongepowered.asm.mixin.Mixin;

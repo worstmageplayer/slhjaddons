@@ -1,4 +1,4 @@
-package dev.slhj.slhjaddons.features;
+package dev.slhj.slhjaddons.features.misc;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.slhj.slhjaddons.core.Feature;

@@ -1,7 +1,7 @@
 package dev.slhj.slhjaddons.mixin;
 
 import dev.slhj.slhjaddons.SlhjAddons;
-import dev.slhj.slhjaddons.features.SignHelper;
+import dev.slhj.slhjaddons.features.skyblock.SignHelper;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.input.CharacterEvent;

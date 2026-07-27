@@ -1,4 +1,4 @@
-package dev.slhj.slhjaddons.features;
+package dev.slhj.slhjaddons.features.pets;
 
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.hud.HudElement;

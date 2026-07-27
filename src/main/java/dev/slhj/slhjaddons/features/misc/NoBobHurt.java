@@ -1,4 +1,4 @@
-package dev.slhj.slhjaddons.features;
+package dev.slhj.slhjaddons.features.misc;
 
 import dev.slhj.slhjaddons.core.Feature;
 

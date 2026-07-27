@@ -1,4 +1,4 @@
-package dev.slhj.slhjaddons.features;
+package dev.slhj.slhjaddons.features.dungeons;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.slhj.slhjaddons.core.Feature;

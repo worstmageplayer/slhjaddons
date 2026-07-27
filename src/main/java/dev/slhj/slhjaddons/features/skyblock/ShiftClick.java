@@ -1,4 +1,4 @@
-package dev.slhj.slhjaddons.features;
+package dev.slhj.slhjaddons.features.skyblock;
 
 import dev.slhj.slhjaddons.core.Feature;
 

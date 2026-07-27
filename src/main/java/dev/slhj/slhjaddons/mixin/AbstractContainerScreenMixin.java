@@ -1,8 +1,8 @@
 package dev.slhj.slhjaddons.mixin;
 
 import dev.slhj.slhjaddons.SlhjAddons;
-import dev.slhj.slhjaddons.features.CancelSlotHighlight;
-import dev.slhj.slhjaddons.features.ShiftClick;
+import dev.slhj.slhjaddons.features.skyblock.CancelSlotHighlight;
+import dev.slhj.slhjaddons.features.skyblock.ShiftClick;
 import dev.slhj.slhjaddons.util.client.ClientUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;

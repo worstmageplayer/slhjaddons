@@ -1,7 +1,7 @@
 package dev.slhj.slhjaddons.mixin;
 
 import dev.slhj.slhjaddons.SlhjAddons;
-import dev.slhj.slhjaddons.features.CustomScoreboard;
+import dev.slhj.slhjaddons.features.skyblock.CustomScoreboard;
 import net.minecraft.client.gui.Gui;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
