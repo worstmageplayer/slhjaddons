@@ -58,6 +58,7 @@ public final class CustomScoreboard extends Feature {
 
         List<String> lines = new ArrayList<>();
         String title = ScoreboardUtils.title();
+        if (title == null) return;
         boolean sb = title.toUpperCase().contains("SKYBLOCK");
         lines.add(sb ? headerSetting.value().get() : title);
         for (String l : ScoreboardUtils.lines()) {

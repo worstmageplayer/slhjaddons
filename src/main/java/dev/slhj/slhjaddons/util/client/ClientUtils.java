@@ -3,6 +3,7 @@ package dev.slhj.slhjaddons.util.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 public final class ClientUtils {
     private ClientUtils() {}
@@ -22,6 +23,7 @@ public final class ClientUtils {
         return p == null ? 0 : p.getInventory().getSelectedSlot();
     }
 
+    @Nullable
     public static String hoverName(ItemStack item) {
         if (item.isEmpty()) return null;
         return item.getHoverName().getString();

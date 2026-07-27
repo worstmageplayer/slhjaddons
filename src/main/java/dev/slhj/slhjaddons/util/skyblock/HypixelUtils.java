@@ -4,7 +4,9 @@ public final class HypixelUtils {
     private HypixelUtils() {}
 
     public static boolean inSkyblock() {
-        return ScoreboardUtils.title().toUpperCase().contains("SKYBLOCK");
+        String title = ScoreboardUtils.title();
+        if (title == null) return false;
+        return title.toUpperCase().contains("SKYBLOCK");
     }
 
     public static boolean inDungeon() {

@@ -2,6 +2,7 @@ package dev.slhj.slhjaddons.util.client;
 
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 public final class ChatUtils {
     private ChatUtils() {}
@@ -16,7 +17,8 @@ public final class ChatUtils {
         if (p != null) p.connection.sendCommand(cmd);
     }
 
+    @Nullable
     public static String colorize(String s) {
-        return s == null ? "" : s.replace('&', '§');
+        return s == null ? null : s.replace('&', '§');
     }
 }

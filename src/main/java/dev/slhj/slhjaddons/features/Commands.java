@@ -2,12 +2,12 @@ package dev.slhj.slhjaddons.features;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.slhj.slhjaddons.SlhjAddons;
+import dev.slhj.slhjaddons.config.SlhjConfig;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.gui.HudEditorScreen;
 import dev.slhj.slhjaddons.gui.SlhjSettingsScreen;
 import dev.slhj.slhjaddons.util.client.ChatUtils;
 import dev.slhj.slhjaddons.util.client.ClientUtils;
-import dev.slhj.slhjaddons.util.skyblock.SkyblockItemUtils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.minecraft.client.Minecraft;
@@ -28,11 +28,20 @@ public final class Commands extends Feature {
 
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) ->
                 dispatcher.register(ClientCommands.literal("slhj")
-                        .executes(ctx -> { openGui(); return 1; })
+                        .executes(ctx -> {
+                            openGui();
+                            return 1;
+                        })
                         .then(ClientCommands.literal("list")
-                                .executes(ctx -> { list(); return 1; }))
+                                .executes(ctx -> {
+                                    list();
+                                    return 1;
+                                }))
                         .then(ClientCommands.literal("component_custom_data")
-                                .executes(ctx -> copyNBT()))
+                                .executes(ctx -> {
+                                    copyNBT();
+                                    return 1;
+                                }))
                         .then(ClientCommands.literal("hud")
                                 .executes(ctx -> {
                                     HudEditorScreen.openHudEditor();
@@ -46,41 +55,27 @@ public final class Commands extends Feature {
                                         })))));
     }
 
-    private int copyNBT() {
+    private void copyNBT() {
         Player player = Minecraft.getInstance().player;
-        if (player == null) return 0;
+        if (player == null) return;
 
         ItemStack held = player.getMainHandItem();
         if (held.isEmpty()) {
             ChatUtils.chat("§cNo item in hand!");
-            return 0;
+            return;
         }
 
         CustomData customData = held.get(DataComponents.CUSTOM_DATA);
         if (customData == null) {
             ChatUtils.chat("§cItem has no custom_data component!");
-            return 0;
+            return;
         }
 
-        CompoundTag tag = customData.copyTag(); // or getUnsafe() if you don't want a copy
+        CompoundTag tag = customData.copyTag();
         String nbtString = tag.toString();
 
         Minecraft.getInstance().keyboardHandler.setClipboard(nbtString);
         ChatUtils.chat("§aCopied custom_data to clipboard! (" + nbtString.length() + " chars)");
-
-        return 1;
-    }
-
-    private Integer getAttunement(ItemStack item) {
-        CustomData itemCustomData = SkyblockItemUtils.getCustomData(item);
-        CompoundTag itemCompoundTag = itemCustomData.copyTag();
-        var td_attune_mode = itemCompoundTag.getInt("td_attune_mode");
-        if (td_attune_mode.isPresent()) {
-            return td_attune_mode.get();
-        }
-
-        ChatUtils.chat("either not a blaze dagger or something else");
-        return null;
     }
 
     private void openGui() {
@@ -89,7 +84,7 @@ public final class Commands extends Feature {
 
     private void list() {
         ChatUtils.chat("&e&lslhj&raddons &7features:");
-        var cfg = SlhjAddons.config();
+        SlhjConfig cfg = SlhjAddons.config();
         for (Feature f : SlhjAddons.features().all()) {
             boolean on = cfg.isFeatureEnabled(f.id());
             ChatUtils.chat(" &7- &f" + f.id() + " " + (on ? "&aON" : "&cOFF"));
@@ -97,7 +92,7 @@ public final class Commands extends Feature {
     }
 
     private void toggle(String id) {
-        var cfg = SlhjAddons.config();
+        SlhjConfig cfg = SlhjAddons.config();
         boolean next = !cfg.isFeatureEnabled(id);
         cfg.setFeatureEnabled(id, next);
         cfg.save();

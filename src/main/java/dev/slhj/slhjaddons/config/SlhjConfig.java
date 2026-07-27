@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.slhj.slhjaddons.SlhjAddons;
 import net.fabricmc.loader.api.FabricLoader;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -73,6 +74,7 @@ public final class SlhjConfig {
         values.put(key, String.format("%08X", argb));
     }
 
+    @Nullable
     public static Integer parseHexColor(String raw) {
         if (raw == null) return null;
         String s = raw.startsWith("#") ? raw.substring(1) : raw;

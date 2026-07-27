@@ -2,6 +2,7 @@ package dev.slhj.slhjaddons.util.skyblock;
 
 import dev.slhj.slhjaddons.util.client.ClientUtils;
 import net.minecraft.ChatFormatting;
+import org.jspecify.annotations.Nullable;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +45,7 @@ public final class CooldownUtils {
     private static final java.util.Map<Character, Integer> ROMAN = java.util.Map.of(
             'I', 1, 'V', 5, 'X', 10, 'L', 50, 'C', 100, 'D', 500, 'M', 1000);
 
+    @Nullable
     private static Integer decodeNumeral(String numeral) {
         String s = numeral.trim().toUpperCase();
         if (!s.matches("^[IVXLCDM]+$")) return null;

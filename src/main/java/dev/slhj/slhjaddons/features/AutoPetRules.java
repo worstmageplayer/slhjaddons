@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public final class AutoPetRules extends Feature implements HudRenderer {
 
     private static final Pattern PET_PATTERN =
-            Pattern.compile("Autopet equipped your (\\[Lvl (\\d+)\\]) (.+?)! VIEW RULE");
+            Pattern.compile("Autopet equipped your (\\[Lvl (\\d+)]) (.+?)! VIEW RULE");
     private static final long DURATION_MS = 5000;
     private static final double FADE_START = 0.7;
 

@@ -6,6 +6,7 @@ import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +39,12 @@ public final class ScoreboardUtils {
         return out;
     }
 
+    @Nullable
     public static String title() {
         var level = Minecraft.getInstance().level;
-        if (level == null) return "";
+        if (level == null) return null;
         Objective obj = level.getScoreboard().getDisplayObjective(DisplaySlot.SIDEBAR);
-        return obj == null ? "" : obj.getDisplayName().getString();
+        return obj == null ? null : obj.getDisplayName().getString();
     }
 
     public static List<String> linesNoFormat() {

@@ -8,6 +8,7 @@ import dev.slhj.slhjaddons.util.client.ChatUtils;
 import dev.slhj.slhjaddons.util.client.SchedulerUtils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
@@ -98,6 +99,8 @@ public final class DungeonCommands extends Feature {
         LocalPlayer player = ClientUtils.player();
         if (player == null) return;
         AbstractContainerMenu menu = player.containerMenu;
-        ClientUtils.mc().gameMode.handleContainerInput(menu.containerId, 13, 0, ContainerInput.PICKUP, player);
+        MultiPlayerGameMode gameMode = ClientUtils.mc().gameMode;
+        if (gameMode == null) return;
+        gameMode.handleContainerInput(menu.containerId, 13, 0, ContainerInput.PICKUP, player);
     }
 }

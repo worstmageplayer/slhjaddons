@@ -5,6 +5,7 @@ import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import org.jspecify.annotations.Nullable;
 
 public final class SignHelper extends Feature {
 
@@ -65,9 +66,10 @@ public final class SignHelper extends Feature {
         }
     }
 
+    @Nullable
     public String getResult() {
         if (lastResult == null) {
-            return lastRawInput == null ? "" : lastRawInput;
+            return lastRawInput == null ? null : lastRawInput;
         }
         String value = lastResult;
         if (value.length() > MAX_SIGN_LINE_LENGTH) {

@@ -13,8 +13,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static dev.slhj.slhjaddons.util.skyblock.SlayerUtils.isSlayerActive;
 
@@ -51,18 +53,13 @@ public final class AutoBlazeSwap extends Feature {
         AttackEntityCallback.EVENT.register((player, level, hand, pos, direction) -> attack(player));
     }
 
-    private InteractionResult attack(Player player) {
-        if (!isEnabled()) return InteractionResult.PASS;
-        if (System.currentTimeMillis() - lastExecutionTime < COOLDOWN_MS) {
-            return InteractionResult.PASS;
-        }
-
-        if (player == null || !isSlayerActive(SlayerUtils.Slayer.BLAZE)) {
-            return InteractionResult.PASS;
-        }
+    private void autoSwap(Player player) {
+        if (!isEnabled()) return;
+        if (System.currentTimeMillis() - lastExecutionTime < COOLDOWN_MS) return;
+        if (player == null || !isSlayerActive(SlayerUtils.Slayer.BLAZE)) return;
 
         Integer blazeAttunement = getBlazeAttunement(player);
-        if (blazeAttunement == null) return InteractionResult.PASS;
+        if (blazeAttunement == null) return;
         //McUtils.chat("Blaze Attunement: " + blazeAttunement.toString());
 
         ItemStack heldDagger = player.getMainHandItem();
@@ -70,20 +67,22 @@ public final class AutoBlazeSwap extends Feature {
         //McUtils.chat("Dagger Attunement: " + heldAttunement);
 
         boolean needsSwap = heldAttunement == null || !heldAttunement.equals(blazeAttunement);
-        if (!needsSwap) return InteractionResult.PASS;
+        if (!needsSwap) return;
 
         SwapResult result = swapDagger(blazeAttunement, player);
-        if (result == null) return InteractionResult.PASS;
+        if (result == null) return;
 
         lastExecutionTime = System.currentTimeMillis();
 
-        if (result.attunement() != null && result.attunement().equals(blazeAttunement)) {
-            return InteractionResult.PASS;
-        }
+        if (result.attunement() != null && result.attunement().equals(blazeAttunement)) return;
         rightClickWithCooldown();
+    }
+    private InteractionResult attack(Player player) {
+        autoSwap(player);
         return InteractionResult.PASS;
     }
 
+    @Nullable
     private Integer getBlazeAttunement(Player player) {
         var box = player.getBoundingBox().inflate(6);
         var stands = player.level().getEntitiesOfClass(ArmorStand.class, box);
@@ -107,6 +106,7 @@ public final class AutoBlazeSwap extends Feature {
 
     private record SwapResult(int hotbarSlot, Integer attunement) {}
 
+    @Nullable
     private SwapResult swapDagger(int blazeAttunementNumber, Player player) {
         String targetId = ATTUNEMENT_DAGGER.get(blazeAttunementNumber);
         if (targetId == null) return null;
@@ -124,12 +124,13 @@ public final class AutoBlazeSwap extends Feature {
         return null;
     }
 
+    @Nullable
     private Integer getAttunement(ItemStack item) {
         CustomData itemCustomData = SkyblockItemUtils.getCustomData(item);
         if (itemCustomData == null) return null;
 
         CompoundTag itemCompoundTag = itemCustomData.copyTag();
-        var attuneMode = itemCompoundTag.getInt("td_attune_mode");
+        Optional<Integer> attuneMode = itemCompoundTag.getInt("td_attune_mode");
         return attuneMode.orElse(null);
     }
 
