@@ -17,6 +17,6 @@ public final class ChatUtils {
     }
 
     public static String colorize(String s) {
-        return s == null ? "" : s.replace('&', '\u00a7');
+        return s == null ? "" : s.replace('&', '§');
     }
 }
