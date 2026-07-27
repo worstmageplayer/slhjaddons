@@ -6,6 +6,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -16,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(AbstractSignEditScreen.class)
 public abstract class AbstractSignEditScreenMixin {
 
-    @Shadow private String[] messages;
+    @Final @Shadow private String[] messages;
 
     @Inject(method = "keyPressed", at = @At("RETURN"))
     private void slhj$onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
@@ -29,7 +30,7 @@ public abstract class AbstractSignEditScreenMixin {
     }
 
     @Unique
-    private String INPUT_SIGN_MARKER = "^^^^^^^^^^^^^^^";
+    private final String INPUT_SIGN_MARKER = "^^^^^^^^^^^^^^^";
 
     @Inject(method = "onDone", at = @At("HEAD"))
     private void slhj$onDone(CallbackInfo ci) {
