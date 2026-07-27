@@ -18,6 +18,7 @@ public final class GoldenFishAlert extends Feature implements HudRenderer {
 
     private final Setting.HexSetting colorSetting;
     private final Setting.SliderSetting durationSetting;
+    private final Setting.TextSetting alertText;
 
     private final HudElement hud = new HudElement("golden_fish_alert", "Golden Fish Alert", 10, 10);
     private final TimedHudAlert alert = new TimedHudAlert();
@@ -27,6 +28,7 @@ public final class GoldenFishAlert extends Feature implements HudRenderer {
         category(Category.FISHING);
         colorSetting = hex("golden_fish_alert.color", "Alert Color", 0xFFFFAA00);
         durationSetting = intSlider("golden_fish_alert.duration", "Alert Duration (ms)", 500, 8000, (int) DEFAULT_ALERT_DURATION_MS);
+        alertText = text("golden_fish_alert.text", "Alert Text", "Golden Fish!");
     }
 
     public static final String id = "golden_fish_alert";
@@ -53,7 +55,7 @@ public final class GoldenFishAlert extends Feature implements HudRenderer {
         long duration = durationSetting.value().get().intValue();
         if (!isEnabled() || !alert.isActive(duration)) return;
 
-        hud.renderText(g, "Golden Fish!", colorSetting.value().get());
+        hud.renderText(g, alertText.value().get(), colorSetting.value().get());
     }
 
     @Override
@@ -63,7 +65,7 @@ public final class GoldenFishAlert extends Feature implements HudRenderer {
 
     @Override
     public String hudPreviewText() {
-        return "Golden Fish!";
+        return alertText.value().get();
     }
 
     @Override
