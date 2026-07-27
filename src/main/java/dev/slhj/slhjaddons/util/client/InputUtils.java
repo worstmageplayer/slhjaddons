@@ -1,5 +1,6 @@
 package dev.slhj.slhjaddons.util.client;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -23,12 +24,13 @@ public final class InputUtils {
         LocalPlayer p = ClientUtils.player();
         if (p != null && ClientUtils.mc().gameMode != null) {
             ClientUtils.mc().gameMode.useItem(p, InteractionHand.MAIN_HAND);
+            p.swing(InteractionHand.MAIN_HAND);
         }
     }
 
     public static void leftClick(boolean requireEntityInRange) {
         LocalPlayer p = ClientUtils.player();
-        var mc = ClientUtils.mc();
+        Minecraft mc = ClientUtils.mc();
         if (p == null || mc.gameMode == null) return;
 
         if (requireEntityInRange) {
