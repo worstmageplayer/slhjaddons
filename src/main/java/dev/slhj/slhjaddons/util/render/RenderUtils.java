@@ -1,5 +1,6 @@
-package dev.slhj.slhjaddons.util;
+package dev.slhj.slhjaddons.util.render;
 
+import dev.slhj.slhjaddons.util.client.ChatUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
@@ -16,7 +17,7 @@ public final class RenderUtils {
 
     /** color is 0xAARRGGBB. */
     public static void text(GuiGraphicsExtractor g, String text, int x, int y, int color, boolean shadow) {
-        g.text(Minecraft.getInstance().font, McUtils.colorize(text), x, y, color, shadow);
+        g.text(Minecraft.getInstance().font, ChatUtils.colorize(text), x, y, color, shadow);
     }
 
     public static void drawHollowRect(GuiGraphicsExtractor g, int x, int y, int w, int h, int thickness, int argb) {

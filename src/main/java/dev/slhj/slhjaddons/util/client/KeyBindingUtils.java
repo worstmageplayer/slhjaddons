@@ -1,4 +1,4 @@
-package dev.slhj.slhjaddons.util;
+package dev.slhj.slhjaddons.util.client;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;

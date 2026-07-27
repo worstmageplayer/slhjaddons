@@ -2,7 +2,7 @@ package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
-import dev.slhj.slhjaddons.util.RenderUtils;
+import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;

@@ -1,8 +1,8 @@
 package dev.slhj.slhjaddons.features;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
-import dev.slhj.slhjaddons.util.ClientUtils;
-import dev.slhj.slhjaddons.util.McUtils;
+import dev.slhj.slhjaddons.util.client.ClientUtils;
+import dev.slhj.slhjaddons.util.client.InputUtils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.player.LocalPlayer;
@@ -39,7 +39,7 @@ public final class AutoFish extends Feature {
         if (ticksSinceCatch >= 0) {
             ticksSinceCatch++;
             if (ticksSinceCatch >= delaySetting.value().get().intValue()) {
-                McUtils.rightClick();
+                InputUtils.rightClick();
                 ticksSinceCatch = -1;
             }
         }
@@ -54,7 +54,7 @@ public final class AutoFish extends Feature {
             if (!armed && TIMER.matcher(name).matches()) {
                 armed = true;
             } else if (armed && name.equals("!!!")) {
-                McUtils.rightClick();
+                InputUtils.rightClick();
                 ticksSinceCatch = 0;
                 armed = false;
             }

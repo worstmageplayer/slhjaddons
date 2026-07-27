@@ -1,9 +1,10 @@
 package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
-import dev.slhj.slhjaddons.util.McUtils;
-import dev.slhj.slhjaddons.util.SkyblockItemUtils;
-import dev.slhj.slhjaddons.util.SlayerUtils;
+import dev.slhj.slhjaddons.util.client.SchedulerUtils;
+import dev.slhj.slhjaddons.util.skyblock.SkyblockItemUtils;
+import dev.slhj.slhjaddons.util.skyblock.SlayerUtils;
+import dev.slhj.slhjaddons.util.client.InputUtils;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
@@ -15,7 +16,7 @@ import net.minecraft.world.item.component.CustomData;
 
 import java.util.Map;
 
-import static dev.slhj.slhjaddons.util.SlayerUtils.isSlayerActive;
+import static dev.slhj.slhjaddons.util.skyblock.SlayerUtils.isSlayerActive;
 
 public final class AutoBlazeSwap extends Feature {
 
@@ -116,7 +117,7 @@ public final class AutoBlazeSwap extends Feature {
             String itemId = SkyblockItemUtils.skyblockId(item);
             if (targetId.equals(itemId)) {
                 int hotbarIndex = slot - INVENTORY_OFFSET;
-                McUtils.setSelectedSlot(hotbarIndex);
+                InputUtils.setSelectedSlot(hotbarIndex);
                 return new SwapResult(hotbarIndex, getAttunement(item));
             }
         }
@@ -132,7 +133,8 @@ public final class AutoBlazeSwap extends Feature {
         return attuneMode.orElse(null);
     }
 
+
     private void rightClickWithCooldown() {
-        McUtils.scheduleTask(McUtils::rightClick);
+        SchedulerUtils.run(InputUtils::rightClick);
     }
 }

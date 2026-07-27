@@ -5,8 +5,9 @@ import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.gui.HudEditorScreen;
 import dev.slhj.slhjaddons.gui.SlhjSettingsScreen;
-import dev.slhj.slhjaddons.util.McUtils;
-import dev.slhj.slhjaddons.util.SkyblockItemUtils;
+import dev.slhj.slhjaddons.util.client.ChatUtils;
+import dev.slhj.slhjaddons.util.client.ClientUtils;
+import dev.slhj.slhjaddons.util.skyblock.SkyblockItemUtils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.minecraft.client.Minecraft;
@@ -51,13 +52,13 @@ public final class Commands extends Feature {
 
         ItemStack held = player.getMainHandItem();
         if (held.isEmpty()) {
-            McUtils.chat("§cNo item in hand!");
+            ChatUtils.chat("§cNo item in hand!");
             return 0;
         }
 
         CustomData customData = held.get(DataComponents.CUSTOM_DATA);
         if (customData == null) {
-            McUtils.chat("§cItem has no custom_data component!");
+            ChatUtils.chat("§cItem has no custom_data component!");
             return 0;
         }
 
@@ -65,7 +66,7 @@ public final class Commands extends Feature {
         String nbtString = tag.toString();
 
         Minecraft.getInstance().keyboardHandler.setClipboard(nbtString);
-        McUtils.chat("§aCopied custom_data to clipboard! (" + nbtString.length() + " chars)");
+        ChatUtils.chat("§aCopied custom_data to clipboard! (" + nbtString.length() + " chars)");
 
         return 1;
     }
@@ -78,20 +79,20 @@ public final class Commands extends Feature {
             return td_attune_mode.get();
         }
 
-        McUtils.chat("either not a blaze dagger or something else");
+        ChatUtils.chat("either not a blaze dagger or something else");
         return null;
     }
 
     private void openGui() {
-        McUtils.MC.execute(() -> McUtils.MC.setScreen(new SlhjSettingsScreen()));
+        ClientUtils.mc().execute(() -> ClientUtils.mc().setScreen(new SlhjSettingsScreen()));
     }
 
     private void list() {
-        McUtils.chat("&e&lslhj&raddons &7features:");
+        ChatUtils.chat("&e&lslhj&raddons &7features:");
         var cfg = SlhjAddons.config();
         for (Feature f : SlhjAddons.features().all()) {
             boolean on = cfg.isFeatureEnabled(f.id());
-            McUtils.chat(" &7- &f" + f.id() + " " + (on ? "&aON" : "&cOFF"));
+            ChatUtils.chat(" &7- &f" + f.id() + " " + (on ? "&aON" : "&cOFF"));
         }
     }
 
@@ -101,6 +102,6 @@ public final class Commands extends Feature {
         cfg.setFeatureEnabled(id, next);
         cfg.save();
         SlhjAddons.features().syncFromConfig();
-        McUtils.chat("&7" + id + " -> " + (next ? "&aON" : "&cOFF"));
+        ChatUtils.chat("&7" + id + " -> " + (next ? "&aON" : "&cOFF"));
     }
 }

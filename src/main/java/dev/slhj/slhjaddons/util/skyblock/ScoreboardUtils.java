@@ -1,4 +1,4 @@
-package dev.slhj.slhjaddons.util;
+package dev.slhj.slhjaddons.util.skyblock;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;

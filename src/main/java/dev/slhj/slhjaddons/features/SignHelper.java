@@ -3,7 +3,7 @@ package dev.slhj.slhjaddons.features;
 import dev.slhj.slhjaddons.calc.Calculator;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
-import dev.slhj.slhjaddons.util.RenderUtils;
+import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public final class SignHelper extends Feature {

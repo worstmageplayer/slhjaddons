@@ -3,8 +3,7 @@ package dev.slhj.slhjaddons.mixin;
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.features.CancelSlotHighlight;
 import dev.slhj.slhjaddons.features.ShiftClick;
-import dev.slhj.slhjaddons.util.ClientUtils;
-import dev.slhj.slhjaddons.util.McUtils;
+import dev.slhj.slhjaddons.util.client.ClientUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -45,8 +44,7 @@ public abstract class ContainerScreenMixin {
         if (!found) return;
         if (hoveredSlot.index < 54) return;
 
-        assert McUtils.MC.gameMode != null;
-        McUtils.MC.gameMode.handleContainerInput(
+        ClientUtils.mc().gameMode.handleContainerInput(
                 getMenu().containerId, hoveredSlot.index, 0, ContainerInput.QUICK_MOVE, ClientUtils.player());
         cir.setReturnValue(true);
     }

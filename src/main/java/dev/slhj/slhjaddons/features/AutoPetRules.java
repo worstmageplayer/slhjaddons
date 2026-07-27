@@ -4,7 +4,7 @@ import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudRenderer;
 import dev.slhj.slhjaddons.hud.TimedHudAlert;
-import dev.slhj.slhjaddons.util.RenderUtils;
+import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.ChatFormatting;

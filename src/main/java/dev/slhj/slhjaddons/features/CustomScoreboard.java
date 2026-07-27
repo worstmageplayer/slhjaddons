@@ -2,8 +2,8 @@ package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
-import dev.slhj.slhjaddons.util.RenderUtils;
-import dev.slhj.slhjaddons.util.ScoreboardUtils;
+import dev.slhj.slhjaddons.util.render.RenderUtils;
+import dev.slhj.slhjaddons.util.skyblock.ScoreboardUtils;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
@@ -13,10 +13,10 @@ import java.util.List;
 
 public final class CustomScoreboard extends Feature {
 
-    private static final String HIDDEN = "\u00a7ewww.hypixel.ne\ud83c\udf82\u00a7et"; // the promo line CT filtered
+    private static final String HIDDEN = "§ewww.hypixel.ne\ud83c\udf82§et"; // the promo line CT filtered
 
-    private static final String DEFAULT_HEADER = "\u00a7e\u00a7lSKYBLOCK";
-    private static final String DEFAULT_FOOTER = "\u00a7lslhj\u00a7raddons\u00a7r";
+    private static final String DEFAULT_HEADER = "§e§lSKYBLOCK";
+    private static final String DEFAULT_FOOTER = "§lslhj§raddons§r";
     private static final double DEFAULT_SCALE = 1.0;
     private static final int DEFAULT_PADDING = 2;
     private static final int DEFAULT_OFFSET = 1;

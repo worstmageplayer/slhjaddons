@@ -3,9 +3,9 @@ package dev.slhj.slhjaddons.features;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
-import dev.slhj.slhjaddons.util.ClientUtils;
-import dev.slhj.slhjaddons.util.KeyBindingUtils;
-import dev.slhj.slhjaddons.util.McUtils;
+import dev.slhj.slhjaddons.util.client.InputUtils;
+import dev.slhj.slhjaddons.util.client.KeyBindingUtils;
+import dev.slhj.slhjaddons.util.client.ClientUtils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
@@ -52,15 +52,15 @@ public final class AutoClick extends Feature {
 
         if (tickCounter++ % interval == 0) {
             if (isMouse2Down()) {
-                McUtils.rightClick();
+                InputUtils.rightClick();
             } else {
-                McUtils.leftClick(entityInRange.value().get());
+                InputUtils.leftClick(entityInRange.value().get());
             }
         }
     }
 
     private boolean isMouse2Down() {
-        return GLFW.glfwGetMouseButton(McUtils.MC.getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_2) == GLFW.GLFW_PRESS;
+        return GLFW.glfwGetMouseButton(ClientUtils.mc().getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_2) == GLFW.GLFW_PRESS;
     }
 
     @Override

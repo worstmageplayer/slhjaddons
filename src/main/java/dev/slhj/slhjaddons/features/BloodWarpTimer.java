@@ -2,7 +2,7 @@ package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.hud.TimedHudAlert;
-import dev.slhj.slhjaddons.util.RenderUtils;
+import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;

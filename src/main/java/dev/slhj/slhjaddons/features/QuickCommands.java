@@ -4,14 +4,13 @@ import com.mojang.blaze3d.platform.InputConstants;
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
-import dev.slhj.slhjaddons.util.ClientUtils;
-import dev.slhj.slhjaddons.util.KeyBindingUtils;
-import dev.slhj.slhjaddons.util.McUtils;
-import dev.slhj.slhjaddons.util.RenderUtils;
+import dev.slhj.slhjaddons.util.client.*;
+import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
@@ -95,8 +94,8 @@ public final class QuickCommands extends Feature {
             inDeadZone = true;
             hoveredSection = -1;
 
-            McUtils.MC.mouseHandler.releaseMouse();
-            McUtils.scheduleTask(McUtils::centerCursor);
+            ClientUtils.mc().mouseHandler.releaseMouse();
+            SchedulerUtils.run(InputUtils::centerCursor);
         }
         wasDown = down;
 
@@ -109,7 +108,7 @@ public final class QuickCommands extends Feature {
                 isOpen = false;
                 inDeadZone = true;
                 hoveredSection = -1;
-                McUtils.MC.mouseHandler.grabMouse();
+                ClientUtils.mc().mouseHandler.grabMouse();
             }
         }
     }
@@ -124,10 +123,11 @@ public final class QuickCommands extends Feature {
         int centerX = screenWidth / 2;
         int centerY = screenHeight / 2;
 
+        Minecraft MC = ClientUtils.mc();
         // Get mouse position
-        double guiScale = McUtils.MC.getWindow().getGuiScale();
-        double mouseX = McUtils.MC.mouseHandler.xpos() / guiScale;
-        double mouseY = McUtils.MC.mouseHandler.ypos() / guiScale;
+        double guiScale = MC.getWindow().getGuiScale();
+        double mouseX = MC.mouseHandler.xpos() / guiScale;
+        double mouseY = MC.mouseHandler.ypos() / guiScale;
 
         // Calculate relative position from center
         double dx = mouseX - centerX;
@@ -285,11 +285,11 @@ public final class QuickCommands extends Feature {
 
     private void executeCommand(String command) {
         if (command == null || command.isEmpty()) {
-            McUtils.chat("&cCommand not found");
+            ChatUtils.chat("&cCommand not found");
             return;
         }
 
-        McUtils.chat("&7Running Command: /" + command);
+        ChatUtils.chat("&7Running Command: /" + command);
 
         var player = ClientUtils.player();
         if (player != null) {

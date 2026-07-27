@@ -1,5 +1,6 @@
-package dev.slhj.slhjaddons.util;
+package dev.slhj.slhjaddons.util.skyblock;
 
+import dev.slhj.slhjaddons.util.client.ChatUtils;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -12,7 +13,7 @@ public final class SkyblockItemUtils {
     public static CustomData getHeldCustomData(Player player) {
         ItemStack held = player.getMainHandItem();
         if (held.isEmpty()) {
-            McUtils.chat("§cNo item in hand!");
+            ChatUtils.chat("§cNo item in hand!");
             return null;
         }
 
@@ -29,7 +30,7 @@ public final class SkyblockItemUtils {
         if (id.isPresent()) {
             return id.get();
         }
-        McUtils.chat("Error, report this or something");
+        ChatUtils.chat("Error, report this or something");
         return "";
     }
 

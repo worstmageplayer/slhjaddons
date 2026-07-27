@@ -1,12 +1,13 @@
 package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
-import dev.slhj.slhjaddons.util.ClientUtils;
-import dev.slhj.slhjaddons.util.HypixelUtils;
-import dev.slhj.slhjaddons.util.McUtils;
+import dev.slhj.slhjaddons.util.client.ClientUtils;
+import dev.slhj.slhjaddons.util.client.InputUtils;
+import dev.slhj.slhjaddons.util.skyblock.HypixelUtils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 public final class AutoZombieShootout extends Feature {
@@ -35,10 +36,13 @@ public final class AutoZombieShootout extends Feature {
         LocalPlayer player = ClientUtils.player();
         if (player == null) return;
 
-        String heldItem = McUtils.itemNameContains(player.getMainHandItem(), "Dart") ? "Dart" : "";
-        if (heldItem.isEmpty()) return;
+        ItemStack mainHandItem = player.getMainHandItem();
+        if (mainHandItem.isEmpty()) return;
 
-        var level = McUtils.MC.level;
+        String heldItem = ClientUtils.hoverName(player.getMainHandItem());
+        if (heldItem != null && !heldItem.contains("Dart")) return;
+
+        var level = ClientUtils.mc().level;
         if (level == null) return;
 
         for (var entity : level.getEntities(null, player.getBoundingBox().inflate(50))) {
@@ -48,7 +52,7 @@ public final class AutoZombieShootout extends Feature {
                 player.setYRot((float) (Math.atan2(lookPos.z - player.getZ(), lookPos.x - player.getX()) * 180 / Math.PI) - 90);
                 player.setXRot((float) -(Math.asin((lookPos.y - player.getEyeY()) / player.distanceTo(entity)) * 180 / Math.PI));
                 
-                McUtils.rightClick();
+                InputUtils.rightClick();
                 lastClick = System.currentTimeMillis();
                 return;
             }

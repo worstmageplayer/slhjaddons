@@ -1,10 +1,10 @@
 package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
-import dev.slhj.slhjaddons.util.ClientUtils;
-import dev.slhj.slhjaddons.util.HypixelUtils;
-import dev.slhj.slhjaddons.util.McUtils;
-import dev.slhj.slhjaddons.util.SkyblockItemUtils;
+import dev.slhj.slhjaddons.util.client.ClientUtils;
+import dev.slhj.slhjaddons.util.client.InputUtils;
+import dev.slhj.slhjaddons.util.skyblock.HypixelUtils;
+import dev.slhj.slhjaddons.util.skyblock.SkyblockItemUtils;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.Blocks;
@@ -36,7 +36,7 @@ public final class SuperboomSwap extends Feature {
             var inv = ClientUtils.player().getInventory();
             for (int i = 0; i < 9; i++) {
                 if (SkyblockItemUtils.idEquals(inv.getItem(i), "SUPERBOOM_TNT")) {
-                    McUtils.setSelectedSlot(i);
+                    InputUtils.setSelectedSlot(i);
                     break;
                 }
             }

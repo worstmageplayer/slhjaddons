@@ -1,8 +1,8 @@
 package dev.slhj.slhjaddons.features;
 
 import dev.slhj.slhjaddons.core.Feature;
-import dev.slhj.slhjaddons.util.McUtils;
-import dev.slhj.slhjaddons.util.RenderUtils;
+import dev.slhj.slhjaddons.util.client.SchedulerUtils;
+import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
@@ -48,7 +48,7 @@ public final class PartyFinderHelper extends Feature {
             analyzePartyFinder(containerScreen);
 
             ScreenMouseEvents.afterMouseClick(screen).register((s, mouseX, mouseY) -> {
-                McUtils.scheduleTask(() -> analyzePartyFinder(containerScreen), 150);
+                SchedulerUtils.runLater(() -> analyzePartyFinder(containerScreen), 150);
                 return false;
             });
 

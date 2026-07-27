@@ -1,5 +1,6 @@
-package dev.slhj.slhjaddons.util;
+package dev.slhj.slhjaddons.util.skyblock;
 
+import dev.slhj.slhjaddons.util.client.ClientUtils;
 import net.minecraft.ChatFormatting;
 
 import java.util.regex.Matcher;
@@ -19,7 +20,7 @@ public final class CooldownUtils {
         if (you == null) return 1.0;
 
         Integer classLevel = null;
-        for (String line : McUtils.getTabListPlayers()) {
+        for (String line : ClientUtils.tabListPlayers()) {
             Matcher m = TAB_ENTRY.matcher(ChatFormatting.stripFormatting(line));
             if (!m.matches()) continue;
             if (!"Mage".equals(m.group(3))) continue;

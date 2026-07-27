@@ -3,8 +3,9 @@ package dev.slhj.slhjaddons.features;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
-import dev.slhj.slhjaddons.util.ClientUtils;
-import dev.slhj.slhjaddons.util.McUtils;
+import dev.slhj.slhjaddons.util.client.ClientUtils;
+import dev.slhj.slhjaddons.util.client.ChatUtils;
+import dev.slhj.slhjaddons.util.client.SchedulerUtils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.minecraft.client.player.LocalPlayer;
@@ -49,19 +50,19 @@ public final class DungeonCommands extends Feature {
     }
 
     private void help() {
-        McUtils.chat("&7Usage: /d [f1-f7 | m1-m7]");
-        McUtils.chat("&7  /d f7");
+        ChatUtils.chat("&7Usage: /d [f1-f7 | m1-m7]");
+        ChatUtils.chat("&7  /d f7");
     }
 
     public void handleDungeonCommand(String arg) {
         if (arg == null || arg.isEmpty()) {
-            McUtils.runCommand("warp dungeons");
+            ChatUtils.runCommand("warp dungeons");
             return;
         }
 
         var matcher = FLOOR_PATTERN.matcher(arg);
         if (!matcher.matches()) {
-            McUtils.chat("&cInvalid floor: " + arg + ". /dungeon help for usage.");
+            ChatUtils.chat("&cInvalid floor: " + arg + ". /dungeon help for usage.");
             return;
         }
 
@@ -74,16 +75,16 @@ public final class DungeonCommands extends Feature {
 
         if (timeLeft > 0) {
             if (addedToQueue) {
-                McUtils.chat(String.format("Rejoining in %.2fs", timeLeft / 1000.0));
+                ChatUtils.chat(String.format("Rejoining in %.2fs", timeLeft / 1000.0));
                 return;
             }
             addedToQueue = true;
-            McUtils.runCommand(String.format("pc Waiting for cooldown, rejoining in %.2fs.", timeLeft / 1000.0));
+            ChatUtils.runCommand(String.format("pc Waiting for cooldown, rejoining in %.2fs.", timeLeft / 1000.0));
         }
 
         long delay = timeLeft + 100;
-        McUtils.scheduleTask(() -> {
-            McUtils.runCommand(String.format("joininstance %s_FLOOR_%s", instanceType, FLOOR_NAMES[floorNum]));
+        SchedulerUtils.runLater(() -> {
+            ChatUtils.runCommand(String.format("joininstance %s_FLOOR_%s", instanceType, FLOOR_NAMES[floorNum]));
             enterUndersized();
         }, delay);
 
@@ -97,6 +98,6 @@ public final class DungeonCommands extends Feature {
         LocalPlayer player = ClientUtils.player();
         if (player == null) return;
         AbstractContainerMenu menu = player.containerMenu;
-        McUtils.MC.gameMode.handleContainerInput(menu.containerId, 13, 0, ContainerInput.PICKUP, player);
+        ClientUtils.mc().gameMode.handleContainerInput(menu.containerId, 13, 0, ContainerInput.PICKUP, player);
     }
 }

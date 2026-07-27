@@ -1,4 +1,4 @@
-package dev.slhj.slhjaddons.util;
+package dev.slhj.slhjaddons.util.skyblock;
 
 import java.util.List;
 

@@ -4,7 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.slhj.slhjaddons.calc.Calculator;
 import dev.slhj.slhjaddons.calc.identifier.Functions;
 import dev.slhj.slhjaddons.core.Feature;
-import dev.slhj.slhjaddons.util.McUtils;
+import dev.slhj.slhjaddons.util.client.ChatUtils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 
@@ -45,10 +45,10 @@ public final class ChatCalc extends Feature {
 
     private void help(String which) {
         if (which.equals("calc")) {
-            McUtils.chat("&7Usage: /calc <expression>  e.g. /calc 2^3+4");
+            ChatUtils.chat("&7Usage: /calc <expression>  e.g. /calc 2^3+4");
         } else {
-            McUtils.chat("&7Usage: /define name(params)=expression  e.g. /define f(x,y)=x^2+y^2");
-            McUtils.chat("&7/define show - lists defined functions");
+            ChatUtils.chat("&7Usage: /define name(params)=expression  e.g. /define f(x,y)=x^2+y^2");
+            ChatUtils.chat("&7/define show - lists defined functions");
         }
     }
 
@@ -56,9 +56,9 @@ public final class ChatCalc extends Feature {
         if (expression == null || expression.isBlank()) { help("calc"); return; }
         try {
             var result = Calculator.calc(expression);
-            McUtils.chat("&7" + expression + " &f= &a" + result.commas());
+            ChatUtils.chat("&7" + expression + " &f= &a" + result.commas());
         } catch (RuntimeException e) {
-            McUtils.chat("&cInvalid input: " + e.getMessage());
+            ChatUtils.chat("&cInvalid input: " + e.getMessage());
         }
     }
 
@@ -69,17 +69,17 @@ public final class ChatCalc extends Feature {
         }
         if (definition.equalsIgnoreCase("show")) {
             var funcs = Functions.getFunctions();
-            if (funcs.isEmpty()) { McUtils.chat("&7No functions defined."); return; }
-            McUtils.chat("&7Defined functions:");
+            if (funcs.isEmpty()) { ChatUtils.chat("&7No functions defined."); return; }
+            ChatUtils.chat("&7Defined functions:");
             for (var f : funcs) {
-                McUtils.chat(" &f- params=" + f.params() + " body=" + f.body());
+                ChatUtils.chat(" &f- params=" + f.params() + " body=" + f.body());
             }
             return;
         }
 
         Matcher m = DEFINE_PATTERN.matcher(definition.replace(" ", ""));
         if (!m.matches()) {
-            McUtils.chat("&cInvalid function format. /define help for help.");
+            ChatUtils.chat("&cInvalid function format. /define help for help.");
             return;
         }
 
@@ -93,9 +93,9 @@ public final class ChatCalc extends Feature {
             } else {
                 Functions.add(name, params, body);
             }
-            McUtils.chat("&aDefined function " + name + "(" + String.join(", ", params) + ") = " + body);
+            ChatUtils.chat("&aDefined function " + name + "(" + String.join(", ", params) + ") = " + body);
         } catch (RuntimeException e) {
-            McUtils.chat("&cInvalid input: " + e.getMessage());
+            ChatUtils.chat("&cInvalid input: " + e.getMessage());
         }
     }
 }

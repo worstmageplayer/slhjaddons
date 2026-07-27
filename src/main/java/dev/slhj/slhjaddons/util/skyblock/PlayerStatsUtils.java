@@ -1,4 +1,4 @@
-package dev.slhj.slhjaddons.util;
+package dev.slhj.slhjaddons.util.skyblock;
 
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
