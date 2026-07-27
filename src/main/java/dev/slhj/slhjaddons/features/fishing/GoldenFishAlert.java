@@ -5,7 +5,6 @@ import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudRenderer;
 import dev.slhj.slhjaddons.hud.TimedHudAlert;
-import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -54,11 +53,7 @@ public final class GoldenFishAlert extends Feature implements HudRenderer {
         long duration = durationSetting.value().get().intValue();
         if (!isEnabled() || !alert.isActive(duration)) return;
 
-        String text = "Golden Fish!";
-        int color = colorSetting.value().get();
-        RenderUtils.pushScale(g, hud.scale());
-        RenderUtils.text(g, text, (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), color, true);
-        RenderUtils.pop(g);
+        hud.renderText(g, "Golden Fish!", colorSetting.value().get());
     }
 
     @Override
@@ -73,9 +68,6 @@ public final class GoldenFishAlert extends Feature implements HudRenderer {
 
     @Override
     public void renderHudPreview(GuiGraphicsExtractor g) {
-        int color = colorSetting.value().get();
-        RenderUtils.pushScale(g, hud.scale());
-        RenderUtils.text(g, hudPreviewText(), (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), color, true);
-        RenderUtils.pop(g);
+        hud.renderText(g, hudPreviewText(), colorSetting.value().get());
     }
 }

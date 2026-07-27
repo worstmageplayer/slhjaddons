@@ -2,6 +2,8 @@ package dev.slhj.slhjaddons.hud;
 
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.config.SlhjConfig;
+import dev.slhj.slhjaddons.util.render.RenderUtils;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public class HudElement {
 
@@ -28,5 +30,11 @@ public class HudElement {
 
     public void setScale(float s) {
         pos.scale = Math.clamp(s, 0.25f, 4f);
+    }
+
+    public void renderText(GuiGraphicsExtractor g, String text, int color) {
+        RenderUtils.pushScale(g, scale());
+        RenderUtils.text(g, text, (int) (x() / scale()), (int) (y() / scale()), color, true);
+        RenderUtils.pop(g);
     }
 }

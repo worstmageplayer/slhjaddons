@@ -4,7 +4,6 @@ import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudRenderer;
 import dev.slhj.slhjaddons.hud.TimedHudAlert;
-import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.ChatFormatting;
@@ -82,15 +81,7 @@ public final class AutoPetRules extends Feature implements HudRenderer {
         if (alpha <= 0) return;
 
         int color = (alpha << 24) | 0xFFFFFF;
-        RenderUtils.pushScale(g, hud.scale());
-        RenderUtils.text(g, label, (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), color, true);
-        RenderUtils.pop(g);
-    }
-
-    private double fadeOut(double t) {
-        if (t < FADE_START) return 0;
-        double phase = (t - FADE_START) / (1 - FADE_START);
-        return Math.pow(phase, 5);
+        hud.renderText(g, label, color);
     }
 
     @Override
@@ -105,8 +96,6 @@ public final class AutoPetRules extends Feature implements HudRenderer {
 
     @Override
     public void renderHudPreview(GuiGraphicsExtractor g) {
-        RenderUtils.pushScale(g, hud.scale());
-        RenderUtils.text(g, PREVIEW_LABEL, (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), 0xFFFFFFFF, true);
-        RenderUtils.pop(g);
+        hud.renderText(g, PREVIEW_LABEL, 0xFFFFFFFF);
     }
 }

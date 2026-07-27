@@ -8,7 +8,6 @@ import dev.slhj.slhjaddons.hud.TimedHudAlert;
 import dev.slhj.slhjaddons.util.client.ChatUtils;
 import dev.slhj.slhjaddons.util.client.ClientUtils;
 import dev.slhj.slhjaddons.util.skyblock.CooldownUtils;
-import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
@@ -81,9 +80,7 @@ public final class RagnarockCooldown extends Feature implements HudRenderer {
         }
 
         String label = "Rag Axe: " + String.format("%.1f", remaining / 1000.0);
-        RenderUtils.pushScale(g, hud.scale());
-        RenderUtils.text(g, label, (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), 0xFFFFFFFF, true);
-        RenderUtils.pop(g);
+        hud.renderText(g, label, 0xFFFFFFFF);
     }
 
     @Override
@@ -98,8 +95,6 @@ public final class RagnarockCooldown extends Feature implements HudRenderer {
 
     @Override
     public void renderHudPreview(GuiGraphicsExtractor g) {
-        RenderUtils.pushScale(g, hud.scale());
-        RenderUtils.text(g, hudPreviewText(), (int) (hud.x() / hud.scale()), (int) (hud.y() / hud.scale()), 0xFFFFFFFF, true);
-        RenderUtils.pop(g);
+        hud.renderText(g, hudPreviewText(), 0xFFFFFFFF);
     }
 }
