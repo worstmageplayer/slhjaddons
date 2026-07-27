@@ -1,6 +1,7 @@
 package dev.slhj.slhjaddons;
 
 import dev.slhj.slhjaddons.config.SlhjConfig;
+import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.FeatureManager;
 import dev.slhj.slhjaddons.features.*;
 import dev.slhj.slhjaddons.features.dungeons.BloodWarpTimer;
@@ -33,6 +34,10 @@ public final class SlhjAddons implements ClientModInitializer {
 
     public static SlhjConfig config() { return config; }
     public static FeatureManager features() { return FEATURES; }
+
+    public static boolean isEnabled(Class<? extends Feature> type) {
+        return FEATURES.isEnabled(type);
+    }
 
     @Override
     public void onInitializeClient() {

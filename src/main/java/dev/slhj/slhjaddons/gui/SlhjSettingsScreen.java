@@ -94,7 +94,7 @@ public final class SlhjSettingsScreen extends Screen {
             for (Feature f : catFeatures) {
                 Checkbox box = Checkbox.builder(Component.literal(f.label()), this.font)
                         .pos(sliderX, curY)
-                        .selected(cfg.isFeatureEnabled(f.id()))
+                        .selected(f.isEnabled())
                         .onValueChange((checkbox, selected) -> {
                             cfg.setFeatureEnabled(f.id(), selected);
                             SlhjAddons.features().syncFromConfig();

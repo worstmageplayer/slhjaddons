@@ -84,16 +84,20 @@ public final class Commands extends Feature {
 
     private void list() {
         ChatUtils.chat("&e&lslhj&raddons &7features:");
-        SlhjConfig cfg = SlhjAddons.config();
         for (Feature f : SlhjAddons.features().all()) {
-            boolean on = cfg.isFeatureEnabled(f.id());
-            ChatUtils.chat(" &7- &f" + f.id() + " " + (on ? "&aON" : "&cOFF"));
+            ChatUtils.chat(" &7- &f" + f.id() + " " + (f.isEnabled() ? "&aON" : "&cOFF"));
         }
     }
 
     private void toggle(String id) {
+        Feature feature = SlhjAddons.features().getById(id);
+        if (feature == null) {
+            ChatUtils.chat("&cUnknown feature: " + id);
+            return;
+        }
+
+        boolean next = !feature.isEnabled();
         SlhjConfig cfg = SlhjAddons.config();
-        boolean next = !cfg.isFeatureEnabled(id);
         cfg.setFeatureEnabled(id, next);
         cfg.save();
         SlhjAddons.features().syncFromConfig();

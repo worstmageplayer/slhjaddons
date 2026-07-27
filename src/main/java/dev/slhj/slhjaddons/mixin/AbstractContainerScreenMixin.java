@@ -30,7 +30,7 @@ public abstract class AbstractContainerScreenMixin {
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void slhj$shiftClick(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
-        if (!SlhjAddons.config().isFeatureEnabled(ShiftClick.id)) return;
+        if (!SlhjAddons.isEnabled(ShiftClick.class)) return;
         if (event.button() != 0 || hoveredSlot == null) return;
 
         Object self = this;
@@ -54,7 +54,7 @@ public abstract class AbstractContainerScreenMixin {
 
     @Inject(method = "extractSlotHighlightFront", at = @At("HEAD"), cancellable = true)
     private void slhj$extractSlotHighlightFront(GuiGraphicsExtractor graphics, CallbackInfo ci) {
-        if (!SlhjAddons.config().isFeatureEnabled(CancelSlotHighlight.id)) return;
+        if (!SlhjAddons.isEnabled(CancelSlotHighlight.class)) return;
         ci.cancel();
     }
 }

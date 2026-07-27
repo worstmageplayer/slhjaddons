@@ -34,7 +34,7 @@ public abstract class AbstractSignEditScreenMixin {
 
     @Inject(method = "onDone", at = @At("HEAD"))
     private void slhj$onDone(CallbackInfo ci) {
-        if (!SlhjAddons.config().isFeatureEnabled(SignHelper.id)) return;
+        if (!SlhjAddons.isEnabled(SignHelper.class)) return;
         if (messages == null || messages.length == 0) return;
         if (messages.length < 2 || !INPUT_SIGN_MARKER.equals(messages[1])) return;
 
@@ -46,7 +46,7 @@ public abstract class AbstractSignEditScreenMixin {
 
     @Unique
     private void pushToFeature() {
-        if (!SlhjAddons.config().isFeatureEnabled(SignHelper.id)) return;
+        if (!SlhjAddons.isEnabled(SignHelper.class)) return;
         SignHelper feature = SlhjAddons.features().get(SignHelper.class);
         if (feature == null || messages == null || messages.length == 0) return;
 
@@ -59,7 +59,7 @@ public abstract class AbstractSignEditScreenMixin {
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void slhj$extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
-        if (!SlhjAddons.config().isFeatureEnabled(SignHelper.id)) return;
+        if (!SlhjAddons.isEnabled(SignHelper.class)) return;
         SignHelper feature = SlhjAddons.features().get(SignHelper.class);
         if (feature != null) feature.render(graphics);
     }
