@@ -23,7 +23,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Client entry point. Replaces index.js: imports every feature and registers the command. */
 public final class SlhjAddons implements ClientModInitializer {
 
     public static final String MOD_ID = "slhjaddons";
