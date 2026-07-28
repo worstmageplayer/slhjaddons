@@ -13,7 +13,6 @@ import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -25,24 +24,15 @@ public abstract class AbstractContainerScreenMixin {
     @Shadow protected Slot hoveredSlot;
     @Shadow public abstract AbstractContainerMenu getMenu();
 
-    @Unique
-    private static final String[] SHIFT_MENUS = {"Trades", "Your Equipment and Stats"};
-
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void slhj$shiftClick(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
-        if (!SlhjAddons.isEnabled(ShiftClick.class)) return;
+        ShiftClick feature = SlhjAddons.features().get(ShiftClick.class);
+        if (feature == null || !feature.isEnabled()) return;
         if (event.button() != 0 || hoveredSlot == null) return;
 
         Object self = this;
         String title = ((AbstractContainerScreen<?>) self).getTitle().getString();
-        boolean found = false;
-        for (String menu : SHIFT_MENUS) {
-            if (menu.equals(title)) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) return;
+        if (!feature.containers().contains(title)) return;
         if (hoveredSlot.index < 54) return;
 
         MultiPlayerGameMode multiplayerGameMode =  ClientUtils.mc().gameMode;
