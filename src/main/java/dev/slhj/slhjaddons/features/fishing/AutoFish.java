@@ -16,7 +16,7 @@ public final class AutoFish extends Feature {
     private int frameCounter = 0;
     private int ticksSinceCatch = -1;
 
-    private final int DEFAULT_DELAY = 20;
+    private final static int DEFAULT_DELAY = 20;
     private final Setting.SliderSetting delaySetting;
 
     public AutoFish() {

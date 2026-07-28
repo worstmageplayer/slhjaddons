@@ -15,7 +15,7 @@ public final class AutoClick extends Feature {
 
     private KeyMapping key;
     private int tickCounter = 0;
-    private final int DEFAULT_CPS = 10;
+    private final static int DEFAULT_CPS = 10;
 
     private final Setting.SliderSetting cpsSetting;
     private final Setting.ToggleSetting entityInRange;
