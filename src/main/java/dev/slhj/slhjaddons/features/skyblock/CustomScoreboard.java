@@ -36,7 +36,7 @@ public final class CustomScoreboard extends Feature {
         category(Category.SKYBLOCK);
         headerSetting = text("scoreboard.header", "Scoreboard Header", DEFAULT_HEADER);
         footerSetting = text("scoreboard.footer", "Scoreboard Footer", DEFAULT_FOOTER);
-        scaleSetting = slider("scoreboard.scale", "Scoreboard Scale", 0, 10, DEFAULT_SCALE);
+        scaleSetting = slider("scoreboard.scale", "Scoreboard Scale", 0.1, 10, DEFAULT_SCALE);
         paddingSetting = intSlider("scoreboard.padding", "Scoreboard Padding", 0, 10, DEFAULT_PADDING);
         offsetSetting = intSlider("scoreboard.offset", "Scoreboard Offset", 0, 20, DEFAULT_OFFSET);
         colorSetting = hex("scoreboard.color", "Scoreboard Background Color", DEFAULT_COLOR);

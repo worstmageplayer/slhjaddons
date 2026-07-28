@@ -27,7 +27,7 @@ public final class Clock extends Feature {
     public Clock() {
         setLabel("Clock");
         category(Category.MISC);
-        scaleSetting = slider("clock.scale", "Clock Scale", 0, 10, DEFAULT_SCALE);
+        scaleSetting = slider("clock.scale", "Clock Scale", 0.1, 10, DEFAULT_SCALE);
         paddingSetting = intSlider("clock.padding", "Clock Padding", 0, 10, DEFAULT_PADDING);
         colorSetting = hex("clock.color", "Clock Color", DEFAULT_COLOR);
         rightAlignedSetting = toggle("clock.right_aligned", "Right Aligned", DEFAULT_RIGHT_ALIGNED);
