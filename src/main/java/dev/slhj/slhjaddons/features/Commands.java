@@ -10,7 +10,6 @@ import dev.slhj.slhjaddons.util.client.ChatUtils;
 import dev.slhj.slhjaddons.util.client.ClientUtils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -56,7 +55,7 @@ public final class Commands extends Feature {
     }
 
     private void copyNBT() {
-        Player player = Minecraft.getInstance().player;
+        Player player = ClientUtils.mc().player;
         if (player == null) return;
 
         ItemStack held = player.getMainHandItem();
@@ -74,7 +73,7 @@ public final class Commands extends Feature {
         CompoundTag tag = customData.copyTag();
         String nbtString = tag.toString();
 
-        Minecraft.getInstance().keyboardHandler.setClipboard(nbtString);
+        ClientUtils.mc().keyboardHandler.setClipboard(nbtString);
         ChatUtils.chat("§aCopied custom_data to clipboard! (" + nbtString.length() + " chars)");
     }
 
