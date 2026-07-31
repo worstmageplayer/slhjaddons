@@ -17,6 +17,8 @@ public final class SignHelper extends Feature {
 
     private final Setting.SliderSetting yPos;
 
+    public final static String INPUT_SIGN_MARKER = "^^^^^^^^^^^^^^^";
+
     public SignHelper() {
         setLabel("Sign Helper");
         category(Category.SKYBLOCK);
