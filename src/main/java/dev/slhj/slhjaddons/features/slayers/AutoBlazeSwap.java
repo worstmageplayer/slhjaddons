@@ -8,6 +8,7 @@ import dev.slhj.slhjaddons.util.client.InputUtils;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -17,6 +18,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static dev.slhj.slhjaddons.util.skyblock.SlayerUtils.isSlayerActive;
 
@@ -30,11 +32,11 @@ public final class AutoBlazeSwap extends Feature {
             "CRYSTAL", 3
     );
 
-    private static final Map<Integer, String> ATTUNEMENT_DAGGER = Map.of(
-            0, "HEARTFIRE_DAGGER",
-            1, "HEARTFIRE_DAGGER",
-            2, "HEARTMAW_DAGGER",
-            3, "HEARTMAW_DAGGER"
+    private static final Map<Integer, Set<String>> ATTUNEMENT_DAGGERS = Map.of(
+            0, Set.of("HEARTFIRE_DAGGER", "BURSTFIRE_DAGGER", "FIREDUST_DAGGER"),
+            1, Set.of("HEARTFIRE_DAGGER", "BURSTFIRE_DAGGER", "FIREDUST_DAGGER"),
+            2, Set.of("HEARTMAW_DAGGER", "BURSTMAW_DAGGER", "MAWDUST_DAGGER"),
+            3, Set.of("HEARTMAW_DAGGER", "BURSTMAW_DAGGER", "MAWDUST_DAGGER")
     );
 
     private long lastExecutionTime = 0;
@@ -50,21 +52,19 @@ public final class AutoBlazeSwap extends Feature {
 
     @Override
     public void init() {
-        AttackEntityCallback.EVENT.register((player, level, hand, pos, direction) -> attack(player));
+        AttackEntityCallback.EVENT.register((player, level, hand, entity, direction) -> attack(player, entity));
     }
 
-    private void autoSwap(Player player) {
+    private void autoSwap(Player player, Entity blaze) {
         if (!isEnabled()) return;
         if (System.currentTimeMillis() - lastExecutionTime < COOLDOWN_MS) return;
         if (player == null || !isSlayerActive(SlayerUtils.Slayer.BLAZE)) return;
 
-        Integer blazeAttunement = getBlazeAttunement(player);
+        Integer blazeAttunement = getBlazeAttunement(blaze);
         if (blazeAttunement == null) return;
-        //McUtils.chat("Blaze Attunement: " + blazeAttunement.toString());
 
         ItemStack heldDagger = player.getMainHandItem();
         Integer heldAttunement = isDagger(heldDagger) ? getAttunement(heldDagger) : null;
-        //McUtils.chat("Dagger Attunement: " + heldAttunement);
 
         boolean needsSwap = heldAttunement == null || !heldAttunement.equals(blazeAttunement);
         if (!needsSwap) return;
@@ -77,15 +77,15 @@ public final class AutoBlazeSwap extends Feature {
         if (result.attunement() != null && result.attunement().equals(blazeAttunement)) return;
         rightClickWithCooldown();
     }
-    private InteractionResult attack(Player player) {
-        autoSwap(player);
+    private InteractionResult attack(Player player, Entity entity) {
+        autoSwap(player, entity);
         return InteractionResult.PASS;
     }
 
     @Nullable
-    private Integer getBlazeAttunement(Player player) {
-        var box = player.getBoundingBox().inflate(6);
-        var stands = player.level().getEntitiesOfClass(ArmorStand.class, box);
+    private Integer getBlazeAttunement(Entity blaze) {
+        var box = blaze.getBoundingBox().inflate(1);
+        var stands = blaze.level().getEntitiesOfClass(ArmorStand.class, box);
 
         for (ArmorStand stand : stands) {
             String name = stand.getName().getString();
@@ -101,21 +101,21 @@ public final class AutoBlazeSwap extends Feature {
 
     private boolean isDagger(ItemStack stack) {
         String id = SkyblockItemUtils.skyblockId(stack);
-        return "HEARTFIRE_DAGGER".equals(id) || "HEARTMAW_DAGGER".equals(id);
+        return ATTUNEMENT_DAGGERS.values().stream().anyMatch(set -> set.contains(id));
     }
 
     private record SwapResult(int hotbarSlot, Integer attunement) {}
 
     @Nullable
     private SwapResult swapDagger(int blazeAttunementNumber, Player player) {
-        String targetId = ATTUNEMENT_DAGGER.get(blazeAttunementNumber);
-        if (targetId == null) return null;
+        Set<String> targetIds = ATTUNEMENT_DAGGERS.get(blazeAttunementNumber);
+        if (targetIds == null) return null;
 
         AbstractContainerMenu container = player.containerMenu;
         for (int slot = INVENTORY_OFFSET; slot < INVENTORY_OFFSET + 9; slot++) {
             ItemStack item = container.getSlot(slot).getItem();
             String itemId = SkyblockItemUtils.skyblockId(item);
-            if (targetId.equals(itemId)) {
+            if (targetIds.contains(itemId)) {
                 int hotbarIndex = slot - INVENTORY_OFFSET;
                 InputUtils.setSelectedSlot(hotbarIndex);
                 return new SwapResult(hotbarIndex, getAttunement(item));
