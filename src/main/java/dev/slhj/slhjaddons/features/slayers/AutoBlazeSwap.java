@@ -50,7 +50,8 @@ public final class AutoBlazeSwap extends Feature {
         BlazeAttunements attunement = getBlazeAttunement(blaze);
         if (attunement == null) return;
 
-        BlazeAttunements heldAttunement = BlazeAttunements.fromStack(player.getMainHandItem());
+        ItemStack heldItem = player.getMainHandItem();
+        BlazeAttunements heldAttunement = attunement.isDagger(heldItem) ? getAttunement(heldItem) : null;
         if (heldAttunement == attunement) return;
 
         BlazeAttunements result = swapDagger(attunement, player);
