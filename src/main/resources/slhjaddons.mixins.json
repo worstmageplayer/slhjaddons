@@ -3,10 +3,13 @@
   "package": "dev.slhj.slhjaddons.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "GuiMixin",
     "AbstractContainerScreenMixin",
     "AbstractSignEditScreenMixin",
-    "GameRendererMixin"
+    "ClientLevelMixin",
+    "FogRendererMixin",
+    "GameRendererMixin",
+    "GuiMixin"
   ],
-  "injectors": { "defaultRequire": 1 }
+  "injectors": {
+    "defaultRequire": 1 }
 }

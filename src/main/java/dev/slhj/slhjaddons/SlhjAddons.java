@@ -11,15 +11,13 @@ import dev.slhj.slhjaddons.features.dungeons.SuperboomSwap;
 import dev.slhj.slhjaddons.features.events.AutoZombieShootout;
 import dev.slhj.slhjaddons.features.fishing.AutoFish;
 import dev.slhj.slhjaddons.features.fishing.GoldenFishAlert;
-import dev.slhj.slhjaddons.features.misc.AutoClick;
-import dev.slhj.slhjaddons.features.misc.Clock;
-import dev.slhj.slhjaddons.features.misc.NoBobHurt;
-import dev.slhj.slhjaddons.features.misc.QuickCommands;
+import dev.slhj.slhjaddons.features.misc.*;
 import dev.slhj.slhjaddons.features.pets.AutoPetRules;
 import dev.slhj.slhjaddons.features.skyblock.*;
 import dev.slhj.slhjaddons.features.slayers.AutoBlazeSwap;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.impl.resource.conditions.conditions.FeaturesEnabledResourceCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +61,8 @@ public final class SlhjAddons implements ClientModInitializer {
         FEATURES.register(new ChatCalc());
         FEATURES.register(new AutoClick());
         FEATURES.register(new NoBobHurt());
+        FEATURES.register(new NoFog());
+        FEATURES.register(new NoBlockBreakParticles());
 
         FEATURES.bootstrap();
 
