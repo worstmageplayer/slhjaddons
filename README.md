@@ -1,4 +1,7 @@
-# BUILD
+# slhjaddons
+Minecraft Fabric mod for Hypixel Skyblock.
+
+## BUILD
 ```bash
 git clone https://github.com/worstmageplayer/slhjaddons.git
 cd slhjaddons
