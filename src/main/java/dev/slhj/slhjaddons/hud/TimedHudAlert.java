@@ -1,11 +1,17 @@
 package dev.slhj.slhjaddons.hud;
 
+import java.util.function.LongSupplier;
+
 public final class TimedHudAlert {
 
+    private final LongSupplier clock;
     private long shownAt = 0;
 
+    public TimedHudAlert() { this(System::currentTimeMillis); }
+    TimedHudAlert(LongSupplier clock) { this.clock = clock; }
+
     public void show() {
-        shownAt = System.currentTimeMillis();
+        shownAt = clock.getAsLong();
     }
 
     public void reset() {
@@ -13,20 +19,15 @@ public final class TimedHudAlert {
     }
 
     public boolean isActive(long durationMs) {
-        if (shownAt == 0) return false;
-        if (elapsedMs() >= durationMs) {
-            shownAt = 0;
-            return false;
-        }
-        return true;
+        return shownAt != 0 && elapsedMs() < durationMs;
     }
 
     public long elapsedMs() {
-        return shownAt == 0 ? 0 : System.currentTimeMillis() - shownAt;
+        return shownAt == 0 ? 0 : clock.getAsLong() - shownAt;
     }
 
     public long remainingMs(long durationMs) {
-        return Math.max(0, durationMs - elapsedMs());
+        return shownAt == 0 ? 0 : Math.max(0, durationMs - elapsedMs());
     }
 
     public double remainingSeconds(long durationMs) {

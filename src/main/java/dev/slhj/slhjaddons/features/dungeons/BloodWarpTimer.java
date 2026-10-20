@@ -1,14 +1,16 @@
 package dev.slhj.slhjaddons.features.dungeons;
 
+import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.hud.HudAnchor;
+import dev.slhj.slhjaddons.hud.HudContent;
+import dev.slhj.slhjaddons.hud.HudElement;
+import dev.slhj.slhjaddons.hud.HudPlacement;
 import dev.slhj.slhjaddons.hud.TimedHudAlert;
-import dev.slhj.slhjaddons.util.render.RenderUtils;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
 
 public final class BloodWarpTimer extends Feature {
 
@@ -35,22 +37,18 @@ public final class BloodWarpTimer extends Feature {
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> alert.reset());
 
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath("slhjaddons", "blood_warp_timer"),
-                (graphics, delta) -> render(graphics));
+        ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+            if (!alert.isActive(DOOR_TIMER_MS)) alert.reset();
+        });
+        SlhjAddons.hud().register(new HudElement(this, "blood_warp_timer", "Blood Warp Timer",
+                new HudPlacement(HudAnchor.CENTER, HudAnchor.CENTER, 0, -5, 1), this::content,
+                () -> HudContent.text("5.0", 0xFFFFAA00)));
     }
 
-    private void render(GuiGraphicsExtractor g) {
-        if (!isEnabled() || !alert.isActive(DOOR_TIMER_MS)) return;
-
+    private HudContent content() {
+        if (!alert.isActive(DOOR_TIMER_MS)) return null;
         double seconds = alert.elapsedMs() / 1000.0;
-        String text = String.format("%.1f", seconds);
         int color = seconds < 5 ? 0xFF00AA00 : seconds < 7.5 ? 0xFFFFAA00 : 0xFFAA0000;
-
-        int screenWidth = g.guiWidth();
-        int screenHeight = g.guiHeight();
-        int x = (screenWidth - RenderUtils.stringWidth(text)) / 2;
-        int y = (screenHeight / 2) - 10;
-        RenderUtils.text(g, text, x, y, color, true);
+        return HudContent.text(String.format("%.1f", seconds), color);
     }
 }

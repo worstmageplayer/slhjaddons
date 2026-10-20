@@ -1,5 +1,7 @@
 package dev.slhj.slhjaddons.mixin;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.features.skyblock.CancelSlotHighlight;
 import dev.slhj.slhjaddons.features.skyblock.ShiftClick;
@@ -39,7 +41,7 @@ public abstract class AbstractContainerScreenMixin {
     private boolean handleShiftClick(MouseButtonEvent event) {
         ShiftClick feature = SlhjAddons.features().get(ShiftClick.class);
         if (feature == null || !feature.isEnabled()) return false;
-        if (event.button() != 0 || hoveredSlot == null) return false;
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT || hoveredSlot == null) return false;
 
         Object self = this;
         String title = ((AbstractContainerScreen<?>) self).getTitle().getString();

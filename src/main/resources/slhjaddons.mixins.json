@@ -1,15 +1,13 @@
 {
   "required": true,
   "package": "dev.slhj.slhjaddons.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_25",
   "client": [
     "AbstractContainerScreenMixin",
     "AbstractSignEditScreenMixin",
-    "CameraMixin",
     "ClientLevelMixin",
     "FogRendererMixin",
-    "GameRendererMixin",
-    "GuiMixin"
+    "GameRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1 }

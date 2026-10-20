@@ -13,7 +13,6 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.resources.Identifier;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +55,8 @@ public final class QuickCommands extends Feature {
 
         key = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.slhjaddons.quick_commands",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_Q,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_Q,
                 KeyBindingUtils.getMainCategory()));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> keyDown());
@@ -125,9 +124,8 @@ public final class QuickCommands extends Feature {
 
         Minecraft MC = ClientUtils.mc();
         // Get mouse position
-        double guiScale = MC.getWindow().getGuiScale();
-        double mouseX = MC.mouseHandler.xpos() / guiScale;
-        double mouseY = MC.mouseHandler.ypos() / guiScale;
+        double mouseX = MC.mouseHandler.getScaledXPos(MC.getWindow());
+        double mouseY = MC.mouseHandler.getScaledYPos(MC.getWindow());
 
         // Calculate relative position from center
         double dx = mouseX - centerX;

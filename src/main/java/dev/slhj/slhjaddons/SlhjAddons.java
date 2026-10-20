@@ -2,6 +2,7 @@ package dev.slhj.slhjaddons;
 
 import dev.slhj.slhjaddons.config.SlhjConfig;
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.hud.HudManager;
 import dev.slhj.slhjaddons.core.FeatureManager;
 import dev.slhj.slhjaddons.features.*;
 import dev.slhj.slhjaddons.features.dungeons.BloodWarpTimer;
@@ -17,7 +18,6 @@ import dev.slhj.slhjaddons.features.skyblock.*;
 import dev.slhj.slhjaddons.features.slayers.AutoBlazeSwap;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.impl.resource.conditions.conditions.FeaturesEnabledResourceCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +27,9 @@ public final class SlhjAddons implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     private static SlhjConfig config;
+    private static final HudManager HUD = new HudManager();
+    public static HudManager hud() { return HUD; }
+
     private static final FeatureManager FEATURES = new FeatureManager();
 
     public static SlhjConfig config() { return config; }
@@ -42,7 +45,6 @@ public final class SlhjAddons implements ClientModInitializer {
 
         FEATURES.register(new Commands());
         FEATURES.register(new Clock());
-        FEATURES.register(new CustomScoreboard());
         FEATURES.register(new RagnarockCooldown());
         FEATURES.register(new AutoFish());
         FEATURES.register(new SuperboomSwap());
@@ -51,7 +53,6 @@ public final class SlhjAddons implements ClientModInitializer {
         FEATURES.register(new AutoZombieShootout());
         FEATURES.register(new AutoBlazeSwap());
         FEATURES.register(new BloodWarpTimer());
-        FEATURES.register(new CancelEmptyTooltip());
         FEATURES.register(new CancelSlotHighlight());
         FEATURES.register(new DungeonCommands());
         FEATURES.register(new GoldenFishAlert());
@@ -65,6 +66,7 @@ public final class SlhjAddons implements ClientModInitializer {
         FEATURES.register(new NoBlockBreakParticles());
 
         FEATURES.bootstrap();
+        HUD.init();
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(mc -> config.save());
         LOGGER.info("slhjaddons loaded {} features", FEATURES.all().size());

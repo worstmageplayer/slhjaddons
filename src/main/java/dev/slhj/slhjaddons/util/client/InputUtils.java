@@ -2,10 +2,11 @@ package dev.slhj.slhjaddons.util.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.EntityHitResult;
-import org.lwjgl.glfw.GLFW;
+import org.lwjgl.sdl.SDLMouse;
 
 public final class InputUtils {
     private InputUtils() {}
@@ -17,14 +18,14 @@ public final class InputUtils {
 
     public static void centerCursor() {
         var window = ClientUtils.mc().getWindow();
-        GLFW.glfwSetCursorPos(window.handle(), window.getWidth() / 2.0, window.getHeight() / 2.0);
+        SDLMouse.SDL_WarpMouseInWindow(window.handle(), window.getScreenWidth() / 2.0f, window.getScreenHeight() / 2.0f);
     }
 
     public static void rightClick() {
         LocalPlayer p = ClientUtils.player();
         if (p != null && ClientUtils.mc().gameMode != null) {
             ClientUtils.mc().gameMode.useItem(p, InteractionHand.MAIN_HAND);
-            p.swing(InteractionHand.MAIN_HAND);
+            p.swing(InteractionHand.MAIN_HAND, p.getMainHandItem().getInteractAnimation(), false);
         }
     }
 
@@ -37,10 +38,11 @@ public final class InputUtils {
             if (mc.hitResult instanceof EntityHitResult entityHit) {
                 Entity target = entityHit.getEntity();
                 mc.gameMode.attack(p, target);
-                p.swing(InteractionHand.MAIN_HAND);
+            } else {
+                return;
             }
-        } else {
-            p.swing(InteractionHand.MAIN_HAND);
         }
+        p.swing(InteractionHand.MAIN_HAND, p.getMainHandItem().getAttackAnimation(), false);
+        p.connection.send(ServerboundPunchPacket.INSTANCE);
     }
 }

@@ -78,7 +78,7 @@ public final class Commands extends Feature {
     }
 
     private void openGui() {
-        ClientUtils.mc().execute(() -> ClientUtils.mc().setScreen(new SlhjSettingsScreen()));
+        ClientUtils.mc().execute(() -> ClientUtils.mc().gui.setScreen(new SlhjSettingsScreen()));
     }
 
     private void list() {

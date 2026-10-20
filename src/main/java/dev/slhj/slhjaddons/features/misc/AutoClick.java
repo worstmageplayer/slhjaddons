@@ -9,7 +9,6 @@ import dev.slhj.slhjaddons.util.client.ClientUtils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
-import org.lwjgl.glfw.GLFW;
 
 public final class AutoClick extends Feature {
 
@@ -35,8 +34,8 @@ public final class AutoClick extends Feature {
     public void init() {
         key = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.slhjaddons.auto_click",
-                InputConstants.Type.KEYSYM,
-                GLFW.GLFW_KEY_GRAVE_ACCENT,
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_GRAVE,
                 KeyBindingUtils.getMainCategory()
         ));
 
@@ -60,7 +59,7 @@ public final class AutoClick extends Feature {
     }
 
     private boolean isMouse2Down() {
-        return GLFW.glfwGetMouseButton(ClientUtils.mc().getWindow().handle(), GLFW.GLFW_MOUSE_BUTTON_2) == GLFW.GLFW_PRESS;
+        return ClientUtils.mc().mouseHandler.isRightPressed();
     }
 
     @Override

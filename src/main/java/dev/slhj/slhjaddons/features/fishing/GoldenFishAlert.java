@@ -1,18 +1,19 @@
 package dev.slhj.slhjaddons.features.fishing;
 
+import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
+import dev.slhj.slhjaddons.hud.HudAnchor;
+import dev.slhj.slhjaddons.hud.HudContent;
 import dev.slhj.slhjaddons.hud.HudElement;
-import dev.slhj.slhjaddons.hud.HudRenderer;
+import dev.slhj.slhjaddons.hud.HudPlacement;
 import dev.slhj.slhjaddons.hud.TimedHudAlert;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
 
-public final class GoldenFishAlert extends Feature implements HudRenderer {
+public final class GoldenFishAlert extends Feature {
 
     private static final long DEFAULT_ALERT_DURATION_MS = 3000;
 
@@ -20,7 +21,6 @@ public final class GoldenFishAlert extends Feature implements HudRenderer {
     private final Setting.SliderSetting durationSetting;
     private final Setting.TextSetting alertText;
 
-    private final HudElement hud = new HudElement("golden_fish_alert", "Golden Fish Alert", 10, 10);
     private final TimedHudAlert alert = new TimedHudAlert();
 
     public GoldenFishAlert() {
@@ -46,30 +46,16 @@ public final class GoldenFishAlert extends Feature implements HudRenderer {
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> alert.reset());
 
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath("slhjaddons", "golden_fish_alert"),
-                (graphics, delta) -> render(graphics));
+        ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+            if (!alert.isActive(durationSetting.value().get().longValue())) alert.reset();
+        });
+        SlhjAddons.hud().register(new HudElement(this, "golden_fish_alert", "Golden Fish Alert",
+                new HudPlacement(HudAnchor.TOP_LEFT, HudAnchor.TOP_LEFT, 10, 10, 1),
+                () -> alert.isActive(durationSetting.value().get().longValue()) ? content() : null,
+                this::content));
     }
 
-    private void render(GuiGraphicsExtractor g) {
-        long duration = durationSetting.value().get().intValue();
-        if (!isEnabled() || !alert.isActive(duration)) return;
-
-        hud.renderText(g, alertText.value().get(), colorSetting.value().get());
-    }
-
-    @Override
-    public HudElement hudElement() {
-        return hud;
-    }
-
-    @Override
-    public String hudPreviewText() {
-        return alertText.value().get();
-    }
-
-    @Override
-    public void renderHudPreview(GuiGraphicsExtractor g) {
-        hud.renderText(g, hudPreviewText(), colorSetting.value().get());
+    private HudContent content() {
+        return HudContent.text(alertText.value().get(), colorSetting.value().get());
     }
 }

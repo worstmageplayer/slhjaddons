@@ -19,8 +19,8 @@ public abstract class ClientLevelMixin {
         ci.cancel();
     }
 
-    @Inject(method = "addBreakingBlockEffect", at = @At("HEAD"), cancellable = true)
-    private void slhj$addBreakingBlockEffect(BlockPos pos, Direction direction, CallbackInfo ci) {
+    @Inject(method = "addBreakingParticles", at = @At("HEAD"), cancellable = true)
+    private void slhj$addBreakingParticles(BlockPos pos, Direction direction, BlockState blockState, CallbackInfo ci) {
         if (!SlhjAddons.isEnabled(NoBlockBreakParticles.class)) return;
         ci.cancel();
     }

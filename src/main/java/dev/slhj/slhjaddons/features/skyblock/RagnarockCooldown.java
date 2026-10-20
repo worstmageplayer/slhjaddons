@@ -1,25 +1,24 @@
 package dev.slhj.slhjaddons.features.skyblock;
 
+import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
+import dev.slhj.slhjaddons.hud.HudAnchor;
+import dev.slhj.slhjaddons.hud.HudContent;
 import dev.slhj.slhjaddons.hud.HudElement;
-import dev.slhj.slhjaddons.hud.HudRenderer;
+import dev.slhj.slhjaddons.hud.HudPlacement;
 import dev.slhj.slhjaddons.hud.TimedHudAlert;
 import dev.slhj.slhjaddons.util.client.ChatUtils;
 import dev.slhj.slhjaddons.util.client.ClientUtils;
 import dev.slhj.slhjaddons.util.skyblock.CooldownUtils;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
 
-public final class RagnarockCooldown extends Feature implements HudRenderer {
+public final class RagnarockCooldown extends Feature {
 
     private static final long BASE_COOLDOWN_MS = 20_000L;
-
-    private final HudElement hud = new HudElement("rag_cooldown", "Rag Cooldown", 10, 10);
 
     private final TimedHudAlert alert = new TimedHudAlert();
     private long cooldownMs = BASE_COOLDOWN_MS;
@@ -46,12 +45,15 @@ public final class RagnarockCooldown extends Feature implements HudRenderer {
             if (text.contains("CASTING") && !onCooldown) startCooldown();
         });
 
+        ClientTickEvents.END_CLIENT_TICK.register(mc -> update());
+        ClientPlayConnectionEvents.DISCONNECT.register((h, c) -> reset());
+
         // worldLoad -> reset
         ClientPlayConnectionEvents.JOIN.register((h, s, c) -> reset());
 
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath("slhjaddons", "rag_cooldown"),
-                (graphics, delta) -> render(graphics));
+        SlhjAddons.hud().register(new HudElement(this, "rag_cooldown", "Ragnarock Cooldown",
+                new HudPlacement(HudAnchor.TOP_LEFT, HudAnchor.TOP_LEFT, 10, 10, 1), this::content,
+                () -> HudContent.text("Rag Axe: 12.3", 0xFFFFFFFF)));
     }
 
     private void startCooldown() {
@@ -66,35 +68,18 @@ public final class RagnarockCooldown extends Feature implements HudRenderer {
         alert.reset();
     }
 
-    private void render(GuiGraphicsExtractor g) {
-        if (!isEnabled() || !onCooldown) return;
-
-        long remaining = alert.remainingMs(cooldownMs);
-        if (remaining <= 0) {
-            onCooldown = false;
-            if (playSoundOnReady.value().get() && ClientUtils.player() != null) {
-                // level.playLocalSound(...)
-            }
-            ChatUtils.chat(readyMessage.value().get());
-            return;
+    private void update() {
+        if (!isEnabled() || !onCooldown || alert.remainingMs(cooldownMs) > 0) return;
+        onCooldown = false;
+        if (playSoundOnReady.value().get() && ClientUtils.player() != null) {
+            // Preserve the existing sound setting; sound playback is not implemented yet.
         }
-
-        String label = "Rag Axe: " + String.format("%.1f", remaining / 1000.0);
-        hud.renderText(g, label, 0xFFFFFFFF);
+        ChatUtils.chat(readyMessage.value().get());
     }
 
-    @Override
-    public HudElement hudElement() {
-        return hud;
-    }
-
-    @Override
-    public String hudPreviewText() {
-        return "Rag Axe: 12.3";
-    }
-
-    @Override
-    public void renderHudPreview(GuiGraphicsExtractor g) {
-        hud.renderText(g, hudPreviewText(), 0xFFFFFFFF);
+    private HudContent content() {
+        long remaining = alert.remainingMs(cooldownMs);
+        if (!onCooldown || remaining <= 0) return null;
+        return HudContent.text("Rag Axe: " + String.format("%.1f", remaining / 1000.0), 0xFFFFFFFF);
     }
 }

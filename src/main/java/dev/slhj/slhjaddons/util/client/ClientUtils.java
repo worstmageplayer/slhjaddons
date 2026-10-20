@@ -12,7 +12,7 @@ public final class ClientUtils {
 
     public static LocalPlayer player() { return mc().player; }
 
-    public static boolean inGui() { return mc().screen != null; }
+    public static boolean inGui() { return mc().gui.screen() != null; }
 
     public static int screenWidth() { return mc().getWindow().getGuiScaledWidth(); }
 

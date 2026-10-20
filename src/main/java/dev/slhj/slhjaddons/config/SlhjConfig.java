@@ -3,6 +3,7 @@ package dev.slhj.slhjaddons.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.slhj.slhjaddons.SlhjAddons;
+import dev.slhj.slhjaddons.hud.HudPlacement;
 import net.fabricmc.loader.api.FabricLoader;
 import org.jspecify.annotations.Nullable;
 
@@ -15,17 +16,11 @@ import java.util.Map;
 public final class SlhjConfig {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("slhjaddons.json");
+    private static Path path() { return FabricLoader.getInstance().getConfigDir().resolve("slhjaddons.json"); }
 
     public Map<String, Boolean> toggles = new HashMap<>();
     public Map<String, String> values = new HashMap<>();
-    public Map<String, HudPos> hud = new HashMap<>();
-
-    public static final class HudPos {
-        public float x, y, scale = 1f;
-        public HudPos() {}
-        public HudPos(float x, float y) { this.x = x; this.y = y; }
-    }
+    public Map<String, HudPlacement> hud = new HashMap<>();
 
     public boolean isFeatureEnabled(String id) {
         return toggles.getOrDefault(id, false);
@@ -88,15 +83,17 @@ public final class SlhjConfig {
         }
     }
 
-    public HudPos hud(String id, float defX, float defY) {
-        return hud.computeIfAbsent(id, k -> new HudPos(defX, defY));
-    }
-
     public static SlhjConfig load() {
         try {
-            if (Files.exists(PATH)) {
-                SlhjConfig c = GSON.fromJson(Files.readString(PATH), SlhjConfig.class);
-                if (c != null) return c;
+            Path configPath = path();
+            if (Files.exists(configPath)) {
+                SlhjConfig c = GSON.fromJson(Files.readString(configPath), SlhjConfig.class);
+                if (c != null) {
+                    if (c.hud == null) c.hud = new HashMap<>();
+                    if (c.values == null) c.values = new HashMap<>();
+                    if (c.toggles == null) c.toggles = new HashMap<>();
+                    return c;
+                }
             }
         } catch (Exception e) {
             SlhjAddons.LOGGER.error("Could not read config, using defaults", e);
@@ -106,8 +103,9 @@ public final class SlhjConfig {
 
     public void save() {
         try {
-            Files.createDirectories(PATH.getParent());
-            Files.writeString(PATH, GSON.toJson(this));
+            Path configPath = path();
+            Files.createDirectories(configPath.getParent());
+            Files.writeString(configPath, GSON.toJson(this));
         } catch (IOException e) {
             SlhjAddons.LOGGER.error("Could not save config", e);
         }

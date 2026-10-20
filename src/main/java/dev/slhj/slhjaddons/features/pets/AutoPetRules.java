@@ -1,18 +1,19 @@
 package dev.slhj.slhjaddons.features.pets;
 
+import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.hud.HudAnchor;
+import dev.slhj.slhjaddons.hud.HudContent;
 import dev.slhj.slhjaddons.hud.HudElement;
-import dev.slhj.slhjaddons.hud.HudRenderer;
+import dev.slhj.slhjaddons.hud.HudPlacement;
 import dev.slhj.slhjaddons.hud.TimedHudAlert;
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
-
 import java.util.regex.Pattern;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.minecraft.ChatFormatting;
 
-public final class AutoPetRules extends Feature implements HudRenderer {
+public final class AutoPetRules extends Feature {
 
     private static final Pattern PET_PATTERN =
             Pattern.compile("Autopet equipped your (\\[Lvl (\\d+)]) (.+?)! VIEW RULE");
@@ -23,8 +24,6 @@ public final class AutoPetRules extends Feature implements HudRenderer {
     private String label = null;
 
     private static final String PREVIEW_LABEL = "§7[Lvl 100] §r§dBlack Cat";
-
-    private final HudElement hud = new HudElement("auto_pet_rules", "Auto Pet Rules", 10, 100);
 
     public AutoPetRules() {
         setLabel("Auto Pet Rules");
@@ -51,9 +50,16 @@ public final class AutoPetRules extends Feature implements HudRenderer {
             }
         });
 
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath("slhjaddons", "auto_pet_rules"),
-                (graphics, delta) -> render(graphics));
+        ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+            if (label != null && !alert.isActive(DURATION_MS)) label = null;
+        });
+        ClientPlayConnectionEvents.DISCONNECT.register((h, c) -> {
+            label = null;
+            alert.reset();
+        });
+        SlhjAddons.hud().register(new HudElement(this, "auto_pet_rules", "Auto Pet Rules",
+                new HudPlacement(HudAnchor.TOP_LEFT, HudAnchor.TOP_LEFT, 10, 100, 1), this::content,
+                () -> HudContent.text(PREVIEW_LABEL, 0xFFFFFFFF)));
     }
 
     private static int[] strippedToRawIndex(String raw) {
@@ -73,29 +79,9 @@ public final class AutoPetRules extends Feature implements HudRenderer {
         return map;
     }
 
-    private void render(GuiGraphicsExtractor g) {
-        if (!isEnabled() || label == null) return;
-        if (!alert.isActive(DURATION_MS)) { label = null; return; }
-
+    private HudContent content() {
+        if (label == null || !alert.isActive(DURATION_MS)) return null;
         int alpha = alert.alpha(DURATION_MS, FADE_START);
-        if (alpha <= 0) return;
-
-        int color = (alpha << 24) | 0xFFFFFF;
-        hud.renderText(g, label, color);
-    }
-
-    @Override
-    public HudElement hudElement() {
-        return hud;
-    }
-
-    @Override
-    public String hudPreviewText() {
-        return PREVIEW_LABEL;
-    }
-
-    @Override
-    public void renderHudPreview(GuiGraphicsExtractor g) {
-        hud.renderText(g, PREVIEW_LABEL, 0xFFFFFFFF);
+        return alpha <= 0 ? null : HudContent.text(label, (alpha << 24) | 0xFFFFFF);
     }
 }

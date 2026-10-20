@@ -1,5 +1,7 @@
 package dev.slhj.slhjaddons.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
+
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.config.SlhjConfig;
 import dev.slhj.slhjaddons.core.Feature;
@@ -240,7 +242,7 @@ public final class SlhjSettingsScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (maxScroll > 0 && event.button() == 0) {
+        if (maxScroll > 0 && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
             int top = VIEWPORT_TOP;
             int trackHeight = this.height - VIEWPORT_BOTTOM_MARGIN - top;
             int sbX = scrollbarX();
