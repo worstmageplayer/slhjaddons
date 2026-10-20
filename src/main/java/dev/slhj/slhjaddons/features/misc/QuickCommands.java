@@ -1,7 +1,6 @@
 package dev.slhj.slhjaddons.features.misc;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
 import dev.slhj.slhjaddons.util.client.*;
@@ -20,12 +19,11 @@ import java.util.List;
 public final class QuickCommands extends Feature {
 
     private KeyMapping key;
-    private boolean wasDown = false;
-    private boolean isOpen = false;
+    private final CommandWheelSession session = new CommandWheelSession();
     private int hoveredSection = -1;
     private boolean inDeadZone = true;
     private final List<String> commandsList = new ArrayList<>();
-    private boolean showCommandString = true;
+    private final Setting.ToggleSetting showCommandString;
 
     private final Setting.TextSetting commandsString;
     private final Setting.SliderSetting innerRadius;
@@ -36,13 +34,25 @@ public final class QuickCommands extends Feature {
 
     public QuickCommands() {
         setLabel("Quick Commands");
+        setDescription("Hold the Quick Commands key to choose a command from a radial menu. Assign the key in Options > Controls > Key Binds.");
         category(Category.MISC);
-        commandsString = text("quick_commands.commands", "Commands", "");
-        innerRadius = intSlider("quick_commands.inner_radius", "Inner Radius", 0, 255, 30);
-        outerRadius = intSlider("quick_commands.outer_radius", "Outer Radius", 0, 255, 90);
-        sectionOffset = intSlider("quick_commands.section_offset", "Section Offset", 0, 255, 10);
-        guiColor = hex("quick_commands.color", "Color", 0xFF8B8B8B);
-        guiHoverColor = hex("quick_commands.hover_color", "Hover Color", 0xFFFFFF00);
+        commandsString = text("quick_commands.commands", "Commands", "",
+                "Comma-separated commands, e.g. /warp hub, /slhj. Leading / is optional.");
+        showCommandString = toggle("quick_commands.show_string", "Show Command On Hover", true);
+        innerRadius = intSlider("quick_commands.inner_radius", "Inner Radius (GUI px)", 0, 254, 30);
+        outerRadius = intSlider("quick_commands.outer_radius", "Outer Radius (GUI px)", 1, 255, 90);
+        sectionOffset = intSlider("quick_commands.section_offset", "Section Offset (GUI px)", 0, 255, 10);
+        guiColor = hex("quick_commands.color", "Color", 0x80000000);
+        guiHoverColor = hex("quick_commands.hover_color", "Hover Color", 0x80FFFFFF);
+        if (outerRadius.value().get() <= innerRadius.value().get())
+            outerRadius.value().set(innerRadius.value().get() + 1);
+        innerRadius.value().onChange(value -> {
+            if (outerRadius.value().get() <= value) outerRadius.value().set(value + 1);
+        });
+        outerRadius.value().onChange(value -> {
+            if (innerRadius.value().get() >= value) innerRadius.value().set(value - 1);
+        });
+        commandsString.value().onChange(value -> loadConfig());
     }
 
     public static final String id = "quick_commands";
@@ -56,10 +66,12 @@ public final class QuickCommands extends Feature {
         key = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.slhjaddons.quick_commands",
                 InputConstants.Type.KEYBOARD,
-                InputConstants.KEY_Q,
+                InputConstants.UNKNOWN.getValue(),
                 KeyBindingUtils.getMainCategory()));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> keyDown());
+        net.fabricmc.fabric.api.client.screen.v1.ScreenEvents.BEFORE_INIT.register((mc, screen, w, h) -> cancelWheel(false));
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((h, mc) -> cancelWheel(false));
 
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath("slhjaddons", "quick_commands"),
@@ -67,55 +79,56 @@ public final class QuickCommands extends Feature {
     }
 
     private void loadConfig() {
-        var cfg = SlhjAddons.config();
-
         String commandsStr = commandsString.value().get();
         commandsList.clear();
         if (!commandsStr.isEmpty()) {
             String[] commands = commandsStr.split(",");
             for (String cmd : commands) {
-                String trimmed = cmd.trim();
+                String trimmed = ChatUtils.normalizeCommand(cmd);
                 if (!trimmed.isEmpty()) {
                     commandsList.add(trimmed);
                 }
             }
         }
 
-        showCommandString = "true".equals(cfg.getString("quick_commands.show_string", "true"));
     }
 
     private void keyDown() {
-        if (!isEnabled() || ClientUtils.inGui()) return;
-        boolean down = key.isDown();
-        if (down && !wasDown) {
-            // McUtils.chat("opened menu");
-            isOpen = true;
-            inDeadZone = true;
-            hoveredSection = -1;
-
-            ClientUtils.mc().mouseHandler.releaseMouse();
-            SchedulerUtils.run(InputUtils::centerCursor);
-        }
-        wasDown = down;
-
-        if (isOpen) {
-            if (!down) {
-                // McUtils.chat("closed menu");
-                if (!inDeadZone && hoveredSection >= 0 && hoveredSection < commandsList.size()) {
-                    executeCommand(commandsList.get(hoveredSection));
-                }
-                isOpen = false;
+        boolean available = isEnabled() && !ClientUtils.inGui() && ClientUtils.player() != null
+                && !commandsList.isEmpty();
+        switch (session.update(key.isDown(), available)) {
+            case OPEN -> {
                 inDeadZone = true;
                 hoveredSection = -1;
-                ClientUtils.mc().mouseHandler.grabMouse();
+                ClientUtils.mc().mouseHandler.releaseMouse();
+                InputUtils.centerCursor();
             }
+            case RELEASE -> {
+                String command = !inDeadZone && hoveredSection >= 0 && hoveredSection < commandsList.size()
+                        ? commandsList.get(hoveredSection) : null;
+                // Restore the mouse before a local command can open a screen.
+                cancelWheel(true);
+                if (command != null) executeCommand(command);
+            }
+            case CANCEL -> cancelWheel(true);
+            case NONE -> { }
         }
     }
 
-    private void render(GuiGraphicsExtractor g) {
-        if (!isEnabled() || !isOpen) return;
+    private void cancelWheel(boolean restoreMouse) {
+        session.cancel();
+        inDeadZone = true;
+        hoveredSection = -1;
+        if (restoreMouse && !ClientUtils.inGui() && ClientUtils.player() != null)
+            ClientUtils.mc().mouseHandler.grabMouse();
+    }
 
-        loadConfig();
+    @Override protected void onDisable() {
+        if (session.isOpen()) cancelWheel(true);
+    }
+
+    private void render(GuiGraphicsExtractor g) {
+        if (!isEnabled() || !session.isOpen() || ClientUtils.inGui()) return;
 
         int screenWidth = g.guiWidth();
         int screenHeight = g.guiHeight();
@@ -185,7 +198,7 @@ public final class QuickCommands extends Feature {
         }
 
         // Draw command name on hover
-        if (showCommandString && !inDeadZone && hoveredSection >= 0 && hoveredSection < commandsList.size()) {
+        if (showCommandString.value().get() && !inDeadZone && hoveredSection >= 0 && hoveredSection < commandsList.size()) {
             String commandName = "/" + commandsList.get(hoveredSection);
             RenderUtils.text(g, commandName, (int) mouseX + 2, (int) mouseY - 7, 0xFFFFFFFF, true);
         }
@@ -289,9 +302,6 @@ public final class QuickCommands extends Feature {
 
         ChatUtils.chat("&7Running Command: /" + command);
 
-        var player = ClientUtils.player();
-        if (player != null) {
-            player.connection.sendChat("/" + command);
-        }
+        ChatUtils.runCommand(command);
     }
 }

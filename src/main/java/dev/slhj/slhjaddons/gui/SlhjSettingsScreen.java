@@ -1,376 +1,384 @@
 package dev.slhj.slhjaddons.gui;
 
-import com.mojang.blaze3d.platform.InputConstants;
-
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.config.SlhjConfig;
+import dev.slhj.slhjaddons.core.ConfigValue;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
+import dev.slhj.slhjaddons.util.client.ChatUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.IntSupplier;
+import java.util.function.BiConsumer;
+import java.util.function.DoubleConsumer;
 
+/** One scrolling settings list with category shortcuts, using Minecraft's native widgets. */
 public final class SlhjSettingsScreen extends Screen {
+    private static final int BODY_TOP = 72, WHITE = 0xFFFFFFFF, MUTED = 0xFFAAAAAA, ERROR = 0xFFFF7777;
+    private final SettingsMenuState state = new SettingsMenuState();
+    private final Map<String, String> drafts = new HashMap<>();
+    private final Map<Feature.Category, Integer> categoryOffsets = new EnumMap<>(Feature.Category.class);
+    private SettingsList categories, options;
+    private EditBox search;
+    private boolean rebuildPending, syncingSearch;
+    private double categoryScroll;
+    private int visibleCount;
+    private Feature.Category activeCategory, pendingJump;
 
-    private record TextLabel(String text, int x, int baseY) {}
-    private record ColorSwatch(int x, int baseY, int size, IntSupplier color) {}
+    public SlhjSettingsScreen() { super(Component.literal("slhjaddons settings")); }
 
-    // This only needs a touch when you add a brand new *category*, not when
-    // you add or change a feature. Any category a feature declares that
-    // isn't listed here just gets appended at the end.
-    private static final List<String> CATEGORY_ORDER =
-            List.of("Skyblock", "Dungeons", "Fishing", "Slayers", "Events", "Misc");
+    private int menuWidth() { return Math.min(760, width - 16); }
+    private int left() { return (width - menuWidth()) / 2; }
+    private int sidebarWidth() { return width < 420 ? 92 : 112; }
+    private int contentLeft() { return left() + sidebarWidth() + 8; }
+    private int contentWidth() { return menuWidth() - sidebarWidth() - 8; }
+    private int bodyHeight() { return Math.max(40, height - BODY_TOP - 42); }
 
-    // --- scrolling ---------------------------------------------------------
-    private static final int VIEWPORT_TOP = 24;
-    private static final int VIEWPORT_BOTTOM_MARGIN = 34;
-    private static final int SCROLLBAR_WIDTH = 6;
-    private static final int HEADER_HEIGHT = 20;
-    private static final int CATEGORY_GAP = 14;
-    private static final int ROW_HEIGHT = 20;
+    @Override protected void init() {
+        rememberScroll();
+        if (categories != null) categoryScroll = categories.scrollAmount();
+        categories = addRenderableWidget(new SettingsList(left(), sidebarWidth()));
+        for (Feature.Category category : state.categories(SlhjAddons.features().all())) addCategory(category);
+        categories.setScrollAmount(categoryScroll);
 
-    private static final float HEADER_SCALE = 1.5f;
-
-    private final List<AbstractWidget> scrollWidgets = new ArrayList<>();
-    private final List<Integer> scrollWidgetBaseY = new ArrayList<>();
-    private final List<Integer> headerBaseY = new ArrayList<>();
-    private final List<String> headerLabel = new ArrayList<>();
-    private final List<TextLabel> textLabels = new ArrayList<>();
-    private final List<ColorSwatch> colorSwatches = new ArrayList<>();
-    private int scrollOffset = 0;
-    private int maxScroll = 0;
-    private boolean draggingScrollbar = false;
-
-    public SlhjSettingsScreen() {
-        super(Component.literal("slhjaddons"));
+        search = addRenderableWidget(new EditBox(font, contentLeft() + 8, 30, contentWidth() - 36, 20,
+                Component.literal("Search all settings")));
+        search.setMaxLength(128);
+        search.setHint(Component.literal("Search all settings..."));
+        search.setValue(state.query());
+        search.setResponder(query -> {
+            if (syncingSearch) return;
+            rememberScroll();
+            state.query(query);
+            pendingJump = null;
+            rebuildPending = true;
+        });
+        addRenderableWidget(Button.builder(Component.literal("X"), b -> {
+            search.setValue("");
+            setFocused(search);
+        }).bounds(contentLeft() + contentWidth() - 24, 30, 20, 20)
+                .tooltip(Tooltip.create(Component.literal("Clear search"))).build());
+        addRenderableWidget(Button.builder(Component.literal("Edit HUD"), b -> HudEditorScreen.openHudEditor(this))
+                .bounds(width / 2 - 154, height - 28, 150, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Done"), b -> onClose())
+                .bounds(width / 2 + 4, height - 28, 150, 20).build());
+        rebuildOptions();
     }
 
-    @Override
-    protected void init() {
-        var cfg = SlhjAddons.config();
-        var features = SlhjAddons.features().all();
+    private void addCategory(Feature.Category category) {
+        Row row = new Row();
+        Button button = Button.builder(Component.literal(category.toString()), b -> {
+            rememberScroll();
+            boolean wasSearching = state.searching();
+            state.query("");
+            syncingSearch = true;
+            search.setValue("");
+            syncingSearch = false;
+            pendingJump = category;
+            if (wasSearching || rebuildPending) rebuildPending = true;
+            else jumpToCategory();
+        }).bounds(0, 0, categories.getRowWidth() - 4, 20).build();
+        button.setOverrideRenderHighlightedSprite(() -> !state.searching() && activeCategory == category
+                || button.isHoveredOrFocused());
+        row.widget(button, 0, 0);
+        categories.add(row, 24);
+    }
 
-        scrollWidgets.clear();
-        scrollWidgetBaseY.clear();
-        headerBaseY.clear();
-        headerLabel.clear();
-        textLabels.clear();
-        colorSwatches.clear();
+    private void rememberScroll() {
+        if (options != null && !rebuildPending) state.scroll(options.scrollAmount());
+    }
 
-        int sliderWidth = 300;
-        int sliderX = this.width / 2 - sliderWidth / 2;
-        int settingsIndent = sliderX + 12;
-        int settingsWidth = sliderWidth - 12;
-
-        Map<String, List<Feature>> byCategory = new LinkedHashMap<>();
-        for (String cat : CATEGORY_ORDER) byCategory.put(cat, new ArrayList<>());
-        for (Feature f : features) {
-            Feature.Category cat = f.category();
-            if (cat == null) continue;
-            byCategory.computeIfAbsent(cat.toString(), k -> new ArrayList<>()).add(f);
+    private void rebuildOptions() {
+        if (options != null) removeWidget(options);
+        options = addRenderableWidget(new SettingsList(contentLeft(), contentWidth()));
+        categoryOffsets.clear();
+        List<Feature> features = state.visible(SlhjAddons.features().all());
+        visibleCount = features.size();
+        Feature.Category previous = null;
+        for (Feature feature : features) {
+            if (feature.category() != previous) {
+                Row heading = new Row();
+                heading.label(feature.category().toString(), 0, 3, MUTED);
+                heading.drawers.add((g, row) -> g.fill(row.getContentX(), row.getContentY() + 15,
+                        row.getContentX() + rowWidth(), row.getContentY() + 16, 0xFF555555));
+                categoryOffsets.put(feature.category(), options.getNextY() - options.getY() - 2);
+                options.add(heading, 19);
+                previous = feature.category();
+            }
+            addFeature(feature);
         }
+        if (features.isEmpty()) {
+            Row empty = new Row();
+            empty.label("No matching features", 0, 4, WHITE);
+            empty.label("Try a different search.", 0, 18, MUTED);
+            options.add(empty, 36);
+        }
+        options.setScrollAmount(state.scroll());
+        rebuildPending = false;
+        if (pendingJump != null) jumpToCategory();
+    }
 
-        int curY = VIEWPORT_TOP + 8;
+    private void jumpToCategory() {
+        options.setScrollAmount(categoryOffsets.getOrDefault(pendingJump, 0));
+        state.scroll(options.scrollAmount());
+        pendingJump = null;
+    }
 
-        for (Map.Entry<String, List<Feature>> entry : byCategory.entrySet()) {
-            List<Feature> catFeatures = entry.getValue();
-            if (catFeatures.isEmpty()) continue;
+    private int rowWidth() { return options.getRowWidth() - 4; }
 
-            headerBaseY.add(curY);
-            headerLabel.add(entry.getKey());
-            curY += HEADER_HEIGHT;
-
-            for (Feature f : catFeatures) {
-                Checkbox box = Checkbox.builder(Component.literal(f.label()), this.font)
-                        .pos(sliderX, curY)
-                        .selected(f.isEnabled())
-                        .onValueChange((checkbox, selected) -> {
-                            cfg.setFeatureEnabled(f.id(), selected);
-                            SlhjAddons.features().syncFromConfig();
-                        })
-                        .build();
-                addScrollable(box, curY);
-                curY += ROW_HEIGHT;
-
-                List<Setting> catSettings = f.settings();
-                if (catSettings.isEmpty()) continue;
-
-                for (Setting setting : catSettings) {
+    private void addFeature(Feature feature) {
+        Row header = new Row();
+        header.drawers.add((g, row) -> g.text(font, font.plainSubstrByWidth(feature.label(), rowWidth() - 54),
+                row.getContentX(), row.getContentY() + 6, WHITE, false));
+        Button toggle = Button.builder(toggleMessage(feature.isEnabled()), b -> {
+            var cfg = SlhjAddons.config();
+            cfg.setFeatureEnabled(feature.id(), !feature.isEnabled());
+            SlhjAddons.features().syncFromConfig();
+            cfg.save();
+            b.setMessage(toggleMessage(feature.isEnabled()));
+        }).bounds(0, 0, 48, 20).tooltip(Tooltip.create(Component.literal("Toggle " + feature.label()))).build();
+        header.widget(toggle, rowWidth() - 48, 0);
+        options.add(header, 24);
+        if (!feature.description().isEmpty()) {
+            Row description = new Row();
+            var lines = font.split(Component.literal(feature.description()), rowWidth() - 8);
+            description.drawers.add((g, row) -> {
+                for (int i = 0; i < lines.size(); i++)
+                    g.text(font, lines.get(i), row.getContentX() + 4, row.getContentY() + i * font.lineHeight, MUTED, false);
+            });
+            options.add(description, lines.size() * font.lineHeight + 8);
+        }
+        for (Setting setting : feature.settings()) addSetting(setting);
+        if (!feature.settings().isEmpty()) {
+            Row reset = new Row();
+            reset.widget(Button.builder(Component.literal("Reset settings"), b -> {
+                for (Setting setting : feature.settings()) {
+                    drafts.remove(setting.key());
                     switch (setting) {
-                        case Setting.ToggleSetting toggleSetting -> {
-                            Checkbox tbox = Checkbox.builder(Component.literal(toggleSetting.label()), this.font)
-                                    .pos(settingsIndent, curY)
-                                    .selected(toggleSetting.value().get())
-                                    .onValueChange((checkbox, selected) -> toggleSetting.value().set(selected))
-                                    .build();
-                            addScrollable(tbox, curY);
-                            curY += ROW_HEIGHT;
-                        }
-                        case Setting.SliderSetting slider -> {
-                            addScrollable(new ConfigSlider(settingsIndent, curY, settingsWidth, 18, slider), curY);
-                            curY += ROW_HEIGHT;
-                        }
-                        case Setting.TextSetting text -> {
-                            textLabels.add(new TextLabel(text.label(), settingsIndent, curY));
-                            curY += 12;
-
-                            EditBox editBox = new EditBox(this.font, settingsIndent, curY, settingsWidth, 18,
-                                    Component.literal(text.label()));
-                            editBox.setMaxLength(512);
-                            editBox.setValue(text.value().get());
-                            if (!text.hint().isEmpty()) editBox.setHint(Component.literal(text.hint()));
-                            editBox.setResponder(value -> text.value().set(value));
-                            addScrollable(editBox, curY);
-                            curY += ROW_HEIGHT;
-                        }
-                        case Setting.HexSetting hex -> {
-                            textLabels.add(new TextLabel(hex.label(), settingsIndent, curY));
-                            curY += 12;
-
-                            int swatchSize = 16;
-                            int swatchGap = 6;
-                            int boxWidth = settingsWidth - swatchSize - swatchGap;
-
-                            EditBox editBox = new EditBox(this.font, settingsIndent, curY, boxWidth, 18,
-                                    Component.literal(hex.label()));
-                            editBox.setMaxLength(9);
-                            editBox.setValue(String.format("#%08X", hex.value().get()));
-                            editBox.setResponder(value -> {
-                                Integer parsed = SlhjConfig.parseHexColor(value);
-                                if (parsed != null) hex.value().set(parsed);
-                            });
-                            addScrollable(editBox, curY);
-
-                            int swatchX = settingsIndent + boxWidth + swatchGap;
-                            colorSwatches.add(new ColorSwatch(swatchX, curY + 1, swatchSize, () -> hex.value().get()));
-
-                            curY += ROW_HEIGHT;
-                        }
-                        case Setting.ButtonSetting btn -> {
-                            Button b = Button.builder(Component.literal(btn.buttonText()), pressed -> btn.action().run())
-                                    .bounds(settingsIndent, curY, settingsWidth, 18)
-                                    .build();
-                            addScrollable(b, curY);
-                            curY += ROW_HEIGHT;
-                        }
+                        case Setting.ToggleSetting s -> reset(s.value());
+                        case Setting.SliderSetting s -> reset(s.value());
+                        case Setting.TextSetting s -> reset(s.value());
+                        case Setting.HexSetting s -> reset(s.value());
+                        case Setting.ButtonSetting ignored -> { }
                     }
                 }
+                SlhjAddons.config().save();
+                rememberScroll();
+                rebuildPending = true;
+            }).bounds(0, 0, Math.min(120, rowWidth()), 20)
+                    .tooltip(Tooltip.create(Component.literal("Restore this feature's settings; keep its ON/OFF state"))).build(), 0, 0);
+            options.add(reset, 30);
+        }
+    }
 
-                curY += 6;
+    private static <T> void reset(ConfigValue<T> value) { value.set(value.def()); }
+    private static Component toggleMessage(boolean enabled) {
+        return Component.literal(enabled ? "ON" : "OFF");
+    }
+
+    private void addSetting(Setting setting) {
+        switch (setting) {
+            case Setting.ToggleSetting toggle -> {
+                Row row = new Row();
+                row.widget(Button.builder(Component.literal(toggle.label() + ": " + (toggle.value().get() ? "ON" : "OFF")), b -> {
+                    toggle.value().set(!toggle.value().get());
+                    b.setMessage(Component.literal(toggle.label() + ": " + (toggle.value().get() ? "ON" : "OFF")));
+                }).bounds(0, 0, rowWidth(), 20).build(), 0, 0);
+                options.add(row, 26);
             }
-
-            curY += CATEGORY_GAP;
-        }
-
-        addRenderableWidget(Button.builder(Component.literal("Edit HUD"), b -> HudEditorScreen.openHudEditor())
-                .bounds(this.width / 2 - 159, this.height - 28, 78, 20)
-                .build());
-        addRenderableWidget(Button.builder(Component.literal("Done"), b -> this.onClose())
-                .bounds(this.width / 2 - 75, this.height - 28, 150, 20)
-                .build());
-
-        int contentBottom = curY;
-        int viewportBottom = this.height - VIEWPORT_BOTTOM_MARGIN;
-        maxScroll = Math.max(0, contentBottom - viewportBottom);
-        scrollOffset = Mth.clamp(scrollOffset, 0, maxScroll);
-        repositionScrollables();
-    }
-
-    private <T extends AbstractWidget> void addScrollable(T widget, int baseY) {
-        scrollWidgets.add(widget);
-        scrollWidgetBaseY.add(baseY);
-        addRenderableWidget(widget);
-    }
-
-    private void repositionScrollables() {
-        int bottom = this.height - VIEWPORT_BOTTOM_MARGIN;
-        for (int i = 0; i < scrollWidgets.size(); i++) {
-            AbstractWidget w = scrollWidgets.get(i);
-            int y = scrollWidgetBaseY.get(i) - scrollOffset;
-            w.setY(y);
-            boolean visible = y + w.getHeight() > VIEWPORT_TOP && y < bottom;
-            w.visible = visible;
-            w.active = visible;
-        }
-    }
-
-    private void scrollBy(int delta) {
-        if (maxScroll <= 0) return;
-        int next = Mth.clamp(scrollOffset + delta, 0, maxScroll);
-        if (next != scrollOffset) {
-            scrollOffset = next;
-            repositionScrollables();
-        }
-    }
-
-    private int scrollbarX() {
-        return this.width - 14;
-    }
-
-    private int scrollbarThumbHeight(int trackHeight) {
-        if (maxScroll <= 0) return trackHeight;
-        int contentHeight = trackHeight + maxScroll;
-        return Math.max(20, trackHeight * trackHeight / contentHeight);
-    }
-
-    private int scrollbarThumbY(int top, int trackHeight, int thumbHeight) {
-        if (maxScroll <= 0) return top;
-        return top + (int) ((trackHeight - thumbHeight) * (scrollOffset / (double) maxScroll));
-    }
-
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (maxScroll > 0) {
-            scrollBy((int) (-scrollY * 16));
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
-    }
-
-    @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (maxScroll > 0 && event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-            int top = VIEWPORT_TOP;
-            int trackHeight = this.height - VIEWPORT_BOTTOM_MARGIN - top;
-            int sbX = scrollbarX();
-            if (event.x() >= sbX && event.x() <= sbX + SCROLLBAR_WIDTH && event.y() >= top && event.y() <= top + trackHeight) {
-                draggingScrollbar = true;
-                jumpScrollbarTo(event.y(), top, trackHeight);
-                return true;
+            case Setting.SliderSetting slider -> addNumber(slider);
+            case Setting.TextSetting text -> addText(text);
+            case Setting.HexSetting hex -> addColor(hex);
+            case Setting.ButtonSetting button -> {
+                Row row = new Row();
+                row.widget(Button.builder(Component.literal(button.buttonText()), b -> button.action().run())
+                        .bounds(0, 0, rowWidth(), 20).build(), 0, 0);
+                options.add(row, 26);
             }
         }
-        return super.mouseClicked(event, doubleClick);
     }
 
-    @Override
-    public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
-        if (draggingScrollbar) {
-            int top = VIEWPORT_TOP;
-            int trackHeight = this.height - VIEWPORT_BOTTOM_MARGIN - top;
-            jumpScrollbarTo(event.y(), top, trackHeight);
-            return true;
-        }
-        return super.mouseDragged(event, dragX, dragY);
-    }
-
-    @Override
-    public boolean mouseReleased(MouseButtonEvent event) {
-        if (draggingScrollbar) {
-            draggingScrollbar = false;
-            return true;
-        }
-        return super.mouseReleased(event);
-    }
-
-    private void jumpScrollbarTo(double mouseY, int top, int trackHeight) {
-        int thumbHeight = scrollbarThumbHeight(trackHeight);
-        double ratio = Mth.clamp((mouseY - top - thumbHeight / 2.0) / (trackHeight - thumbHeight), 0.0, 1.0);
-        scrollOffset = (int) Math.round(ratio * maxScroll);
-        repositionScrollables();
-    }
-
-    @Override
-    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
-        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
-        graphics.centeredText(this.font, "slhjaddons settings", this.width / 2, 10, 0xFFFFFFFF);
-
-        int viewportBottom = this.height - VIEWPORT_BOTTOM_MARGIN;
-        int headerCenterX = this.width / 2;
-
-        for (int i = 0; i < headerBaseY.size(); i++) {
-            int y = headerBaseY.get(i) - scrollOffset;
-            if (y + HEADER_HEIGHT <= VIEWPORT_TOP || y >= viewportBottom) continue;
-
-            String label = headerLabel.get(i);
-
-            graphics.pose().pushMatrix();
-            graphics.pose().scale(HEADER_SCALE, HEADER_SCALE);
-            graphics.centeredText(this.font, label,
-                    Math.round(headerCenterX / HEADER_SCALE), Math.round(y / HEADER_SCALE), 0xFFFFD866);
-            graphics.pose().popMatrix();
-
-            int lineY = y + HEADER_HEIGHT - 4;
-            int lineRight = this.width - 12;
-            graphics.fill(12, lineY, lineRight, lineY + 1, 0x55FFFFFF);
-        }
-
-        for (TextLabel label : textLabels) {
-            int y = label.baseY() - scrollOffset;
-            if (y + this.font.lineHeight > VIEWPORT_TOP && y < viewportBottom) {
-                graphics.text(this.font, label.text(), label.x(), y, 0xFFFFFFFF);
+    private void addNumber(Setting.SliderSetting setting) {
+        Row row = new Row();
+        row.label(setting.label(), 0, 0, WHITE);
+        int fieldWidth = Math.min(70, rowWidth() / 3);
+        EditBox number = new EditBox(font, 0, 0, fieldWidth, 20, Component.literal(setting.label()));
+        number.setMaxLength(16);
+        number.setValue(drafts.getOrDefault(setting.key(), SettingsInputs.numberText(setting.value().get(), setting.isInt())));
+        number.setTextColor(SettingsInputs.number(number.getValue(), setting.min(), setting.max(), setting.isInt()) == null ? ERROR : WHITE);
+        ConfigSlider slider = new ConfigSlider(rowWidth() - fieldWidth - 6, setting, value -> {
+            drafts.remove(setting.key());
+            number.setValue(SettingsInputs.numberText(value, setting.isInt()));
+        });
+        number.setResponder(text -> {
+            drafts.put(setting.key(), text);
+            Double value = SettingsInputs.number(text, setting.min(), setting.max(), setting.isInt());
+            number.setTextColor(value == null ? ERROR : WHITE);
+            if (value != null) { setting.value().set(value); slider.refresh(); }
+        });
+        row.widget(slider, 0, 13);
+        row.widget(number, rowWidth() - fieldWidth, 13);
+        row.drawers.add((g, entry) -> {
+            // A coupled setting (for example wheel radii) may have changed this value.
+            if (!number.isFocused()) {
+                String actual = SettingsInputs.numberText(setting.value().get(), setting.isInt());
+                if (!actual.equals(number.getValue()) && SettingsInputs.number(number.getValue(), setting.min(), setting.max(), setting.isInt()) != null) {
+                    drafts.remove(setting.key());
+                    number.setValue(actual);
+                    slider.refresh();
+                }
             }
-        }
-
-        for (ColorSwatch swatch : colorSwatches) {
-            int y = swatch.baseY() - scrollOffset;
-            if (y + swatch.size() <= VIEWPORT_TOP || y >= viewportBottom) continue;
-            graphics.fill(swatch.x() - 1, y - 1, swatch.x() + swatch.size() + 1, y + swatch.size() + 1, 0xFFFFFFFF);
-            graphics.fill(swatch.x(), y, swatch.x() + swatch.size(), y + swatch.size(), swatch.color().getAsInt());
-        }
-
-        if (maxScroll > 0) {
-            int top = VIEWPORT_TOP;
-            int trackHeight = this.height - VIEWPORT_BOTTOM_MARGIN - top;
-            int sbX = scrollbarX();
-            int thumbHeight = scrollbarThumbHeight(trackHeight);
-            int thumbY = scrollbarThumbY(top, trackHeight, thumbHeight);
-            graphics.fill(sbX, top, sbX + SCROLLBAR_WIDTH, top + trackHeight, 0x55000000);
-            graphics.fill(sbX, thumbY, sbX + SCROLLBAR_WIDTH, thumbY + thumbHeight, 0xFFAAAAAA);
-        }
+            boolean valid = SettingsInputs.number(number.getValue(), setting.min(), setting.max(), setting.isInt()) != null;
+            String range = SettingsInputs.numberText(setting.min(), setting.isInt()) + " - "
+                    + SettingsInputs.numberText(setting.max(), setting.isInt());
+            g.text(font, (valid ? "Range: " : "Enter ") + range + (valid || !setting.isInt() ? "" : " (whole numbers)"),
+                    entry.getContentX(), entry.getContentY() + 35, valid ? MUTED : ERROR, false);
+        });
+        options.add(row, 49);
     }
 
-    @Override
-    public void onClose() {
+    private void addText(Setting.TextSetting setting) {
+        Row row = new Row();
+        row.label(setting.label(), 0, 0, WHITE);
+        EditBox text = new EditBox(font, 0, 0, rowWidth(), 20, Component.literal(setting.label()));
+        text.setMaxLength(512);
+        text.setValue(setting.value().get());
+        if (!setting.hint().isEmpty()) {
+            text.setHint(Component.literal(setting.hint()));
+            text.setTooltip(Tooltip.create(Component.literal(setting.hint())));
+        }
+        text.setResponder(setting.value()::set);
+        row.widget(text, 0, 13);
+        boolean preview = setting.key().endsWith(".message") || setting.key().endsWith(".text");
+        if (preview) row.drawers.add((g, entry) -> g.text(font,
+                font.plainSubstrByWidth("Preview: " + ChatUtils.colorize(setting.value().get()), rowWidth()),
+                entry.getContentX(), entry.getContentY() + 36, WHITE, true));
+        options.add(row, preview ? 51 : 40);
+    }
+
+    private void addColor(Setting.HexSetting setting) {
+        Row row = new Row();
+        row.label(setting.label(), 0, 0, WHITE);
+        EditBox hex = new EditBox(font, 0, 0, rowWidth() - 26, 20, Component.literal(setting.label()));
+        hex.setMaxLength(9);
+        hex.setValue(drafts.getOrDefault(setting.key(), SettingsInputs.hex(setting.value().get())));
+        hex.setTextColor(SlhjConfig.parseHexColor(hex.getValue()) == null ? ERROR : WHITE);
+        hex.setResponder(text -> {
+            drafts.put(setting.key(), text);
+            Integer color = SlhjConfig.parseHexColor(text);
+            hex.setTextColor(color == null ? ERROR : WHITE);
+            if (color != null) setting.value().set(color);
+        });
+        row.widget(hex, 0, 13);
+        row.widget(new ColorSwatchButton(() -> setting.value().get(), () -> {
+            drafts.remove(setting.key());
+            minecraft.gui.setScreen(new ColorPickerScreen(this, setting));
+        }), rowWidth() - 20, 13);
+        row.drawers.add((g, entry) -> {
+            boolean valid = SlhjConfig.parseHexColor(hex.getValue()) != null;
+            g.text(font, valid ? "#AARRGGBB (alpha first)" : "Use 6 or 8 hex digits", entry.getContentX(),
+                    entry.getContentY() + 35, valid ? MUTED : ERROR, false);
+        });
+        options.add(row, 49);
+    }
+
+    @Override public void tick() {
+        super.tick();
+        if (rebuildPending) rebuildOptions();
+    }
+
+    @Override public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        activeCategory = null;
+        for (Feature.Category category : state.categories(SlhjAddons.features().all())) {
+            Integer offset = categoryOffsets.get(category);
+            if (offset != null && offset <= options.scrollAmount() + 1) activeCategory = category;
+        }
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
+        g.centeredText(font, title, width / 2, 10, WHITE);
+        g.text(font, "Categories", left() + 8, 58, MUTED, false);
+        String heading = state.searching() ? "Search results" : "All features";
+        g.text(font, heading + " (" + visibleCount + ")", contentLeft() + 8, 58, WHITE, false);
+        if (width >= 480) g.text(font, "Changes apply immediately", left(), height - 40, MUTED, false);
+    }
+
+    @Override public void removed() {
+        rememberScroll();
+        if (categories != null) categoryScroll = categories.scrollAmount();
         SlhjAddons.config().save();
-        super.onClose();
+        super.removed();
+    }
+    @Override public boolean isPauseScreen() { return false; }
+
+    private final class SettingsList extends ContainerObjectSelectionList<Row> {
+        SettingsList(int x, int width) {
+            super(SlhjSettingsScreen.this.minecraft, width, bodyHeight(), BODY_TOP, 24);
+            centerListVertically = false;
+            setX(x);
+        }
+        @Override public int getRowWidth() { return getWidth() - 16; }
+        void add(Row row, int height) { addEntry(row, height); }
     }
 
-    @Override
-    public boolean isPauseScreen() {
-        return false;
+    private record WidgetPlacement(AbstractWidget widget, int x, int y) {}
+
+    private final class Row extends ContainerObjectSelectionList.Entry<Row> {
+        private final List<WidgetPlacement> widgets = new ArrayList<>();
+        private final List<BiConsumer<GuiGraphicsExtractor, Row>> drawers = new ArrayList<>();
+        void widget(AbstractWidget widget, int x, int y) { widgets.add(new WidgetPlacement(widget, x, y)); }
+        void label(String text, int x, int y, int color) {
+            drawers.add((g, row) -> g.text(font, font.plainSubstrByWidth(text, getWidth() - x - 4),
+                    getContentX() + x, getContentY() + y, color, false));
+        }
+        @Override public void extractContent(GuiGraphicsExtractor g, int mouseX, int mouseY, boolean hovered, float partialTick) {
+            for (var drawer : drawers) drawer.accept(g, this);
+            for (WidgetPlacement placement : widgets) {
+                placement.widget().setPosition(getContentX() + placement.x(), getContentY() + placement.y());
+                placement.widget().extractRenderState(g, mouseX, mouseY, partialTick);
+            }
+        }
+        @Override public List<? extends GuiEventListener> children() { return widgets.stream().map(WidgetPlacement::widget).toList(); }
+        @Override public List<? extends NarratableEntry> narratables() { return widgets.stream().map(WidgetPlacement::widget).toList(); }
     }
 
     private static final class ConfigSlider extends AbstractSliderButton {
-        private final Setting.SliderSetting spec;
-
-        ConfigSlider(int x, int y, int w, int h, Setting.SliderSetting spec) {
-            super(x, y, w, h, Component.empty(), normalize(spec, spec.value().get()));
-            this.spec = spec;
+        private final Setting.SliderSetting setting;
+        private final DoubleConsumer changed;
+        ConfigSlider(int width, Setting.SliderSetting setting, DoubleConsumer changed) {
+            super(0, 0, width, 20, Component.empty(), normalize(setting));
+            this.setting = setting;
+            this.changed = changed;
             updateMessage();
         }
-
-        private static double normalize(Setting.SliderSetting spec, double v) {
-            return (v - spec.min()) / (spec.max() - spec.min());
+        private static double normalize(Setting.SliderSetting setting) {
+            return Math.clamp((setting.value().get() - setting.min()) / (setting.max() - setting.min()), 0, 1);
         }
-
-        private double denormalized() {
-            return spec.min() + value * (spec.max() - spec.min());
+        void refresh() { value = normalize(setting); updateMessage(); }
+        @Override protected void updateMessage() {
+            double actual = setting.min() + value * (setting.max() - setting.min());
+            setMessage(Component.literal(SettingsInputs.numberText(actual, setting.isInt())));
         }
-
-        @Override
-        protected void updateMessage() {
-            double v = denormalized();
-            String text = spec.isInt() ? String.valueOf((int) Math.round(v)) : String.format("%.2f", v);
-            setMessage(Component.literal(spec.label() + ": " + text));
+        @Override protected net.minecraft.network.chat.MutableComponent createNarrationMessage() {
+            return Component.literal(setting.label() + ": " + getMessage().getString());
         }
-
-        @Override
-        protected void applyValue() {
-            double v = denormalized();
-            spec.value().set(spec.isInt() ? (double) Math.round(v) : v);
+        @Override protected void applyValue() {
+            double actual = setting.min() + value * (setting.max() - setting.min());
+            if (setting.isInt()) actual = Math.rint(actual);
+            setting.value().set(actual);
+            changed.accept(actual);
         }
     }
 }

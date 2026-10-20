@@ -27,6 +27,7 @@ public final class AutoPetRules extends Feature {
 
     public AutoPetRules() {
         setLabel("Auto Pet Rules");
+        setDescription("Show the pet equipped by an Autopet rule.");
         category(Category.PETS);
     }
 

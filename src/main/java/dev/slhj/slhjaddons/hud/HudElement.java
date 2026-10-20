@@ -12,6 +12,8 @@ import java.util.function.Supplier;
 
 /** One persistent element, used unchanged by gameplay and the editor. */
 public final class HudElement {
+    public enum RenderLayer { HUD, SCREEN }
+    private final RenderLayer renderLayer;
     private final Feature owner;
     private final String id, label;
     private final HudPlacement placement, defaults;
@@ -23,14 +25,27 @@ public final class HudElement {
         this(owner, id, label, defaults, live, example, SlhjAddons.config());
     }
 
+    public HudElement(Feature owner, String id, String label, HudPlacement defaults,
+                      Supplier<@Nullable HudContent> live, Supplier<HudContent> example, RenderLayer layer) {
+        this(owner, id, label, defaults, live, example, SlhjAddons.config(), layer);
+    }
+
     HudElement(Feature owner, String id, String label, HudPlacement defaults,
                Supplier<@Nullable HudContent> live, Supplier<HudContent> example,
                dev.slhj.slhjaddons.config.SlhjConfig config) {
+        this(owner, id, label, defaults, live, example, config, RenderLayer.HUD);
+    }
+
+    HudElement(Feature owner, String id, String label, HudPlacement defaults,
+               Supplier<@Nullable HudContent> live, Supplier<HudContent> example,
+               dev.slhj.slhjaddons.config.SlhjConfig config, RenderLayer layer) {
+        this.renderLayer = layer;
         this.owner = owner; this.id = id; this.label = label;
         this.defaults = defaults.copy();
         this.placement = HudMigration.resolve(config, id, defaults);
         this.live = live; this.example = example;
     }
+    public RenderLayer renderLayer() { return renderLayer; }
     public String id() { return id; }
     public String label() { return label; }
     public boolean enabled() { return owner.isEnabled(); }

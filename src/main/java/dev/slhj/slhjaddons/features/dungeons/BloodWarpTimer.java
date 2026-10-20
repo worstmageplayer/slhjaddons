@@ -19,6 +19,7 @@ public final class BloodWarpTimer extends Feature {
 
     public BloodWarpTimer() {
         setLabel("Blood Warp Timer");
+        setDescription("Show elapsed time after the Blood Door opens.");
         category(Category.DUNGEONS);
     }
 

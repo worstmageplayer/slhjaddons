@@ -5,6 +5,7 @@ import dev.slhj.slhjaddons.core.Feature;
 public final class NoBlockBreakParticles extends Feature {
     public NoBlockBreakParticles() {
         setLabel("No Block Break Particles");
+        setDescription("Hide block breaking and destruction particles.");
         category( Category.MISC);
     }
 

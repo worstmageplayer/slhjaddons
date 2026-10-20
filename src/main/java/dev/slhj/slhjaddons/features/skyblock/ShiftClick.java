@@ -14,6 +14,7 @@ public final class ShiftClick extends Feature {
 
     public ShiftClick() {
         setLabel("Shift Click");
+        setDescription("Quick-move inventory items in the configured container screens.");
         category(Category.SKYBLOCK);
         containersSetting = text(
                 "shift_click.containers",

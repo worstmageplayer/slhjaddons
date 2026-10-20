@@ -19,6 +19,7 @@ public final class ChatCalc extends Feature {
 
     public static final String id = "chat_calc";
     @Override public String id() { return id; }
+    @Override public boolean toggleable() { return false; }
 
     @Override
     public void init() {

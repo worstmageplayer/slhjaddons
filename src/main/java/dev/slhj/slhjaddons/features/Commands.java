@@ -20,6 +20,7 @@ public final class Commands extends Feature {
 
     public static final String id = "commands";
     @Override public String id() { return id; }
+    @Override public boolean toggleable() { return false; }
 
     @Override
     public void init() {
@@ -84,7 +85,7 @@ public final class Commands extends Feature {
     private void list() {
         ChatUtils.chat("&e&lslhj&raddons &7features:");
         for (Feature f : SlhjAddons.features().all()) {
-            ChatUtils.chat(" &7- &f" + f.id() + " " + (f.isEnabled() ? "&aON" : "&cOFF"));
+            ChatUtils.chat(" &7- &f" + f.id() + " " + (!f.toggleable() ? "&aAlways available" : f.isEnabled() ? "&aON" : "&cOFF"));
         }
     }
 
@@ -95,6 +96,10 @@ public final class Commands extends Feature {
             return;
         }
 
+        if (!feature.toggleable()) {
+            ChatUtils.chat("&7" + id + " is always available and cannot be toggled.");
+            return;
+        }
         boolean next = !feature.isEnabled();
         SlhjConfig cfg = SlhjAddons.config();
         cfg.setFeatureEnabled(id, next);

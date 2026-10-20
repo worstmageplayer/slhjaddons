@@ -18,11 +18,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /** Edits the same persistent HUD objects drawn during gameplay. */
 public final class HudEditorScreen extends Screen {
@@ -39,10 +41,16 @@ public final class HudEditorScreen extends Screen {
     private boolean expanded, syncing;
     private int panelScroll;
     private double grabX, grabY, pointerX, pointerY;
-    private EditBox offsetX, offsetY, scale;
+    private NumberField offsetX, offsetY, scale;
     private Button edit;
+    @Nullable private final Screen parent;
 
-    public HudEditorScreen() { super(Component.literal("HUD Editor")); }
+    public HudEditorScreen() { this(null); }
+
+    public HudEditorScreen(@Nullable Screen parent) {
+        super(Component.literal("HUD Editor"));
+        this.parent = parent;
+    }
 
     private int stripWidth() { return Math.min(360, width - 12); }
     private int stripX() { return (width - stripWidth()) / 2; }
@@ -58,14 +66,25 @@ public final class HudEditorScreen extends Screen {
     }
 
     @Override protected void init() {
+        commitFields();
         selection.cancel();
         frames = SlhjAddons.hud().prepare(true);
         rebuildControls();
     }
 
     private void rebuildControls() {
+        commitFields();
+        clearFocus();
+        setFocused(null);
         clearWidgets();
+        offsetX = offsetY = scale = null;
         panelWidgets.clear(); screenAnchors.clear(); elementAnchors.clear();
+        addRenderableWidget(Button.builder(Component.literal("<"), b -> cycleSelection(-1))
+                .bounds(stripX() + stripWidth() - 148, 16, 22, 20)
+                .tooltip(Tooltip.create(Component.literal("Previous HUD element"))).build());
+        addRenderableWidget(Button.builder(Component.literal(">"), b -> cycleSelection(1))
+                .bounds(stripX() + stripWidth() - 124, 16, 22, 20)
+                .tooltip(Tooltip.create(Component.literal("Next HUD element"))).build());
         edit = addRenderableWidget(Button.builder(Component.literal(expanded ? "Hide" : "Edit"), b -> {
             expanded = !expanded;
             rebuildControls();
@@ -80,12 +99,12 @@ public final class HudEditorScreen extends Screen {
             offsetX = field(left, 126, fieldWidth, "X offset", value -> {
                 selection.selected().placement().x = value;
                 constrainSelected();
-            });
+            }, () -> selection.selected().placement().x);
             offsetY = field(right, 126, fieldWidth, "Y offset", value -> {
                 selection.selected().placement().y = value;
                 constrainSelected();
-            });
-            scale = field(left, 164, fieldWidth, "Scale", this::setScale);
+            }, () -> selection.selected().placement().y);
+            scale = field(left, 164, fieldWidth, "Scale", this::setScale, () -> selection.selected().placement().scale);
             panel(Button.builder(Component.literal("Align anchors"), b -> {
                 var p = selection.selected().placement();
                 p.x = 0; p.y = 0;
@@ -101,6 +120,7 @@ public final class HudEditorScreen extends Screen {
         } else offsetX = offsetY = scale = null;
         positionPanelWidgets();
         syncControls();
+        setFocused(edit);
     }
 
     private void addAnchorGrid(int x, boolean screen) {
@@ -122,22 +142,56 @@ public final class HudEditorScreen extends Screen {
         }
     }
 
-    private EditBox field(int x, int y, int fieldWidth, String label, Consumer<Float> update) {
-        EditBox field = new EditBox(font, x, 0, fieldWidth, 18, Component.literal(label));
-        field.setMaxLength(16);
-        field.setResponder(text -> {
-            if (syncing || selection.selected() == null) return;
-            try {
-                float value = Float.parseFloat(text);
-                if (!Float.isFinite(value)) throw new NumberFormatException();
-                update.accept(value);
-                field.setTextColor(WHITE);
-            } catch (NumberFormatException ignored) {
-                field.setTextColor(0xFFFF7777);
-            }
-        });
+    private NumberField field(int x, int y, int fieldWidth, String label, Consumer<Float> update, Supplier<Float> read) {
+        NumberField field = new NumberField(x, fieldWidth, label, update, read);
         panel(field, y);
         return field;
+    }
+
+    private void commitFields() {
+        if (offsetX != null) offsetX.commit();
+        if (offsetY != null) offsetY.commit();
+        if (scale != null) scale.commit();
+    }
+
+    private final class NumberField extends EditBox {
+        private final HudElement owner = selection.selected();
+        private final Consumer<Float> update;
+        private final Supplier<Float> read;
+        private boolean dirty;
+
+        NumberField(int x, int fieldWidth, String label, Consumer<Float> update, Supplier<Float> read) {
+            super(HudEditorScreen.this.font, x, 0, fieldWidth, 18, Component.literal(label));
+            this.update = update;
+            this.read = read;
+            setMaxLength(16);
+            setResponder(text -> {
+                if (syncing) return;
+                dirty = true;
+                setTextColor(SettingsInputs.finiteFloat(text) == null ? 0xFFFF7777 : WHITE);
+            });
+        }
+
+        void commit() {
+            if (!dirty || syncing || owner != selection.selected() || !owner.enabled()) return;
+            Float value = SettingsInputs.finiteFloat(getValue());
+            if (value != null) update.accept(value);
+            dirty = false;
+            syncing = true;
+            setValue(String.format(Locale.ROOT, "%.2f", read.get()));
+            setTextColor(WHITE);
+            syncing = false;
+        }
+
+        @Override public void setFocused(boolean focused) {
+            if (!focused && isFocused()) commit();
+            super.setFocused(focused);
+        }
+
+        @Override public boolean keyPressed(KeyEvent event) {
+            if (event.isConfirmation()) { commit(); return true; }
+            return super.keyPressed(event);
+        }
     }
 
     private void panel(AbstractWidget widget, int y) {
@@ -273,10 +327,10 @@ public final class HudEditorScreen extends Screen {
         List<HudElement> under = hits(mouseX, mouseY);
         int index = under.indexOf(selection.selected());
         String overlap = index >= 0 && under.size() > 1 ? " · " + (index + 1) + " of " + under.size() : "";
-        name = font.plainSubstrByWidth(name, Math.max(1, stripWidth() - 116 - font.width(overlap))) + overlap;
+        name = font.plainSubstrByWidth(name, Math.max(1, stripWidth() - 164 - font.width(overlap))) + overlap;
         g.text(font, name, x + 8, 27,
                 selection.selected() == null ? MUTED : GOLD, false);
-        String hint = width >= 430 ? "Click: cycle  |  Drag: move  |  Scroll: scale  |  Tab: next element"
+        String hint = expanded ? "Tab: next control · Enter: apply number" : width >= 430 ? "Click: cycle  |  Drag: move  |  Scroll: scale  |  Tab: next element"
                 : "Click: cycle · Drag: move · Tab: next";
         g.centeredText(font, hint, width / 2, height - 15, MUTED);
         if (frames.isEmpty()) {
@@ -309,6 +363,8 @@ public final class HudEditorScreen extends Screen {
     }
 
     @Override public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_LEFT && getFocused() instanceof NumberField field
+                && !field.isMouseOver(event.x(), event.y())) field.commit();
         if (super.mouseClicked(event, doubleClick)) return true;
         if (overStrip(event.x(), event.y()) || overPanel(event.x(), event.y())) return true;
         if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) return false;
@@ -351,37 +407,67 @@ public final class HudEditorScreen extends Screen {
         if (overStrip(mouseX, mouseY)) return true;
         List<HudElement> under = hits(mouseX, mouseY);
         if (under.isEmpty()) return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        commitFields();
+        setFocused(null);
         HudElement target = under.contains(selection.selected()) ? selection.selected() : under.getFirst();
         HudElement.Frame frame = frameFor(target);
         target.placement().scale = Math.clamp(target.placement().scale + (float) scrollY * .1f, .1f, 10f);
         frame.constrain(width, height);
         return true;
     }
+    private void cycleSelection(int direction) {
+        commitFields();
+        List<HudElement> enabled = frames.stream().map(HudElement.Frame::element).filter(HudElement::enabled).toList();
+        if (enabled.isEmpty()) return;
+        HudElement before = selection.selected();
+        int current = before == null ? -1 : enabled.indexOf(before);
+        int next = current < 0 ? (direction < 0 ? enabled.size() - 1 : 0)
+                : Math.floorMod(current + direction, enabled.size());
+        selection.select(enabled.get(next));
+        changedSelection(before);
+    }
+
     @Override public boolean keyPressed(KeyEvent event) {
-        if (event.shortcutKey() == 9 && !(getFocused() instanceof EditBox)) {
-            List<HudElement> enabled = frames.stream().map(HudElement.Frame::element).filter(HudElement::enabled).toList();
-            if (!enabled.isEmpty()) {
-                HudElement before = selection.selected();
-                int current = before == null ? -1 : enabled.indexOf(before);
-                int next = current < 0 ? (event.hasShiftDown() ? enabled.size() - 1 : 0)
-                        : Math.floorMod(current + (event.hasShiftDown() ? -1 : 1), enabled.size());
-                selection.select(enabled.get(next));
-                changedSelection(before);
+        if (event.shortcutKey() == 9) {
+            if (!expanded) {
+                cycleSelection(event.hasShiftDown() ? -1 : 1);
+                return true;
             }
-            return true;
+            // Include off-screen panel controls in keyboard navigation, then reveal focus.
+            for (PanelWidget entry : panelWidgets) {
+                entry.widget().visible = true;
+                entry.widget().active = true;
+            }
+            boolean handled = super.keyPressed(event);
+            for (PanelWidget entry : panelWidgets) if (entry.widget() == getFocused()) {
+                int top = entry.y() - panelScroll;
+                int bottom = top + entry.widget().getHeight();
+                if (top < 2) panelScroll = entry.y() - 2;
+                else if (bottom > panelBottom() - PANEL_TOP - 2)
+                    panelScroll = entry.y() + entry.widget().getHeight() - (panelBottom() - PANEL_TOP) + 2;
+            }
+            positionPanelWidgets();
+            return handled;
         }
         return super.keyPressed(event);
     }
     @Override public void removed() {
+        commitFields();
         selection.cancel();
         SlhjAddons.config().save();
         super.removed();
     }
     @Override public boolean isPauseScreen() { return false; }
 
+    @Override public void onClose() { minecraft.gui.setScreen(parent); }
+
     public static void openHudEditor() {
+        openHudEditor(null);
+    }
+
+    public static void openHudEditor(@Nullable Screen parent) {
         SlhjAddons.config().save();
         Minecraft mc = Minecraft.getInstance();
-        mc.execute(() -> mc.gui.setScreen(new HudEditorScreen()));
+        mc.execute(() -> mc.gui.setScreen(new HudEditorScreen(parent)));
     }
 }

@@ -14,6 +14,7 @@ public final class SuperboomSwap extends Feature {
 
     public SuperboomSwap() {
         setLabel("SuperBoom Auto Swap");
+        setDescription("Switch to Superboom TNT when clicking a breakable dungeon wall.");
         category(Category.DUNGEONS);
     }
 

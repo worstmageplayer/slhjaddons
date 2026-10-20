@@ -31,6 +31,7 @@ public final class AutoBlazeSwap extends Feature {
 
     public AutoBlazeSwap() {
         setLabel("Blaze Slayer Dagger Auto Swap");
+        setDescription("Switch daggers and attunement for a Blaze Slayer target.");
         category(Category.SLAYERS);
     }
 

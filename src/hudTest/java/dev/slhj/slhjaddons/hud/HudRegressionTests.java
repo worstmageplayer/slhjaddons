@@ -3,6 +3,9 @@ package dev.slhj.slhjaddons.hud;
 import com.google.gson.Gson;
 import dev.slhj.slhjaddons.config.SlhjConfig;
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.features.skyblock.RagnarockCooldownRegressionTests;
+import dev.slhj.slhjaddons.gui.SettingsMenuRegressionTests;
+import dev.slhj.slhjaddons.util.skyblock.MageCooldownRegressionTests;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,7 +26,16 @@ public final class HudRegressionTests {
         draggingAndAvailability();
         sharedContentAndEnablement();
         timerReadsHaveNoSideEffects();
+        screenOverlayLayer();
         System.out.println("HUD regression checks passed: " + checks);
+        MageCooldownRegressionTests.run();
+        RagnarockCooldownRegressionTests.run();
+        SettingsMenuRegressionTests.run();
+        dev.slhj.slhjaddons.core.CoreRegressionTests.run();
+        dev.slhj.slhjaddons.features.dungeons.DungeonJoinRegressionTests.run();
+        dev.slhj.slhjaddons.features.fishing.FishingRegressionTests.run();
+        dev.slhj.slhjaddons.features.misc.InputRegressionTests.run();
+        dev.slhj.slhjaddons.features.skyblock.SignHelperRegressionTests.run();
     }
     private static void check(boolean value, String message) {
         checks++;
@@ -192,6 +204,24 @@ public final class HudRegressionTests {
         }
         check(HudContent.text("first\nsecond\n", 0).lines().equals(List.of("first", "second", "")), "multiline content preserves empty lines");
     }
+    private static void screenOverlayLayer() {
+        Feature owner = new Feature() { @Override public String id() { return "overlay"; } };
+        owner.setEnabled(true);
+        AtomicInteger reads = new AtomicInteger();
+        HudContent example = HudContent.text("Most Wanted: M\nLeast Wanted: A, B", 0xFFFFFFFF);
+        var element = new HudElement(owner, "overlay", "Overlay", defaults(), () -> {
+            reads.incrementAndGet(); return null;
+        }, () -> example, new SlhjConfig(), HudElement.RenderLayer.SCREEN);
+        var manager = new HudManager(); manager.register(element);
+        check(manager.prepare(false).isEmpty() && reads.get() == 0,
+                "screen overlays excluded from normal HUD rendering before content is queried");
+        check(element.content(true) == example, "screen overlay has shared editor preview");
+        check(example.lines().size() == 2, "party preview uses two lines");
+        check(element.content(false) == null, "inactive screen has no live overlay");
+        owner.setEnabled(false);
+        check(element.content(true) == null, "disabled overlay has no editor preview");
+    }
+
     private static void timerReadsHaveNoSideEffects() {
         AtomicLong now = new AtomicLong(1000);
         var alert = new TimedHudAlert(now::get);

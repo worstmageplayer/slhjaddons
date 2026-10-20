@@ -8,13 +8,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.Items;
-import java.util.regex.Pattern;
 public final class AutoFish extends Feature {
-    private static final Pattern TIMER = Pattern.compile("^\\d\\.\\d$");
-    private boolean armed = false;
-
-    private int frameCounter = 0;
-    private int ticksSinceCatch = -1;
+    private final FishingCycle cycle = new FishingCycle();
+    private int frameCounter;
 
     private final static int DEFAULT_DELAY = 20;
     private final Setting.SliderSetting delaySetting;
@@ -22,7 +18,8 @@ public final class AutoFish extends Feature {
     public AutoFish() {
         category(Category.FISHING);
         setLabel("Auto Fish");
-        delaySetting = intSlider("auto_fish.delay", "Auto Fish Delay (ticks)", 0, 50, DEFAULT_DELAY);
+        setDescription("Reel in on a fishing alert, then cast again after a delay.");
+        delaySetting = intSlider("auto_fish.delay", "Recast Delay (ticks)", 0, 50, DEFAULT_DELAY);
     }
 
     public static final String id = "auto_fish";
@@ -31,32 +28,34 @@ public final class AutoFish extends Feature {
     @Override
     public void init() {
         ClientTickEvents.END_CLIENT_TICK.register(mc -> tick());
+        net.fabricmc.fabric.api.client.screen.v1.ScreenEvents.BEFORE_INIT.register((mc, screen, w, h) -> reset());
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.JOIN.register((h, sender, mc) -> reset());
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((h, mc) -> reset());
     }
 
+    private void reset() { cycle.reset(); frameCounter = 0; }
+    @Override protected void onDisable() { reset(); }
+
     private void tick() {
+        LocalPlayer p = ClientUtils.player();
+        if (!isEnabled() || ClientUtils.inGui() || p == null || !p.getMainHandItem().is(Items.FISHING_ROD)) {
+            reset();
+            return;
+        }
         frameCounter++;
 
-        if (ticksSinceCatch >= 0) {
-            ticksSinceCatch++;
-            if (ticksSinceCatch >= delaySetting.value().get().intValue()) {
-                InputUtils.rightClick();
-                ticksSinceCatch = -1;
-            }
+        if (cycle.tick(true, delaySetting.value().get().intValue())) {
+            InputUtils.rightClick();
+            return;
         }
 
-        if (!isEnabled() || ClientUtils.inGui()) return;
         if (frameCounter % 4 != 0) return;
-        LocalPlayer p = ClientUtils.player();
-        if (p == null || !p.getMainHandItem().is(Items.FISHING_ROD)) return;
         var box = p.getBoundingBox().inflate(8.0);
         for (ArmorStand stand : p.level().getEntitiesOfClass(ArmorStand.class, box)) {
             String name = ChatFormatting.stripFormatting(stand.getName().getString());
-            if (!armed && TIMER.matcher(name).matches()) {
-                armed = true;
-            } else if (armed && name.equals("!!!")) {
+            if (cycle.observe(name)) {
                 InputUtils.rightClick();
-                ticksSinceCatch = 0;
-                armed = false;
+                break;
             }
         }
     }

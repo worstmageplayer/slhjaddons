@@ -20,8 +20,9 @@ public final class Clock extends Feature {
 
     public Clock() {
         setLabel("Clock");
+        setDescription("Show the current local time on your HUD.");
         category(Category.MISC);
-        colorSetting = hex("clock.color", "Clock Color", DEFAULT_COLOR);
+        colorSetting = hex("clock.color", "Text Color", DEFAULT_COLOR);
     }
 
     public static final String id = "clock";

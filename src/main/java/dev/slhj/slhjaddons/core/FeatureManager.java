@@ -14,13 +14,15 @@ public final class FeatureManager {
     private final Map<String, Feature> byId = new HashMap<>();
 
     public void register(Feature feature) {
+        if (byId.containsKey(feature.id()))
+            throw new IllegalArgumentException("Duplicate feature id: " + feature.id());
         features.add(feature);
         byType.put(feature.getClass(), feature);
         byId.put(feature.id(), feature);
     }
 
     public List<Feature> all() {
-        return features;
+        return List.copyOf(features);
     }
 
     public void bootstrap() {
@@ -41,7 +43,7 @@ public final class FeatureManager {
     }
 
     public <T extends Feature> T get(Class<T> type) {
-        return (T) byType.get(type);
+        return type.cast(byType.get(type));
     }
 
     public boolean isEnabled(Class<? extends Feature> type) {

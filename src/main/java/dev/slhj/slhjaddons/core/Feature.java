@@ -31,13 +31,21 @@ public abstract class Feature {
     private boolean enabled;
     private Category category;
     private String label;
+    private String description = "";
     private final List<Setting> settings = new ArrayList<>();
 
     public abstract String id();
 
+    /** Infrastructure commands are always available and cannot be toggled. */
+    public boolean toggleable() { return true; }
+
     public String label() {
         return label;
     }
+
+    public String description() { return description; }
+
+    protected final void setDescription(String description) { this.description = description; }
 
     public void init() {}
 
@@ -45,10 +53,11 @@ public abstract class Feature {
     protected void onDisable() {}
 
     public final boolean isEnabled() {
-        return enabled;
+        return !toggleable() || enabled;
     }
 
     public final void setEnabled(boolean value) {
+        value = !toggleable() || value;
         if (value == enabled) return;
         enabled = value;
         if (value) onEnable(); else onDisable();
@@ -75,14 +84,14 @@ public abstract class Feature {
     }
 
     protected final Setting.SliderSetting slider(String key, String label, double min, double max, double def) {
-        var value = ConfigValue.ofDouble(key, def);
+        var value = ConfigValue.ofDouble(key, def, min, max, false);
         var s = new Setting.SliderSetting(value, label, min, max, false);
         settings.add(s);
         return s;
     }
 
     protected final Setting.SliderSetting intSlider(String key, String label, int min, int max, int def) {
-        var value = ConfigValue.ofDouble(key, def);
+        var value = ConfigValue.ofDouble(key, def, min, max, true);
         var s = new Setting.SliderSetting(value, label, min, max, true);
         settings.add(s);
         return s;

@@ -18,6 +18,7 @@ public final class HudManager {
     public List<HudElement.Frame> prepare(boolean editor) {
         List<HudElement.Frame> frames = new ArrayList<>();
         for (HudElement element : elements) {
+            if (!editor && element.renderLayer() == HudElement.RenderLayer.SCREEN) continue;
             HudElement.Frame frame = element.prepare(editor);
             if (frame != null) frames.add(frame);
         }

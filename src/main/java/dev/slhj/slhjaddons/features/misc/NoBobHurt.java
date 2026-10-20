@@ -5,6 +5,7 @@ import dev.slhj.slhjaddons.core.Feature;
 public final class NoBobHurt extends Feature {
     public NoBobHurt() {
         setLabel("No Bob Hurt");
+        setDescription("Disable the camera shake when taking damage.");
         category(Category.MISC);
     }
     

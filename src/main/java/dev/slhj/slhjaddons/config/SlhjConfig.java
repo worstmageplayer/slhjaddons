@@ -40,8 +40,13 @@ public final class SlhjConfig {
     }
 
     public boolean getBool(String key, boolean def) {
-        try { return Boolean.parseBoolean(values.get(key)); }
-        catch (Exception e) { return def; }
+        return parseBoolean(values.get(key), def);
+    }
+
+    public static boolean parseBoolean(String raw, boolean def) {
+        if ("true".equalsIgnoreCase(raw)) return true;
+        if ("false".equalsIgnoreCase(raw)) return false;
+        return def;
     }
 
     public int getInt(String key, int def) {

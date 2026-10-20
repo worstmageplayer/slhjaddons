@@ -16,6 +16,7 @@ import dev.slhj.slhjaddons.features.misc.*;
 import dev.slhj.slhjaddons.features.pets.AutoPetRules;
 import dev.slhj.slhjaddons.features.skyblock.*;
 import dev.slhj.slhjaddons.features.slayers.AutoBlazeSwap;
+import dev.slhj.slhjaddons.util.skyblock.CooldownUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import org.slf4j.Logger;
@@ -53,7 +54,6 @@ public final class SlhjAddons implements ClientModInitializer {
         FEATURES.register(new AutoZombieShootout());
         FEATURES.register(new AutoBlazeSwap());
         FEATURES.register(new BloodWarpTimer());
-        FEATURES.register(new CancelSlotHighlight());
         FEATURES.register(new DungeonCommands());
         FEATURES.register(new GoldenFishAlert());
         FEATURES.register(new PartyFinderHelper());
@@ -65,6 +65,7 @@ public final class SlhjAddons implements ClientModInitializer {
         FEATURES.register(new NoFog());
         FEATURES.register(new NoBlockBreakParticles());
 
+        CooldownUtils.init();
         FEATURES.bootstrap();
         HUD.init();
 

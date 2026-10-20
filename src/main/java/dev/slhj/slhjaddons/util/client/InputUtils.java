@@ -34,13 +34,10 @@ public final class InputUtils {
         Minecraft mc = ClientUtils.mc();
         if (p == null || mc.gameMode == null) return;
 
-        if (requireEntityInRange) {
-            if (mc.hitResult instanceof EntityHitResult entityHit) {
-                Entity target = entityHit.getEntity();
-                mc.gameMode.attack(p, target);
-            } else {
-                return;
-            }
+        if (mc.hitResult instanceof EntityHitResult entityHit) {
+            mc.gameMode.attack(p, entityHit.getEntity());
+        } else if (requireEntityInRange) {
+            return;
         }
         p.swing(InteractionHand.MAIN_HAND, p.getMainHandItem().getAttackAnimation(), false);
         p.connection.send(ServerboundPunchPacket.INSTANCE);

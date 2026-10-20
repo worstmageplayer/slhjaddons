@@ -20,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class AbstractSignEditScreenMixin {
 
     @Final @Shadow private String[] messages;
+    @Unique private boolean slhj$initialized;
 
     @Inject(method = "keyPressed", at = @At("RETURN"))
     private void slhj$onKeyPressed(KeyEvent event, CallbackInfoReturnable<Boolean> cir) {
@@ -31,16 +32,31 @@ public abstract class AbstractSignEditScreenMixin {
         pushToFeature();
     }
 
-    @Inject(method = "onDone", at = @At("HEAD"))
-    private void slhj$onDone(CallbackInfo ci) {
-        if (!SlhjAddons.isEnabled(SignHelper.class)) return;
-        if (messages == null || messages.length == 0) return;
-        if (messages.length < 2 || !INPUT_SIGN_MARKER.equals(messages[1])) return;
-
+    @Inject(method = "init", at = @At("TAIL"))
+    private void slhj$init(CallbackInfo ci) {
         SignHelper feature = SlhjAddons.features().get(SignHelper.class);
-        if (feature == null) return;
+        if (feature != null && !slhj$initialized) feature.resetSign();
+        slhj$initialized = true;
+        pushToFeature();
+    }
 
+    @Inject(method = "removed", at = @At("HEAD"))
+    private void slhj$submit(CallbackInfo ci) {
+        if (!SlhjAddons.isEnabled(SignHelper.class) || !supportedSign()) return;
+        SignHelper feature = SlhjAddons.features().get(SignHelper.class);
+        feature.updateFromSignLine(messages[0]);
         messages[0] = feature.getResult();
+    }
+
+    @Inject(method = "removed", at = @At("TAIL"))
+    private void slhj$removed(CallbackInfo ci) {
+        SignHelper feature = SlhjAddons.features().get(SignHelper.class);
+        if (feature != null) feature.resetSign();
+    }
+
+    @Unique
+    private boolean supportedSign() {
+        return messages != null && messages.length >= 2 && INPUT_SIGN_MARKER.equals(messages[1]);
     }
 
     @Unique
@@ -49,8 +65,8 @@ public abstract class AbstractSignEditScreenMixin {
         SignHelper feature = SlhjAddons.features().get(SignHelper.class);
         if (feature == null || messages == null || messages.length == 0) return;
 
-        if (messages.length < 2 || !INPUT_SIGN_MARKER.equals(messages[1])) {
-            feature.setDisplayFormula(null);
+        if (!supportedSign()) {
+            feature.resetSign();
             return;
         }
         feature.updateFromSignLine(messages[0]);
@@ -58,7 +74,7 @@ public abstract class AbstractSignEditScreenMixin {
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void slhj$extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, CallbackInfo ci) {
-        if (!SlhjAddons.isEnabled(SignHelper.class)) return;
+        if (!SlhjAddons.isEnabled(SignHelper.class) || !supportedSign()) return;
         SignHelper feature = SlhjAddons.features().get(SignHelper.class);
         if (feature != null) feature.render(graphics);
     }

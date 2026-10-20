@@ -7,7 +7,6 @@ import dev.slhj.slhjaddons.hud.HudAnchor;
 import dev.slhj.slhjaddons.hud.HudContent;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudPlacement;
-import dev.slhj.slhjaddons.hud.TimedHudAlert;
 import dev.slhj.slhjaddons.util.client.ChatUtils;
 import dev.slhj.slhjaddons.util.client.ClientUtils;
 import dev.slhj.slhjaddons.util.skyblock.CooldownUtils;
@@ -20,18 +19,20 @@ public final class RagnarockCooldown extends Feature {
 
     private static final long BASE_COOLDOWN_MS = 20_000L;
 
-    private final TimedHudAlert alert = new TimedHudAlert();
-    private long cooldownMs = BASE_COOLDOWN_MS;
-    private boolean onCooldown = false;
+    private final RagnarockCooldownTimer timer = new RagnarockCooldownTimer(
+            () -> Math.round(BASE_COOLDOWN_MS * CooldownUtils.getCooldownMultiplier()));
 
     private final Setting.TextSetting readyMessage;
     private final Setting.ToggleSetting playSoundOnReady;
+    private final Setting.SliderSetting readyVolume;
 
     public RagnarockCooldown() {
         setLabel("Ragnarock Cooldown Timer");
+        setDescription("Track Ragnarock cooldown, including dungeon Mage reductions.");
         category(Category.SKYBLOCK);
         readyMessage = text("rag_cooldown.message", "Ready Message", "&r&5&lRagnarock &aReady!");
         playSoundOnReady = toggle("rag_cooldown.play_sound", "Play Sound On Ready", false);
+        readyVolume = intSlider("rag_cooldown.sound_volume", "Ready Sound Volume (%)", 0, 100, 50);
     }
 
     public static final String id = "rag_cooldown";
@@ -42,44 +43,37 @@ public final class RagnarockCooldown extends Feature {
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (!isEnabled() || !overlay) return;
             String text = ChatFormatting.stripFormatting(message.getString());
-            if (text.contains("CASTING") && !onCooldown) startCooldown();
+            timer.onActionBar(text);
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> update());
-        ClientPlayConnectionEvents.DISCONNECT.register((h, c) -> reset());
+        ClientPlayConnectionEvents.DISCONNECT.register((h, c) -> timer.reset());
 
         // worldLoad -> reset
-        ClientPlayConnectionEvents.JOIN.register((h, s, c) -> reset());
+        ClientPlayConnectionEvents.JOIN.register((h, s, c) -> timer.reset());
 
         SlhjAddons.hud().register(new HudElement(this, "rag_cooldown", "Ragnarock Cooldown",
                 new HudPlacement(HudAnchor.TOP_LEFT, HudAnchor.TOP_LEFT, 10, 10, 1), this::content,
                 () -> HudContent.text("Rag Axe: 12.3", 0xFFFFFFFF)));
     }
 
-    private void startCooldown() {
-        cooldownMs = (long) (BASE_COOLDOWN_MS * CooldownUtils.getCooldownMultiplier());
-        alert.show();
-        onCooldown = true;
-    }
-
-    private void reset() {
-        onCooldown = false;
-        cooldownMs = BASE_COOLDOWN_MS;
-        alert.reset();
-    }
-
     private void update() {
-        if (!isEnabled() || !onCooldown || alert.remainingMs(cooldownMs) > 0) return;
-        onCooldown = false;
+        if (!isEnabled() || !timer.tick()) return;
         if (playSoundOnReady.value().get() && ClientUtils.player() != null) {
-            // Preserve the existing sound setting; sound playback is not implemented yet.
+            ClientUtils.mc().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                    net.minecraft.sounds.SoundEvents.NOTE_BLOCK_PLING.value(), 1f, readyVolume.value().get().floatValue() / 100f));
         }
         ChatUtils.chat(readyMessage.value().get());
     }
 
     private HudContent content() {
-        long remaining = alert.remainingMs(cooldownMs);
-        if (!onCooldown || remaining <= 0) return null;
+        long remaining = timer.remainingMs();
+        if (remaining <= 0) return null;
         return HudContent.text("Rag Axe: " + String.format("%.1f", remaining / 1000.0), 0xFFFFFFFF);
+    }
+
+    @Override
+    protected void onDisable() {
+        timer.reset();
     }
 }

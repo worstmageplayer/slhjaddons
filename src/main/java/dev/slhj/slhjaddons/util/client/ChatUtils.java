@@ -13,8 +13,16 @@ public final class ChatUtils {
     }
 
     public static void runCommand(String cmd) {
+        cmd = normalizeCommand(cmd);
+        if (cmd.isEmpty()) return;
         LocalPlayer p = ClientUtils.player();
         if (p != null) p.connection.sendCommand(cmd);
+    }
+
+    public static String normalizeCommand(String cmd) {
+        if (cmd == null) return "";
+        String normalized = cmd.strip();
+        return normalized.startsWith("/") ? normalized.substring(1).stripLeading() : normalized;
     }
 
     @Nullable

@@ -20,6 +20,7 @@ public final class AutoZombieShootout extends Feature {
 
     public AutoZombieShootout() {
         setLabel("Auto Zombie Shootout");
+        setDescription("Aim at zombies and use a held Dart during Zombie Shootout.");
         category(Category.EVENTS);
     }
 

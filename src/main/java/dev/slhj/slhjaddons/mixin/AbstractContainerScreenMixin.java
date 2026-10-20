@@ -3,10 +3,9 @@ package dev.slhj.slhjaddons.mixin;
 import com.mojang.blaze3d.platform.InputConstants;
 
 import dev.slhj.slhjaddons.SlhjAddons;
-import dev.slhj.slhjaddons.features.skyblock.CancelSlotHighlight;
 import dev.slhj.slhjaddons.features.skyblock.ShiftClick;
 import dev.slhj.slhjaddons.util.client.ClientUtils;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import dev.slhj.slhjaddons.util.client.ContainerScreenPosition;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -18,23 +17,22 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractContainerScreen.class)
-public abstract class AbstractContainerScreenMixin {
+public abstract class AbstractContainerScreenMixin implements ContainerScreenPosition {
 
     @Shadow protected Slot hoveredSlot;
+    @Shadow protected int leftPos;
+    @Shadow protected int topPos;
     @Shadow public abstract AbstractContainerMenu getMenu();
+
+    @Override public int slhj$getLeftPos() { return leftPos; }
+    @Override public int slhj$getTopPos() { return topPos; }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void slhj$shiftClick(MouseButtonEvent event, boolean doubleClick, CallbackInfoReturnable<Boolean> cir) {
         if (handleShiftClick(event)) cir.setReturnValue(true);
-    }
-
-    @Inject(method = "extractSlotHighlightFront", at = @At("HEAD"), cancellable = true)
-    private void slhj$extractSlotHighlightFront(GuiGraphicsExtractor graphics, CallbackInfo ci) {
-        if (SlhjAddons.isEnabled(CancelSlotHighlight.class)) ci.cancel();
     }
 
     @Unique
@@ -46,7 +44,8 @@ public abstract class AbstractContainerScreenMixin {
         Object self = this;
         String title = ((AbstractContainerScreen<?>) self).getTitle().getString();
         if (!feature.containers().contains(title)) return false;
-        if (hoveredSlot.index < 54) return false;
+        var player = ClientUtils.player();
+        if (player == null || hoveredSlot.container != player.getInventory()) return false;
 
         MultiPlayerGameMode multiplayerGameMode =  ClientUtils.mc().gameMode;
         if (multiplayerGameMode == null) return false;
@@ -55,7 +54,7 @@ public abstract class AbstractContainerScreenMixin {
                 hoveredSlot.index,
                 0,
                 ContainerInput.QUICK_MOVE,
-                ClientUtils.player());
+                player);
         return true;
     }
 }

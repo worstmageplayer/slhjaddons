@@ -13,7 +13,7 @@ import net.minecraft.client.KeyMapping;
 public final class AutoClick extends Feature {
 
     private KeyMapping key;
-    private int tickCounter = 0;
+    private final dev.slhj.slhjaddons.util.client.ClickPacer pacer = new dev.slhj.slhjaddons.util.client.ClickPacer();
     private final static int DEFAULT_CPS = 10;
 
     private final Setting.SliderSetting cpsSetting;
@@ -22,8 +22,9 @@ public final class AutoClick extends Feature {
     public AutoClick() {
         category(Category.MISC);
         setLabel("Auto Click");
-        cpsSetting = intSlider("auto_click.cps", "Auto Click CPS", 0, 40, DEFAULT_CPS);
-        entityInRange = toggle("auto_click.entity_in_range", "Auto Click Requires Entity In Range", true);
+        setDescription("Click while holding the Auto Click key; hold right mouse to use right clicks. Change the key in Options > Controls > Key Binds.");
+        cpsSetting = intSlider("auto_click.cps", "Click Rate (CPS)", 0, 20, DEFAULT_CPS);
+        entityInRange = toggle("auto_click.entity_in_range", "Requires Entity In Range", true);
     }
 
 
@@ -40,16 +41,13 @@ public final class AutoClick extends Feature {
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> tick());
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((h, mc) -> pacer.reset());
     }
 
     private void tick() {
-        if (!isEnabled() || ClientUtils.inGui()) return;
-        if (!key.isDown()) return;
 
         int cps = cpsSetting.value().get().intValue();
-        int interval = Math.max(1, 20 / Math.max(1, cps));
-
-        if (tickCounter++ % interval == 0) {
+        if (pacer.tick(cps, isEnabled() && !ClientUtils.inGui() && ClientUtils.player() != null && key.isDown())) {
             if (isMouse2Down()) {
                 InputUtils.rightClick();
             } else {
@@ -64,6 +62,6 @@ public final class AutoClick extends Feature {
 
     @Override
     protected void onDisable() {
-        tickCounter = 0;
+        pacer.reset();
     }
 }
