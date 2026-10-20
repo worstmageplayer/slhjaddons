@@ -2,8 +2,13 @@ package dev.slhj.slhjaddons.hud;
 
 import com.google.gson.Gson;
 import dev.slhj.slhjaddons.config.SlhjConfig;
+import dev.slhj.slhjaddons.core.CoreRegressionTests;
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.features.dungeons.DungeonJoinRegressionTests;
+import dev.slhj.slhjaddons.features.fishing.FishingRegressionTests;
+import dev.slhj.slhjaddons.features.misc.InputRegressionTests;
 import dev.slhj.slhjaddons.features.skyblock.RagnarockCooldownRegressionTests;
+import dev.slhj.slhjaddons.features.skyblock.SignHelperRegressionTests;
 import dev.slhj.slhjaddons.gui.SettingsMenuRegressionTests;
 import dev.slhj.slhjaddons.util.skyblock.MageCooldownRegressionTests;
 
@@ -11,7 +16,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-/** Dependency-free regression suite, run by Gradle's hudTest task and check lifecycle. */
 public final class HudRegressionTests {
     private static int checks;
     private static final float SW = 1000, SH = 800, W = 60, H = 40;
@@ -31,11 +35,11 @@ public final class HudRegressionTests {
         MageCooldownRegressionTests.run();
         RagnarockCooldownRegressionTests.run();
         SettingsMenuRegressionTests.run();
-        dev.slhj.slhjaddons.core.CoreRegressionTests.run();
-        dev.slhj.slhjaddons.features.dungeons.DungeonJoinRegressionTests.run();
-        dev.slhj.slhjaddons.features.fishing.FishingRegressionTests.run();
-        dev.slhj.slhjaddons.features.misc.InputRegressionTests.run();
-        dev.slhj.slhjaddons.features.skyblock.SignHelperRegressionTests.run();
+        CoreRegressionTests.run();
+        DungeonJoinRegressionTests.run();
+        FishingRegressionTests.run();
+        InputRegressionTests.run();
+        SignHelperRegressionTests.run();
     }
     private static void check(boolean value, String message) {
         checks++;

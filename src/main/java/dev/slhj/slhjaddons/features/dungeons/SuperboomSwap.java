@@ -11,15 +11,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public final class SuperboomSwap extends Feature {
-
     public SuperboomSwap() {
         setLabel("SuperBoom Auto Swap");
         setDescription("Switch to Superboom TNT when clicking a breakable dungeon wall.");
-        category(Category.DUNGEONS);
+        setCategory(Category.DUNGEONS);
     }
 
-    public static final String id = "superboom_swap";
-    @Override public String id() { return id; }
+    public static final String ID = "superboom_swap";
+    @Override public String id() { return ID; }
 
     @Override
     public void init() {
@@ -41,7 +40,7 @@ public final class SuperboomSwap extends Feature {
                     break;
                 }
             }
-            return InteractionResult.PASS; // don't eat the click
+            return InteractionResult.PASS;
         });
     }
 }

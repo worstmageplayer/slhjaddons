@@ -7,7 +7,6 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.IntSupplier;
 
-/** Standard button chrome with a checkerboard showing the color's actual opacity. */
 final class ColorSwatchButton extends Button {
     private final IntSupplier color;
 

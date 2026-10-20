@@ -2,10 +2,10 @@ package dev.slhj.slhjaddons.core;
 
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.config.SlhjConfig;
-import dev.slhj.slhjaddons.features.Commands;
 import dev.slhj.slhjaddons.features.ChatCalc;
-import dev.slhj.slhjaddons.features.misc.QuickCommands;
+import dev.slhj.slhjaddons.features.Commands;
 import dev.slhj.slhjaddons.features.misc.AutoClick;
+import dev.slhj.slhjaddons.features.misc.QuickCommands;
 
 public final class CoreRegressionTests {
     private static int checks;
@@ -18,11 +18,11 @@ public final class CoreRegressionTests {
     }
     public static void run() {
         SlhjConfig config = new SlhjConfig();
-        check(config.getBool("missing", true), "missing legacy boolean respects true default");
+        check(config.getBoolean("missing", true), "missing legacy boolean respects true default");
         config.set("bad", "maybe");
-        check(config.getBool("bad", true), "malformed boolean respects default");
+        check(config.getBoolean("bad", true), "malformed boolean respects default");
         config.set("bad", "false");
-        check(!config.getBool("bad", true), "explicit false preserved");
+        check(!config.getBoolean("bad", true), "explicit false preserved");
         config.set("rate", "40");
         var rate = new ConfigValue<>("rate", 10.0, Double::parseDouble, String::valueOf,
                 value -> ConfigValue.normalizeNumber(value, 10, 0, 20, true), config);
@@ -36,7 +36,6 @@ public final class CoreRegressionTests {
         rate.set(Double.NaN);
         check(rate.get() == 10, "non-finite assignments use default");
 
-        // Exercise real feature construction and coupled ConfigValues without a game client.
         try {
             var configField = SlhjAddons.class.getDeclaredField("config");
             configField.setAccessible(true);
@@ -70,7 +69,7 @@ public final class CoreRegressionTests {
                 config.setFeatureEnabled("chat_calc", false);
                 manager.syncFromConfig();
                 check(commands.isEnabled() && calculator.isEnabled(), "infrastructure stays available with saved OFF toggles");
-                check(!commands.toggleable() && !calculator.toggleable(), "infrastructure explicitly non-toggleable");
+                check(!commands.isToggleable() && !calculator.isToggleable(), "infrastructure explicitly non-toggleable");
                 commands.setEnabled(false);
                 check(commands.isEnabled(), "direct disable cannot switch infrastructure off");
                 try {
@@ -82,7 +81,7 @@ public final class CoreRegressionTests {
                 }
                 Feature normal = new Feature() { @Override public String id() { return "test"; } };
                 normal.setEnabled(true); normal.setEnabled(false);
-                check(!normal.isEnabled() && normal.toggleable(), "ordinary features still disable normally");
+                check(!normal.isEnabled() && normal.isToggleable(), "ordinary features still disable normally");
             } finally { configField.set(null, previous); }
         } catch (ReflectiveOperationException e) { throw new AssertionError(e); }
         System.out.println("Core regression checks passed: " + checks);

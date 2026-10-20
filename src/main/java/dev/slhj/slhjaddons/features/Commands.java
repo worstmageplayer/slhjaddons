@@ -17,10 +17,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
 public final class Commands extends Feature {
-
-    public static final String id = "commands";
-    @Override public String id() { return id; }
-    @Override public boolean toggleable() { return false; }
+    public static final String ID = "commands";
+    @Override public String id() { return ID; }
+    @Override public boolean isToggleable() { return false; }
 
     @Override
     public void init() {
@@ -39,7 +38,7 @@ public final class Commands extends Feature {
                                 }))
                         .then(ClientCommands.literal("component_custom_data")
                                 .executes(ctx -> {
-                                    copyNBT();
+                                    copyNbt();
                                     return 1;
                                 }))
                         .then(ClientCommands.literal("hud")
@@ -55,7 +54,7 @@ public final class Commands extends Feature {
                                         })))));
     }
 
-    private void copyNBT() {
+    private void copyNbt() {
         Player player = ClientUtils.mc().player;
         if (player == null) return;
 
@@ -85,7 +84,7 @@ public final class Commands extends Feature {
     private void list() {
         ChatUtils.chat("&e&lslhj&raddons &7features:");
         for (Feature f : SlhjAddons.features().all()) {
-            ChatUtils.chat(" &7- &f" + f.id() + " " + (!f.toggleable() ? "&aAlways available" : f.isEnabled() ? "&aON" : "&cOFF"));
+            ChatUtils.chat(" &7- &f" + f.id() + " " + (!f.isToggleable() ? "&aAlways available" : f.isEnabled() ? "&aON" : "&cOFF"));
         }
     }
 
@@ -96,7 +95,7 @@ public final class Commands extends Feature {
             return;
         }
 
-        if (!feature.toggleable()) {
+        if (!feature.isToggleable()) {
             ChatUtils.chat("&7" + id + " is always available and cannot be toggled.");
             return;
         }

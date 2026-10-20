@@ -3,7 +3,6 @@ package dev.slhj.slhjaddons.hud;
 import java.util.List;
 import java.util.function.Predicate;
 
-/** Click/drag state independent of rendering. Hits are in topmost-first order. */
 public final class HudSelection<T> {
     private T selected, pressed;
     private List<T> pressHits = List.of();

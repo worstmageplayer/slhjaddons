@@ -17,6 +17,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -26,7 +27,6 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.DoubleConsumer;
 
-/** One scrolling settings list with category shortcuts, using Minecraft's native widgets. */
 public final class SlhjSettingsScreen extends Screen {
     private static final int BODY_TOP = 72, WHITE = 0xFFFFFFFF, MUTED = 0xFFAAAAAA, ERROR = 0xFFFF7777;
     private final SettingsMenuState state = new SettingsMenuState();
@@ -172,7 +172,7 @@ public final class SlhjSettingsScreen extends Screen {
                         case Setting.ToggleSetting s -> reset(s.value());
                         case Setting.SliderSetting s -> reset(s.value());
                         case Setting.TextSetting s -> reset(s.value());
-                        case Setting.HexSetting s -> reset(s.value());
+                        case Setting.ColorSetting s -> reset(s.value());
                         case Setting.ButtonSetting ignored -> { }
                     }
                 }
@@ -185,7 +185,7 @@ public final class SlhjSettingsScreen extends Screen {
         }
     }
 
-    private static <T> void reset(ConfigValue<T> value) { value.set(value.def()); }
+    private static <T> void reset(ConfigValue<T> value) { value.set(value.defaultValue()); }
     private static Component toggleMessage(boolean enabled) {
         return Component.literal(enabled ? "ON" : "OFF");
     }
@@ -202,7 +202,7 @@ public final class SlhjSettingsScreen extends Screen {
             }
             case Setting.SliderSetting slider -> addNumber(slider);
             case Setting.TextSetting text -> addText(text);
-            case Setting.HexSetting hex -> addColor(hex);
+            case Setting.ColorSetting hex -> addColor(hex);
             case Setting.ButtonSetting button -> {
                 Row row = new Row();
                 row.widget(Button.builder(Component.literal(button.buttonText()), b -> button.action().run())
@@ -218,34 +218,33 @@ public final class SlhjSettingsScreen extends Screen {
         int fieldWidth = Math.min(70, rowWidth() / 3);
         EditBox number = new EditBox(font, 0, 0, fieldWidth, 20, Component.literal(setting.label()));
         number.setMaxLength(16);
-        number.setValue(drafts.getOrDefault(setting.key(), SettingsInputs.numberText(setting.value().get(), setting.isInt())));
-        number.setTextColor(SettingsInputs.number(number.getValue(), setting.min(), setting.max(), setting.isInt()) == null ? ERROR : WHITE);
+        number.setValue(drafts.getOrDefault(setting.key(), SettingsInputs.numberText(setting.value().get(), setting.integer())));
+        number.setTextColor(SettingsInputs.number(number.getValue(), setting.min(), setting.max(), setting.integer()) == null ? ERROR : WHITE);
         ConfigSlider slider = new ConfigSlider(rowWidth() - fieldWidth - 6, setting, value -> {
             drafts.remove(setting.key());
-            number.setValue(SettingsInputs.numberText(value, setting.isInt()));
+            number.setValue(SettingsInputs.numberText(value, setting.integer()));
         });
         number.setResponder(text -> {
             drafts.put(setting.key(), text);
-            Double value = SettingsInputs.number(text, setting.min(), setting.max(), setting.isInt());
+            Double value = SettingsInputs.number(text, setting.min(), setting.max(), setting.integer());
             number.setTextColor(value == null ? ERROR : WHITE);
             if (value != null) { setting.value().set(value); slider.refresh(); }
         });
         row.widget(slider, 0, 13);
         row.widget(number, rowWidth() - fieldWidth, 13);
         row.drawers.add((g, entry) -> {
-            // A coupled setting (for example wheel radii) may have changed this value.
             if (!number.isFocused()) {
-                String actual = SettingsInputs.numberText(setting.value().get(), setting.isInt());
-                if (!actual.equals(number.getValue()) && SettingsInputs.number(number.getValue(), setting.min(), setting.max(), setting.isInt()) != null) {
+                String actual = SettingsInputs.numberText(setting.value().get(), setting.integer());
+                if (!actual.equals(number.getValue()) && SettingsInputs.number(number.getValue(), setting.min(), setting.max(), setting.integer()) != null) {
                     drafts.remove(setting.key());
                     number.setValue(actual);
                     slider.refresh();
                 }
             }
-            boolean valid = SettingsInputs.number(number.getValue(), setting.min(), setting.max(), setting.isInt()) != null;
-            String range = SettingsInputs.numberText(setting.min(), setting.isInt()) + " - "
-                    + SettingsInputs.numberText(setting.max(), setting.isInt());
-            g.text(font, (valid ? "Range: " : "Enter ") + range + (valid || !setting.isInt() ? "" : " (whole numbers)"),
+            boolean valid = SettingsInputs.number(number.getValue(), setting.min(), setting.max(), setting.integer()) != null;
+            String range = SettingsInputs.numberText(setting.min(), setting.integer()) + " - "
+                    + SettingsInputs.numberText(setting.max(), setting.integer());
+            g.text(font, (valid ? "Range: " : "Enter ") + range + (valid || !setting.integer() ? "" : " (whole numbers)"),
                     entry.getContentX(), entry.getContentY() + 35, valid ? MUTED : ERROR, false);
         });
         options.add(row, 49);
@@ -270,7 +269,7 @@ public final class SlhjSettingsScreen extends Screen {
         options.add(row, preview ? 51 : 40);
     }
 
-    private void addColor(Setting.HexSetting setting) {
+    private void addColor(Setting.ColorSetting setting) {
         Row row = new Row();
         row.label(setting.label(), 0, 0, WHITE);
         EditBox hex = new EditBox(font, 0, 0, rowWidth() - 26, 20, Component.literal(setting.label()));
@@ -369,14 +368,14 @@ public final class SlhjSettingsScreen extends Screen {
         void refresh() { value = normalize(setting); updateMessage(); }
         @Override protected void updateMessage() {
             double actual = setting.min() + value * (setting.max() - setting.min());
-            setMessage(Component.literal(SettingsInputs.numberText(actual, setting.isInt())));
+            setMessage(Component.literal(SettingsInputs.numberText(actual, setting.integer())));
         }
-        @Override protected net.minecraft.network.chat.MutableComponent createNarrationMessage() {
+        @Override protected MutableComponent createNarrationMessage() {
             return Component.literal(setting.label() + ": " + getMessage().getString());
         }
         @Override protected void applyValue() {
             double actual = setting.min() + value * (setting.max() - setting.min());
-            if (setting.isInt()) actual = Math.rint(actual);
+            if (setting.integer()) actual = Math.rint(actual);
             setting.value().set(actual);
             changed.accept(actual);
         }

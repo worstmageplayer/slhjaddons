@@ -13,16 +13,15 @@ import net.minecraft.network.chat.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Color and alpha editing using Minecraft's standard sliders and text field. */
 final class ColorPickerScreen extends Screen {
     private final Screen parent;
-    private final Setting.HexSetting setting;
+    private final Setting.ColorSetting setting;
     private final int original;
     private final List<ChannelSlider> channels = new ArrayList<>();
     private EditBox hex;
     private boolean syncing, invalid, accepted;
 
-    ColorPickerScreen(Screen parent, Setting.HexSetting setting) {
+    ColorPickerScreen(Screen parent, Setting.ColorSetting setting) {
         super(Component.literal(setting.label()));
         this.parent = parent;
         this.setting = setting;
@@ -56,7 +55,7 @@ final class ColorPickerScreen extends Screen {
         });
         int gap = 6, buttonWidth = (controlWidth() - 2 * gap) / 3;
         addRenderableWidget(Button.builder(Component.literal("Default"), b -> {
-            setting.value().set(setting.value().def());
+            setting.value().set(setting.value().defaultValue());
             refresh();
         }).bounds(left(), height - 28, buttonWidth, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose()).bounds(left() + buttonWidth + gap, height - 28, buttonWidth, 20).build());

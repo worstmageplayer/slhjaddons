@@ -1,7 +1,6 @@
 package dev.slhj.slhjaddons.mixin;
 
 import com.mojang.blaze3d.platform.InputConstants;
-
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.features.skyblock.ShiftClick;
 import dev.slhj.slhjaddons.util.client.ClientUtils;
@@ -21,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(AbstractContainerScreen.class)
 public abstract class AbstractContainerScreenMixin implements ContainerScreenPosition {
-
     @Shadow protected Slot hoveredSlot;
     @Shadow protected int leftPos;
     @Shadow protected int topPos;
@@ -47,7 +45,7 @@ public abstract class AbstractContainerScreenMixin implements ContainerScreenPos
         var player = ClientUtils.player();
         if (player == null || hoveredSlot.container != player.getInventory()) return false;
 
-        MultiPlayerGameMode multiplayerGameMode =  ClientUtils.mc().gameMode;
+        MultiPlayerGameMode multiplayerGameMode = ClientUtils.mc().gameMode;
         if (multiplayerGameMode == null) return false;
         multiplayerGameMode.handleContainerInput(
                 getMenu().containerId,

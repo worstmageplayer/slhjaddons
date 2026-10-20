@@ -1,6 +1,5 @@
 package dev.slhj.slhjaddons.util.client;
 
-/** One pulse at most per tick; fractional rates do not accumulate bursts. */
 public final class ClickPacer {
     private int credit;
     private boolean running;

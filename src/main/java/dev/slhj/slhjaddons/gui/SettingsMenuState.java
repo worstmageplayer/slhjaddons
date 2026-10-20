@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/** Navigation state survives child screens and window/GUI-scale changes. */
 final class SettingsMenuState {
     private static final List<Feature.Category> ORDER = List.of(Feature.Category.SKYBLOCK,
             Feature.Category.DUNGEONS, Feature.Category.FISHING, Feature.Category.SLAYERS,

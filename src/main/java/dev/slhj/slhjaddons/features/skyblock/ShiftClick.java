@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ShiftClick extends Feature {
-
     private static final String DEFAULT_CONTAINERS = "Trades,Your Equipment and Stats";
 
     private final Setting.TextSetting containersSetting;
@@ -15,7 +14,7 @@ public final class ShiftClick extends Feature {
     public ShiftClick() {
         setLabel("Shift Click");
         setDescription("Quick-move inventory items in the configured container screens.");
-        category(Category.SKYBLOCK);
+        setCategory(Category.SKYBLOCK);
         containersSetting = text(
                 "shift_click.containers",
                 "Containers",
@@ -23,12 +22,8 @@ public final class ShiftClick extends Feature {
                 "Containers to Shift Click, e.g. Trades,Your Equipment and Stats");
     }
 
-    public static final String id = "shift_click";
-    @Override public String id() { return id; }
-
-    @Override
-    public void init() {
-    }
+    public static final String ID = "shift_click";
+    @Override public String id() { return ID; }
 
     public List<String> containers() {
         List<String> result = new ArrayList<>();

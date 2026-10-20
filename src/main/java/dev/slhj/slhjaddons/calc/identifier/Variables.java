@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Variables {
-    private static final Map<String, BigDecimal> variableMap = new HashMap<>();
+    private static final Map<String, BigDecimal> VARIABLES = new HashMap<>();
     static {
         add("pi", "3.14159265358979323846264338327950288419716939937510");
         add("phi", "1.61803398874989484820458683436563811772030917980576");
@@ -33,39 +33,39 @@ public class Variables {
         if (includes(name)) {
             throw new RuntimeException(String.format("Variable %s already defined", name));
         }
-        variableMap.put(name, new BigDecimal(value));
+        VARIABLES.put(name, new BigDecimal(value));
     }
 
     public static void add(String name, BigDecimal value) {
         if (includes(name)) {
             throw new RuntimeException(String.format("Variable %s already defined", name));
         }
-        variableMap.put(name, value);
+        VARIABLES.put(name, value);
     }
 
     public static void set(String name, String value) {
         if (!includes(name)) {
             throw new RuntimeException(String.format("Variable %s has not been defined", name));
         }
-        variableMap.replace(name, new BigDecimal(value));
+        VARIABLES.replace(name, new BigDecimal(value));
     }
 
     public static void set(String name, BigDecimal value) {
         if (!includes(name)) {
             throw new RuntimeException(String.format("Variable %s has not been defined", name));
         }
-        variableMap.replace(name, value);
+        VARIABLES.replace(name, value);
     }
 
     public static boolean includes(String name) {
-        return variableMap.containsKey(name);
+        return VARIABLES.containsKey(name);
     }
 
     public static BigDecimal get(String name) {
-        return variableMap.get(name);
+        return VARIABLES.get(name);
     }
 
     public static Map<String, BigDecimal> getVariableMap() {
-        return variableMap;
+        return VARIABLES;
     }
 }

@@ -14,10 +14,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 
 public final class GoldenFishAlert extends Feature {
-
     private static final long DEFAULT_ALERT_DURATION_MS = 3000;
 
-    private final Setting.HexSetting colorSetting;
+    private final Setting.ColorSetting colorSetting;
     private final Setting.SliderSetting durationSetting;
     private final Setting.TextSetting alertText;
 
@@ -26,14 +25,14 @@ public final class GoldenFishAlert extends Feature {
     public GoldenFishAlert() {
         setLabel("Golden Fish Alert");
         setDescription("Show an alert when a Golden Fish surfaces from the lava.");
-        category(Category.FISHING);
-        colorSetting = hex("golden_fish_alert.color", "Alert Color", 0xFFFFAA00);
+        setCategory(Category.FISHING);
+        colorSetting = color("golden_fish_alert.color", "Alert Color", 0xFFFFAA00);
         durationSetting = intSlider("golden_fish_alert.duration", "Alert Duration (ms)", 500, 8000, (int) DEFAULT_ALERT_DURATION_MS);
         alertText = text("golden_fish_alert.text", "Alert Text", "Golden Fish!");
     }
 
-    public static final String id = "golden_fish_alert";
-    @Override public String id() { return id; }
+    public static final String ID = "golden_fish_alert";
+    @Override public String id() { return ID; }
 
     @Override
     public void init() {

@@ -3,11 +3,16 @@ package dev.slhj.slhjaddons.features.misc;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.core.Setting;
-import dev.slhj.slhjaddons.util.client.*;
+import dev.slhj.slhjaddons.util.client.ChatUtils;
+import dev.slhj.slhjaddons.util.client.ClientUtils;
+import dev.slhj.slhjaddons.util.client.InputUtils;
+import dev.slhj.slhjaddons.util.client.KeyBindingUtils;
 import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -17,33 +22,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class QuickCommands extends Feature {
-
     private KeyMapping key;
     private final CommandWheelSession session = new CommandWheelSession();
     private int hoveredSection = -1;
     private boolean inDeadZone = true;
-    private final List<String> commandsList = new ArrayList<>();
-    private final Setting.ToggleSetting showCommandString;
+    private final List<String> commands = new ArrayList<>();
+    private final Setting.ToggleSetting showCommandOnHover;
 
-    private final Setting.TextSetting commandsString;
+    private final Setting.TextSetting commandsSetting;
     private final Setting.SliderSetting innerRadius;
     private final Setting.SliderSetting outerRadius;
     private final Setting.SliderSetting sectionOffset;
-    private final Setting.HexSetting guiColor;
-    private final Setting.HexSetting guiHoverColor;
+    private final Setting.ColorSetting guiColor;
+    private final Setting.ColorSetting guiHoverColor;
 
     public QuickCommands() {
         setLabel("Quick Commands");
         setDescription("Hold the Quick Commands key to choose a command from a radial menu. Assign the key in Options > Controls > Key Binds.");
-        category(Category.MISC);
-        commandsString = text("quick_commands.commands", "Commands", "",
+        setCategory(Category.MISC);
+        commandsSetting = text("quick_commands.commands", "Commands", "",
                 "Comma-separated commands, e.g. /warp hub, /slhj. Leading / is optional.");
-        showCommandString = toggle("quick_commands.show_string", "Show Command On Hover", true);
+        showCommandOnHover = toggle("quick_commands.show_string", "Show Command On Hover", true);
         innerRadius = intSlider("quick_commands.inner_radius", "Inner Radius (GUI px)", 0, 254, 30);
         outerRadius = intSlider("quick_commands.outer_radius", "Outer Radius (GUI px)", 1, 255, 90);
         sectionOffset = intSlider("quick_commands.section_offset", "Section Offset (GUI px)", 0, 255, 10);
-        guiColor = hex("quick_commands.color", "Color", 0x80000000);
-        guiHoverColor = hex("quick_commands.hover_color", "Hover Color", 0x80FFFFFF);
+        guiColor = color("quick_commands.color", "Color", 0x80000000);
+        guiHoverColor = color("quick_commands.hover_color", "Hover Color", 0x80FFFFFF);
         if (outerRadius.value().get() <= innerRadius.value().get())
             outerRadius.value().set(innerRadius.value().get() + 1);
         innerRadius.value().onChange(value -> {
@@ -52,16 +56,15 @@ public final class QuickCommands extends Feature {
         outerRadius.value().onChange(value -> {
             if (innerRadius.value().get() >= value) innerRadius.value().set(value - 1);
         });
-        commandsString.value().onChange(value -> loadConfig());
+        commandsSetting.value().onChange(value -> reloadCommands());
     }
 
-    public static final String id = "quick_commands";
-    @Override public String id() { return id; }
+    public static final String ID = "quick_commands";
+    @Override public String id() { return ID; }
 
     @Override
     public void init() {
-        // Load config
-        loadConfig();
+        reloadCommands();
 
         key = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.slhjaddons.quick_commands",
@@ -69,33 +72,26 @@ public final class QuickCommands extends Feature {
                 InputConstants.UNKNOWN.getValue(),
                 KeyBindingUtils.getMainCategory()));
 
-        ClientTickEvents.END_CLIENT_TICK.register(mc -> keyDown());
-        net.fabricmc.fabric.api.client.screen.v1.ScreenEvents.BEFORE_INIT.register((mc, screen, w, h) -> cancelWheel(false));
-        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((h, mc) -> cancelWheel(false));
+        ClientTickEvents.END_CLIENT_TICK.register(mc -> tick());
+        ScreenEvents.BEFORE_INIT.register((mc, screen, w, h) -> cancelWheel(false));
+        ClientPlayConnectionEvents.DISCONNECT.register((h, mc) -> cancelWheel(false));
 
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath("slhjaddons", "quick_commands"),
                 (graphics, delta) -> render(graphics));
     }
 
-    private void loadConfig() {
-        String commandsStr = commandsString.value().get();
-        commandsList.clear();
-        if (!commandsStr.isEmpty()) {
-            String[] commands = commandsStr.split(",");
-            for (String cmd : commands) {
-                String trimmed = ChatUtils.normalizeCommand(cmd);
-                if (!trimmed.isEmpty()) {
-                    commandsList.add(trimmed);
-                }
-            }
+    private void reloadCommands() {
+        commands.clear();
+        for (String command : commandsSetting.value().get().split(",")) {
+            String normalized = ChatUtils.normalizeCommand(command);
+            if (!normalized.isEmpty()) commands.add(normalized);
         }
-
     }
 
-    private void keyDown() {
+    private void tick() {
         boolean available = isEnabled() && !ClientUtils.inGui() && ClientUtils.player() != null
-                && !commandsList.isEmpty();
+                && !commands.isEmpty();
         switch (session.update(key.isDown(), available)) {
             case OPEN -> {
                 inDeadZone = true;
@@ -104,9 +100,9 @@ public final class QuickCommands extends Feature {
                 InputUtils.centerCursor();
             }
             case RELEASE -> {
-                String command = !inDeadZone && hoveredSection >= 0 && hoveredSection < commandsList.size()
-                        ? commandsList.get(hoveredSection) : null;
-                // Restore the mouse before a local command can open a screen.
+                String command = !inDeadZone && hoveredSection >= 0 && hoveredSection < commands.size()
+                        ? commands.get(hoveredSection) : null;
+
                 cancelWheel(true);
                 if (command != null) executeCommand(command);
             }
@@ -135,12 +131,11 @@ public final class QuickCommands extends Feature {
         int centerX = screenWidth / 2;
         int centerY = screenHeight / 2;
 
-        Minecraft MC = ClientUtils.mc();
-        // Get mouse position
-        double mouseX = MC.mouseHandler.getScaledXPos(MC.getWindow());
-        double mouseY = MC.mouseHandler.getScaledYPos(MC.getWindow());
+        Minecraft mc = ClientUtils.mc();
 
-        // Calculate relative position from center
+        double mouseX = mc.mouseHandler.getScaledXPos(mc.getWindow());
+        double mouseY = mc.mouseHandler.getScaledYPos(mc.getWindow());
+
         double dx = mouseX - centerX;
         double dy = mouseY - centerY;
 
@@ -148,24 +143,21 @@ public final class QuickCommands extends Feature {
         int outerRad = outerRadius.value().get().intValue();
         int sectionOff = sectionOffset.value().get().intValue();
 
-        // Update dead zone and hovered section
         List<int[]> innerPoints = new ArrayList<>();
-        generateRadialMenuShapes(
+        populateDeadZonePolygon(
                 centerX, centerY,
                 innerRad,
-                outerRad,
                 sectionOff,
                 innerPoints);
 
         inDeadZone = pointInPolygon(mouseX, mouseY, innerPoints);
         if (!inDeadZone) {
-            hoveredSection = getMouseSection(dx, dy, commandsList.size());
+            hoveredSection = getMouseSection(dx, dy, commands.size());
         } else {
             hoveredSection = -1;
         }
 
-        // Draw radial menu sections
-        int numSections = Math.max(commandsList.size(), 3);
+        int numSections = Math.max(commands.size(), 3);
         double pi = Math.PI;
         double sectionAngle = (pi * 2) / numSections;
         double angleOffset = -pi / 2;
@@ -191,21 +183,19 @@ public final class QuickCommands extends Feature {
             int[] p3 = {(int) (sectionCenterX + cos2 * outerRad), (int) (sectionCenterY + sin2 * outerRad)};
             int[] p4 = {(int) (sectionCenterX + cos1 * outerRad), (int) (sectionCenterY + sin1 * outerRad)};
 
-            int colour = (i == hoveredSection) ? guiHoverColor.value().get() : guiColor.value().get();
+            int color = (i == hoveredSection) ? guiHoverColor.value().get() : guiColor.value().get();
 
-            // Draw filled quad
-            drawFilledQuad(g, p1, p2, p3, p4, colour);
+            drawFilledQuad(g, p1, p2, p3, p4, color);
         }
 
-        // Draw command name on hover
-        if (showCommandString.value().get() && !inDeadZone && hoveredSection >= 0 && hoveredSection < commandsList.size()) {
-            String commandName = "/" + commandsList.get(hoveredSection);
+        if (showCommandOnHover.value().get() && !inDeadZone && hoveredSection >= 0 && hoveredSection < commands.size()) {
+            String commandName = "/" + commands.get(hoveredSection);
             RenderUtils.text(g, commandName, (int) mouseX + 2, (int) mouseY - 7, 0xFFFFFFFF, true);
         }
     }
 
-    private void generateRadialMenuShapes(int centerX, int centerY, int innerRadius, int outerRadius, int sectionOffset, List<int[]> innerPoints) {
-        int numSections = Math.max(commandsList.size(), 3);
+    private void populateDeadZonePolygon(int centerX, int centerY, int innerRadius, int sectionOffset, List<int[]> innerPoints) {
+        int numSections = Math.max(commands.size(), 3);
         double pi = Math.PI;
         double sectionAngle = (pi * 2) / numSections;
         double angleOffset = -pi / 2;
@@ -213,21 +203,18 @@ public final class QuickCommands extends Feature {
 
         for (int i = 0; i < numSections; i++) {
             double angle1 = sectionAngle * i + angleOffset;
-            double angle2 = sectionAngle * (i + 1) + angleOffset;
-
             int x = (int) (centerX + Math.cos(angle1) * deadRadius);
             int y = (int) (centerY + Math.sin(angle1) * deadRadius);
             innerPoints.add(new int[]{x, y});
         }
     }
 
-    private void drawFilledQuad(GuiGraphicsExtractor g, int[] p1, int[] p2, int[] p3, int[] p4, int colour) {
-        // Draw quad as two triangles
-        drawTriangle(g, p1[0], p1[1], p2[0], p2[1], p3[0], p3[1], colour);
-        drawTriangle(g, p1[0], p1[1], p3[0], p3[1], p4[0], p4[1], colour);
+    private void drawFilledQuad(GuiGraphicsExtractor g, int[] p1, int[] p2, int[] p3, int[] p4, int color) {
+        drawTriangle(g, p1[0], p1[1], p2[0], p2[1], p3[0], p3[1], color);
+        drawTriangle(g, p1[0], p1[1], p3[0], p3[1], p4[0], p4[1], color);
     }
 
-    private void drawTriangle(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2, int x3, int y3, int colour) {
+    private void drawTriangle(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2, int x3, int y3, int color) {
         int minY = Math.min(Math.min(y1, y2), y3);
         int maxY = Math.max(Math.max(y1, y2), y3);
 
@@ -243,7 +230,7 @@ public final class QuickCommands extends Feature {
                 int minX = Math.min(Math.min(xPoints[0], xPoints[1]), xCount > 2 ? xPoints[2] : Integer.MAX_VALUE);
                 int maxX = Math.max(Math.max(xPoints[0], xPoints[1]), xCount > 2 ? xPoints[2] : Integer.MIN_VALUE);
                 if (minX < maxX) {
-                    RenderUtils.fill(g, minX, y, maxX - minX, 1, colour);
+                    RenderUtils.fill(g, minX, y, maxX - minX, 1, color);
                 }
             }
         }

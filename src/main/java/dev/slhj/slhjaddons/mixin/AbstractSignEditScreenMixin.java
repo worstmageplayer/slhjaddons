@@ -2,7 +2,6 @@ package dev.slhj.slhjaddons.mixin;
 
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.features.skyblock.SignHelper;
-import static dev.slhj.slhjaddons.features.skyblock.SignHelper.INPUT_SIGN_MARKER;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 import net.minecraft.client.input.CharacterEvent;
@@ -16,9 +15,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import static dev.slhj.slhjaddons.features.skyblock.SignHelper.INPUT_SIGN_MARKER;
+
 @Mixin(AbstractSignEditScreen.class)
 public abstract class AbstractSignEditScreenMixin {
-
     @Final @Shadow private String[] messages;
     @Unique private boolean slhj$initialized;
 

@@ -2,7 +2,6 @@ package dev.slhj.slhjaddons.features.skyblock;
 
 import java.util.function.Function;
 
-/** Cache belongs to one sign session, never to a previously opened sign. */
 final class SignInputState {
     record Result(String value, String formatted) {}
     private final Function<String, Result> evaluate;
@@ -27,7 +26,6 @@ final class SignInputState {
             display = result.formatted().equals(expression) ? result.formatted()
                     : expression + " = " + result.formatted();
         } catch (RuntimeException ignored) {
-            // An unsuccessful calculation must never replace the user's text.
         }
     }
 

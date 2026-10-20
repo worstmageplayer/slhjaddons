@@ -1,16 +1,29 @@
 package dev.slhj.slhjaddons.calc.lexer;
 
 import dev.slhj.slhjaddons.calc.exceptions.LexerException;
+import dev.slhj.slhjaddons.calc.lexer.Token.CommaToken;
+import dev.slhj.slhjaddons.calc.lexer.Token.EndToken;
+import dev.slhj.slhjaddons.calc.lexer.Token.IdentifierToken;
+import dev.slhj.slhjaddons.calc.lexer.Token.NumberToken;
+import dev.slhj.slhjaddons.calc.lexer.Token.OperatorToken;
+import dev.slhj.slhjaddons.calc.lexer.Token.ParenthesisToken;
+import dev.slhj.slhjaddons.calc.lexer.Token.PrefixToken;
+import dev.slhj.slhjaddons.calc.lexer.Token.SemicolonToken;
 import dev.slhj.slhjaddons.calc.lexer.Token.TokenType;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
-import static dev.slhj.slhjaddons.calc.lexer.Token.*;
 import static dev.slhj.slhjaddons.calc.lexer.Token.OperatorToken.isOperator;
 import static dev.slhj.slhjaddons.calc.lexer.Token.ParenthesisToken.isParenthesis;
 import static dev.slhj.slhjaddons.calc.lexer.Token.PrefixToken.isPrefix;
 import static dev.slhj.slhjaddons.calc.lexer.Token.SuffixToken.isSuffix;
+import static dev.slhj.slhjaddons.calc.lexer.Token.identifierToken;
+import static dev.slhj.slhjaddons.calc.lexer.Token.numberToken;
+import static dev.slhj.slhjaddons.calc.lexer.Token.operatorToken;
+import static dev.slhj.slhjaddons.calc.lexer.Token.parenthesisToken;
+import static dev.slhj.slhjaddons.calc.lexer.Token.prefixToken;
+import static dev.slhj.slhjaddons.calc.lexer.Token.suffixToken;
 
 public class Lexer {
     public static TokenType[] tokenize(String input) {
@@ -93,7 +106,7 @@ public class Lexer {
             }
 
             if (c == ';') {
-                tokens.add(SemiColonToken.SEMI_COLON_TOKEN);
+                tokens.add(SemicolonToken.SEMICOLON_TOKEN);
                 i++;
                 continue;
             }

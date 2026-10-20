@@ -15,7 +15,7 @@ public final class PlayerStatsUtils {
     private static final Pattern OVERFLOW = Pattern.compile("([\\d,]+)\u02ac");
     private static final Pattern DEFENSE = Pattern.compile("([\\d,]+)\u2748 Defense");
 
-    private static volatile Integer currentHealth, maxHealth, currentMana, maxMana, currentDefense, overflowMana, effectiveHP;
+    private static volatile Integer currentHealth, maxHealth, currentMana, maxMana, currentDefense, overflowMana, effectiveHealth;
 
     public static void init() {
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
@@ -39,7 +39,7 @@ public final class PlayerStatsUtils {
             if (d.find()) currentDefense = parse(d.group(1));
 
             if (currentHealth != null && currentDefense != null) {
-                effectiveHP = (int) (currentHealth * (1 + currentDefense / 100.0));
+                effectiveHealth = (int) (currentHealth * (1 + currentDefense / 100.0));
             }
         });
 
@@ -52,7 +52,7 @@ public final class PlayerStatsUtils {
     }
 
     private static void reset() {
-        currentHealth = maxHealth = currentMana = maxMana = currentDefense = overflowMana = effectiveHP = null;
+        currentHealth = maxHealth = currentMana = maxMana = currentDefense = overflowMana = effectiveHealth = null;
     }
 
     public static Integer currentHealth() { return currentHealth; }
@@ -61,5 +61,5 @@ public final class PlayerStatsUtils {
     public static Integer maxMana() { return maxMana; }
     public static Integer currentDefense() { return currentDefense; }
     public static Integer overflowMana() { return overflowMana; }
-    public static Integer effectiveHP() { return effectiveHP; }
+    public static Integer effectiveHealth() { return effectiveHealth; }
 }

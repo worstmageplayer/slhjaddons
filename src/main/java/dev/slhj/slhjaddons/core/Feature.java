@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class Feature {
-
     public enum Category {
         SKYBLOCK("Skyblock"),
         SLAYERS("Slayers"),
@@ -36,8 +35,7 @@ public abstract class Feature {
 
     public abstract String id();
 
-    /** Infrastructure commands are always available and cannot be toggled. */
-    public boolean toggleable() { return true; }
+    public boolean isToggleable() { return true; }
 
     public String label() {
         return label;
@@ -53,11 +51,11 @@ public abstract class Feature {
     protected void onDisable() {}
 
     public final boolean isEnabled() {
-        return !toggleable() || enabled;
+        return !isToggleable() || enabled;
     }
 
     public final void setEnabled(boolean value) {
-        value = !toggleable() || value;
+        value = !isToggleable() || value;
         if (value == enabled) return;
         enabled = value;
         if (value) onEnable(); else onDisable();
@@ -71,7 +69,7 @@ public abstract class Feature {
         return Collections.unmodifiableList(settings);
     }
 
-    protected final void category(Category category) {
+    protected final void setCategory(Category category) {
         this.category = category;
     }
 
@@ -79,52 +77,41 @@ public abstract class Feature {
         this.label = label;
     }
 
-    protected final String header() {
-        return this.label;
+    protected final Setting.SliderSetting slider(String key, String label, double min, double max, double defaultValue) {
+        var value = ConfigValue.ofDouble(key, defaultValue, min, max, false);
+        return addSetting(new Setting.SliderSetting(value, label, min, max, false));
     }
 
-    protected final Setting.SliderSetting slider(String key, String label, double min, double max, double def) {
-        var value = ConfigValue.ofDouble(key, def, min, max, false);
-        var s = new Setting.SliderSetting(value, label, min, max, false);
-        settings.add(s);
-        return s;
+    protected final Setting.SliderSetting intSlider(String key, String label, int min, int max, int defaultValue) {
+        var value = ConfigValue.ofDouble(key, defaultValue, min, max, true);
+        return addSetting(new Setting.SliderSetting(value, label, min, max, true));
     }
 
-    protected final Setting.SliderSetting intSlider(String key, String label, int min, int max, int def) {
-        var value = ConfigValue.ofDouble(key, def, min, max, true);
-        var s = new Setting.SliderSetting(value, label, min, max, true);
-        settings.add(s);
-        return s;
+    protected final Setting.TextSetting text(String key, String label, String defaultValue) {
+        return text(key, label, defaultValue, "");
     }
 
-    protected final Setting.TextSetting text(String key, String label, String def) {
-        return text(key, label, def, "");
+    protected final Setting.TextSetting text(String key, String label, String defaultValue, String hint) {
+        var value = ConfigValue.ofString(key, defaultValue);
+        return addSetting(new Setting.TextSetting(value, label, hint));
     }
 
-    protected final Setting.TextSetting text(String key, String label, String def, String hint) {
-        var value = ConfigValue.ofString(key, def);
-        var s = new Setting.TextSetting(value, label, hint);
-        settings.add(s);
-        return s;
-    }
-
-    protected final Setting.HexSetting hex(String key, String label, int def) {
-        var value = ConfigValue.ofColor(key, def);
-        var s = new Setting.HexSetting(value, label);
-        settings.add(s);
-        return s;
+    protected final Setting.ColorSetting color(String key, String label, int defaultValue) {
+        var value = ConfigValue.ofColor(key, defaultValue);
+        return addSetting(new Setting.ColorSetting(value, label));
     }
 
     protected final Setting.ButtonSetting button(String key, String label, String buttonText, Runnable action) {
-        var s = new Setting.ButtonSetting(key, label, buttonText, action);
-        settings.add(s);
-        return s;
+        return addSetting(new Setting.ButtonSetting(key, label, buttonText, action));
     }
 
-    protected final Setting.ToggleSetting toggle(String key, String label, boolean def) {
-        var value = ConfigValue.ofBool(key, def);
-        var s = new Setting.ToggleSetting(value, label);
-        settings.add(s);
-        return s;
+    protected final Setting.ToggleSetting toggle(String key, String label, boolean defaultValue) {
+        var value = ConfigValue.ofBoolean(key, defaultValue);
+        return addSetting(new Setting.ToggleSetting(value, label));
+    }
+
+    private <T extends Setting> T addSetting(T setting) {
+        settings.add(setting);
+        return setting;
     }
 }

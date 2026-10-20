@@ -1,6 +1,5 @@
 package dev.slhj.slhjaddons.hud;
 
-/** Persistent placement in GUI units. Legacy x/y fields become top-left offsets unchanged. */
 public final class HudPlacement {
     public HudAnchor screenAnchor = HudAnchor.TOP_LEFT;
     public HudAnchor elementAnchor = HudAnchor.TOP_LEFT;

@@ -26,7 +26,6 @@ import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/** Edits the same persistent HUD objects drawn during gameplay. */
 public final class HudEditorScreen extends Screen {
     private static final int WHITE = 0xFFFFFFFF, MUTED = 0xFFB8C0CC;
     private static final int GOLD = 0xFFFFCA64, CYAN = 0xFF78DCE8;
@@ -173,7 +172,7 @@ public final class HudEditorScreen extends Screen {
         }
 
         void commit() {
-            if (!dirty || syncing || owner != selection.selected() || !owner.enabled()) return;
+            if (!dirty || syncing || owner != selection.selected() || !owner.isEnabled()) return;
             Float value = SettingsInputs.finiteFloat(getValue());
             if (value != null) update.accept(value);
             dirty = false;
@@ -231,7 +230,7 @@ public final class HudEditorScreen extends Screen {
 
     private HudElement.Frame selectedFrame() { return frameFor(selection.selected()); }
     private HudElement.Frame frameFor(HudElement element) {
-        for (var frame : frames) if (frame.element() == element && element.enabled()) return frame;
+        for (var frame : frames) if (frame.element() == element && element.isEnabled()) return frame;
         return null;
     }
     private void constrainSelected() {
@@ -248,7 +247,7 @@ public final class HudEditorScreen extends Screen {
         List<HudElement> hits = new ArrayList<>();
         for (int i = frames.size() - 1; i >= 0; i--) {
             var frame = frames.get(i);
-            if (frame.element().enabled() && frame.bounds(width, height).contains(x, y, 4)) hits.add(frame.element());
+            if (frame.element().isEnabled() && frame.bounds(width, height).contains(x, y, 4)) hits.add(frame.element());
         }
         return hits;
     }
@@ -268,7 +267,7 @@ public final class HudEditorScreen extends Screen {
         pointerX = mouseX; pointerY = mouseY;
         frames = SlhjAddons.hud().prepare(true);
         HudElement before = selection.selected();
-        selection.retain(HudElement::enabled);
+        selection.retain(HudElement::isEnabled);
         changedSelection(before);
         moveDragged();
         g.fill(0, 0, width, height, 0x77000000);
@@ -417,7 +416,7 @@ public final class HudEditorScreen extends Screen {
     }
     private void cycleSelection(int direction) {
         commitFields();
-        List<HudElement> enabled = frames.stream().map(HudElement.Frame::element).filter(HudElement::enabled).toList();
+        List<HudElement> enabled = frames.stream().map(HudElement.Frame::element).filter(HudElement::isEnabled).toList();
         if (enabled.isEmpty()) return;
         HudElement before = selection.selected();
         int current = before == null ? -1 : enabled.indexOf(before);
@@ -433,7 +432,7 @@ public final class HudEditorScreen extends Screen {
                 cycleSelection(event.hasShiftDown() ? -1 : 1);
                 return true;
             }
-            // Include off-screen panel controls in keyboard navigation, then reveal focus.
+
             for (PanelWidget entry : panelWidgets) {
                 entry.widget().visible = true;
                 entry.widget().active = true;

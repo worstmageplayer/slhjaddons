@@ -15,42 +15,42 @@ public final class ScoreboardUtils {
     private ScoreboardUtils() {}
 
     public static List<String> lines() {
-        List<String> out = new ArrayList<>();
+        List<String> lines = new ArrayList<>();
         var level = Minecraft.getInstance().level;
-        if (level == null) return out;
+        if (level == null) return lines;
 
-        Scoreboard sb = level.getScoreboard();
-        Objective obj = sb.getDisplayObjective(DisplaySlot.SIDEBAR);
-        if (obj == null) return out;
+        Scoreboard scoreboard = level.getScoreboard();
+        Objective objective = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
+        if (objective == null) return lines;
 
-        var scores = new ArrayList<>(sb.listPlayerScores(obj));
+        var scores = new ArrayList<>(scoreboard.listPlayerScores(objective));
         scores.sort((a, b) -> Integer.compare(a.value(), b.value()));
 
         List<String> ordered = new ArrayList<>();
         for (var entry : scores) {
             String owner = entry.owner();
-            PlayerTeam team = sb.getPlayersTeam(owner);
+            PlayerTeam team = scoreboard.getPlayersTeam(owner);
             String line = team == null
                     ? owner
                     : team.getPlayerPrefix().getString() + owner + team.getPlayerSuffix().getString();
             ordered.add(line);
         }
-        for (int i = ordered.size() - 1; i >= 0; i--) out.add(ordered.get(i));
-        return out;
+        for (int i = ordered.size() - 1; i >= 0; i--) lines.add(ordered.get(i));
+        return lines;
     }
 
     @Nullable
     public static String title() {
         var level = Minecraft.getInstance().level;
         if (level == null) return null;
-        Objective obj = level.getScoreboard().getDisplayObjective(DisplaySlot.SIDEBAR);
-        return obj == null ? null : obj.getDisplayName().getString();
+        Objective objective = level.getScoreboard().getDisplayObjective(DisplaySlot.SIDEBAR);
+        return objective == null ? null : objective.getDisplayName().getString();
     }
 
     public static List<String> linesNoFormat() {
         List<String> raw = lines();
-        List<String> out = new ArrayList<>(raw.size());
-        for (String s : raw) out.add(ChatFormatting.stripFormatting(s));
-        return out;
+        List<String> lines = new ArrayList<>(raw.size());
+        for (String s : raw) lines.add(ChatFormatting.stripFormatting(s));
+        return lines;
     }
 }

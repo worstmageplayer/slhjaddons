@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class SlhjConfig {
-
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static Path path() { return FabricLoader.getInstance().getConfigDir().resolve("slhjaddons.json"); }
 
@@ -30,44 +29,43 @@ public final class SlhjConfig {
         toggles.put(id, on);
     }
 
-    /** Raw string for a key, or null if unset. Prefer ConfigValue<T> over this for new code. */
     public String raw(String key) {
         return values.get(key);
     }
 
-    public String getString(String key, String def) {
-        return values.getOrDefault(key, def);
+    public String getString(String key, String defaultValue) {
+        return values.getOrDefault(key, defaultValue);
     }
 
-    public boolean getBool(String key, boolean def) {
-        return parseBoolean(values.get(key), def);
+    public boolean getBoolean(String key, boolean defaultValue) {
+        return parseBoolean(values.get(key), defaultValue);
     }
 
-    public static boolean parseBoolean(String raw, boolean def) {
+    public static boolean parseBoolean(String raw, boolean defaultValue) {
         if ("true".equalsIgnoreCase(raw)) return true;
         if ("false".equalsIgnoreCase(raw)) return false;
-        return def;
+        return defaultValue;
     }
 
-    public int getInt(String key, int def) {
+    public int getInt(String key, int defaultValue) {
         try { return Integer.parseInt(values.get(key)); }
-        catch (Exception e) { return def; }
+        catch (Exception e) { return defaultValue; }
     }
 
-    public double getDouble(String key, double def) {
+    public double getDouble(String key, double defaultValue) {
         try { return Double.parseDouble(values.get(key)); }
-        catch (Exception e) { return def; }
+        catch (Exception e) { return defaultValue; }
     }
 
     public void set(String key, String value) {
         values.put(key, value);
     }
 
-    public int getColor(String key, int def) {
+    public int getColor(String key, int defaultValue) {
         String v = values.get(key);
-        if (v == null) return def;
+        if (v == null) return defaultValue;
         Integer parsed = parseHexColor(v);
-        return parsed != null ? parsed : def;
+        return parsed != null ? parsed : defaultValue;
     }
 
     public void setColor(String key, int argb) {

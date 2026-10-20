@@ -7,26 +7,26 @@ import org.jspecify.annotations.Nullable;
 public final class ChatUtils {
     private ChatUtils() {}
 
-    public static void chat(String msg) {
-        LocalPlayer p = ClientUtils.player();
-        if (p != null) p.sendSystemMessage(Component.literal(colorize(msg)));
+    public static void chat(String message) {
+        LocalPlayer player = ClientUtils.player();
+        if (player != null) player.sendSystemMessage(Component.literal(colorize(message)));
     }
 
-    public static void runCommand(String cmd) {
-        cmd = normalizeCommand(cmd);
-        if (cmd.isEmpty()) return;
-        LocalPlayer p = ClientUtils.player();
-        if (p != null) p.connection.sendCommand(cmd);
+    public static void runCommand(String command) {
+        command = normalizeCommand(command);
+        if (command.isEmpty()) return;
+        LocalPlayer player = ClientUtils.player();
+        if (player != null) player.connection.sendCommand(command);
     }
 
-    public static String normalizeCommand(String cmd) {
-        if (cmd == null) return "";
-        String normalized = cmd.strip();
+    public static String normalizeCommand(String command) {
+        if (command == null) return "";
+        String normalized = command.strip();
         return normalized.startsWith("/") ? normalized.substring(1).stripLeading() : normalized;
     }
 
     @Nullable
-    public static String colorize(String s) {
-        return s == null ? null : s.replace('&', '§');
+    public static String colorize(String text) {
+        return text == null ? null : text.replace('&', '§');
     }
 }

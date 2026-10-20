@@ -1,6 +1,7 @@
 package dev.slhj.slhjaddons.hud;
 
 import dev.slhj.slhjaddons.SlhjAddons;
+import dev.slhj.slhjaddons.config.SlhjConfig;
 import dev.slhj.slhjaddons.core.Feature;
 import dev.slhj.slhjaddons.util.client.ChatUtils;
 import net.minecraft.client.Minecraft;
@@ -10,7 +11,6 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
 
-/** One persistent element, used unchanged by gameplay and the editor. */
 public final class HudElement {
     public enum RenderLayer { HUD, SCREEN }
     private final RenderLayer renderLayer;
@@ -32,13 +32,13 @@ public final class HudElement {
 
     HudElement(Feature owner, String id, String label, HudPlacement defaults,
                Supplier<@Nullable HudContent> live, Supplier<HudContent> example,
-               dev.slhj.slhjaddons.config.SlhjConfig config) {
+               SlhjConfig config) {
         this(owner, id, label, defaults, live, example, config, RenderLayer.HUD);
     }
 
     HudElement(Feature owner, String id, String label, HudPlacement defaults,
                Supplier<@Nullable HudContent> live, Supplier<HudContent> example,
-               dev.slhj.slhjaddons.config.SlhjConfig config, RenderLayer layer) {
+               SlhjConfig config, RenderLayer layer) {
         this.renderLayer = layer;
         this.owner = owner; this.id = id; this.label = label;
         this.defaults = defaults.copy();
@@ -48,12 +48,12 @@ public final class HudElement {
     public RenderLayer renderLayer() { return renderLayer; }
     public String id() { return id; }
     public String label() { return label; }
-    public boolean enabled() { return owner.isEnabled(); }
+    public boolean isEnabled() { return owner.isEnabled(); }
     public HudPlacement placement() { return placement; }
     public void reset() { placement.copyFrom(defaults); }
 
     @Nullable HudContent content(boolean editor) {
-        if (!enabled()) return null;
+        if (!isEnabled()) return null;
         HudContent content = live.get();
         return content == null && editor ? example.get() : content;
     }

@@ -1,5 +1,4 @@
 plugins {
-
     id 'net.fabricmc.fabric-loom' version '1.17.21'
     id 'java'
 }
@@ -46,7 +45,6 @@ tasks.named("processResources", ProcessResources).configure {
     }
 }
 
-// Keep the dependency-free regression runner separate from framework-discovered tests.
 sourceSets {
     hudTest {
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath

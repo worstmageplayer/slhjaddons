@@ -7,32 +7,32 @@ import dev.slhj.slhjaddons.hud.HudContent;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudPlacement;
 import dev.slhj.slhjaddons.hud.TimedHudAlert;
-import java.util.regex.Pattern;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 
-public final class AutoPetRules extends Feature {
+import java.util.regex.Pattern;
 
+public final class AutoPetRules extends Feature {
     private static final Pattern PET_PATTERN =
             Pattern.compile("Autopet equipped your (\\[Lvl (\\d+)]) (.+?)! VIEW RULE");
     private static final long DURATION_MS = 5000;
     private static final double FADE_START = 0.7;
 
     private final TimedHudAlert alert = new TimedHudAlert();
-    private String label = null;
+    private String petLabel = null;
 
     private static final String PREVIEW_LABEL = "§7[Lvl 100] §r§dBlack Cat";
 
     public AutoPetRules() {
         setLabel("Auto Pet Rules");
         setDescription("Show the pet equipped by an Autopet rule.");
-        category(Category.PETS);
+        setCategory(Category.PETS);
     }
 
-    public static final String id = "auto_pet_rules";
-    @Override public String id() { return id; }
+    public static final String ID = "auto_pet_rules";
+    @Override public String id() { return ID; }
 
     @Override
     public void init() {
@@ -46,16 +46,16 @@ public final class AutoPetRules extends Feature {
                 int[] rawIndex = strippedToRawIndex(raw);
                 int rawStart = rawIndex[matcher.start(1)];
                 int rawEnd = rawIndex[matcher.end(3)];
-                label = raw.substring(rawStart, rawEnd);
+                petLabel = raw.substring(rawStart, rawEnd);
                 alert.show();
             }
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(mc -> {
-            if (label != null && !alert.isActive(DURATION_MS)) label = null;
+            if (petLabel != null && !alert.isActive(DURATION_MS)) petLabel = null;
         });
         ClientPlayConnectionEvents.DISCONNECT.register((h, c) -> {
-            label = null;
+            petLabel = null;
             alert.reset();
         });
         SlhjAddons.hud().register(new HudElement(this, "auto_pet_rules", "Auto Pet Rules",
@@ -81,8 +81,8 @@ public final class AutoPetRules extends Feature {
     }
 
     private HudContent content() {
-        if (label == null || !alert.isActive(DURATION_MS)) return null;
+        if (petLabel == null || !alert.isActive(DURATION_MS)) return null;
         int alpha = alert.alpha(DURATION_MS, FADE_START);
-        return alpha <= 0 ? null : HudContent.text(label, (alpha << 24) | 0xFFFFFF);
+        return alpha <= 0 ? null : HudContent.text(petLabel, (alpha << 24) | 0xFFFFFF);
     }
 }

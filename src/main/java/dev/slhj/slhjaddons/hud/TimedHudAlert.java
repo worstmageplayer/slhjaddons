@@ -3,7 +3,6 @@ package dev.slhj.slhjaddons.hud;
 import java.util.function.LongSupplier;
 
 public final class TimedHudAlert {
-
     private final LongSupplier clock;
     private long shownAt = 0;
 

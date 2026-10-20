@@ -11,17 +11,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
 public final class AutoZombieShootout extends Feature {
+    private static final long CLICK_COOLDOWN_MS = 200;
+    private long lastClickAt = 0;
 
-    private static final long CLICK_COOLDOWN = 200;
-    private long lastClick = 0;
-
-    public static final String id = "auto_zombie_shootout";
-    @Override public String id() { return id; }
+    public static final String ID = "auto_zombie_shootout";
+    @Override public String id() { return ID; }
 
     public AutoZombieShootout() {
         setLabel("Auto Zombie Shootout");
         setDescription("Aim at zombies and use a held Dart during Zombie Shootout.");
-        category(Category.EVENTS);
+        setCategory(Category.EVENTS);
     }
 
     @Override
@@ -32,7 +31,7 @@ public final class AutoZombieShootout extends Feature {
     private void tick() {
         if (!isEnabled()) return;
         if (!HypixelUtils.inSkyblock()) return;
-        if (System.currentTimeMillis() - lastClick < CLICK_COOLDOWN) return;
+        if (System.currentTimeMillis() - lastClickAt < CLICK_COOLDOWN_MS) return;
 
         LocalPlayer player = ClientUtils.player();
         if (player == null) return;
@@ -49,12 +48,11 @@ public final class AutoZombieShootout extends Feature {
         for (var entity : level.getEntities(null, player.getBoundingBox().inflate(50))) {
             if (entity instanceof LivingEntity && entity != player && entity.getDisplayName().getString().contains("Zombie")) {
                 Vec3 lookPos = entity.getEyePosition();
-                var rot = player.getRotationVector();
                 player.setYRot((float) (Math.atan2(lookPos.z - player.getZ(), lookPos.x - player.getX()) * 180 / Math.PI) - 90);
                 player.setXRot((float) -(Math.asin((lookPos.y - player.getEyeY()) / player.distanceTo(entity)) * 180 / Math.PI));
-                
+
                 InputUtils.rightClick();
-                lastClick = System.currentTimeMillis();
+                lastClickAt = System.currentTimeMillis();
                 return;
             }
         }

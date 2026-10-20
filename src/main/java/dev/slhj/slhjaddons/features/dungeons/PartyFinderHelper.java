@@ -2,9 +2,12 @@ package dev.slhj.slhjaddons.features.dungeons;
 
 import dev.slhj.slhjaddons.SlhjAddons;
 import dev.slhj.slhjaddons.core.Feature;
-import dev.slhj.slhjaddons.hud.*;
-import dev.slhj.slhjaddons.util.client.ContainerScreenPosition;
+import dev.slhj.slhjaddons.hud.HudAnchor;
+import dev.slhj.slhjaddons.hud.HudContent;
+import dev.slhj.slhjaddons.hud.HudElement;
+import dev.slhj.slhjaddons.hud.HudPlacement;
 import dev.slhj.slhjaddons.util.client.ClientUtils;
+import dev.slhj.slhjaddons.util.client.ContainerScreenPosition;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.ChatFormatting;
@@ -16,14 +19,17 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public final class PartyFinderHelper extends Feature {
-
-    public static final String id = "party_finder_helper";
+    public static final String ID = "party_finder_helper";
 
     private static final String PARTY_FINDER_TITLE = "Party Finder";
     private static final int PARTY_SIZE = 5;
@@ -68,14 +74,14 @@ public final class PartyFinderHelper extends Feature {
     public PartyFinderHelper() {
         setLabel("Party Finder Helper");
         setDescription("Highlight parties missing your class and show the most and least wanted classes.");
-        category(Category.DUNGEONS);
+        setCategory(Category.DUNGEONS);
     }
 
-    @Override public String id() { return id; }
+    @Override public String id() { return ID; }
 
     @Override
     public void init() {
-        overlay = new HudElement(this, id, label(),
+        overlay = new HudElement(this, ID, label(),
                 new HudPlacement(HudAnchor.TOP_LEFT, HudAnchor.TOP_LEFT, 10, 10, 1),
                 () -> isPartyFinderOpen() ? HudContent.text(buildOverlayText(), 0xFFFFFFFF) : null,
                 () -> HudContent.text("Your Class: " + DungeonClass.MAGE.colored()

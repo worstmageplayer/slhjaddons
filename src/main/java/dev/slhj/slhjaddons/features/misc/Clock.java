@@ -7,26 +7,26 @@ import dev.slhj.slhjaddons.hud.HudAnchor;
 import dev.slhj.slhjaddons.hud.HudContent;
 import dev.slhj.slhjaddons.hud.HudElement;
 import dev.slhj.slhjaddons.hud.HudPlacement;
+
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public final class Clock extends Feature {
-
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("H : mm");
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("H : mm");
 
     private static final int DEFAULT_COLOR = 0xFFFFFFFF;
 
-    private final Setting.HexSetting colorSetting;
+    private final Setting.ColorSetting colorSetting;
 
     public Clock() {
         setLabel("Clock");
         setDescription("Show the current local time on your HUD.");
-        category(Category.MISC);
-        colorSetting = hex("clock.color", "Text Color", DEFAULT_COLOR);
+        setCategory(Category.MISC);
+        colorSetting = color("clock.color", "Text Color", DEFAULT_COLOR);
     }
 
-    public static final String id = "clock";
-    @Override public String id() { return id; }
+    public static final String ID = "clock";
+    @Override public String id() { return ID; }
 
     @Override
     public void init() {
@@ -35,6 +35,6 @@ public final class Clock extends Feature {
     }
 
     private HudContent content() {
-        return HudContent.text(LocalTime.now().format(FMT), colorSetting.value().get());
+        return HudContent.text(LocalTime.now().format(TIME_FORMAT), colorSetting.value().get());
     }
 }

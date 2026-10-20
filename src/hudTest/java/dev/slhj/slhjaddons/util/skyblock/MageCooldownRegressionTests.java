@@ -44,7 +44,6 @@ public final class MageCooldownRegressionTests {
     }
 
     private static void cooldownPercentages() {
-        // Fixed expected values catch odd/even boundaries and accidentally doubling the level bonus.
         double[][] fixtures = {
                 {0, .50, .75}, {1, .50, .75}, {2, .49, .74}, {20, .40, .65},
                 {39, .31, .56}, {40, .30, .55}, {49, .26, .51}, {50, .25, .50}

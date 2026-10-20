@@ -5,7 +5,6 @@ import java.util.Locale;
 final class SettingsInputs {
     private SettingsInputs() {}
 
-    /** Invalid intermediate edits never replace the last valid setting. */
     static Double number(String text, double min, double max, boolean integer) {
         try {
             double value = Double.parseDouble(text);

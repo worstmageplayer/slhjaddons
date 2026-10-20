@@ -14,9 +14,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 
 public final class RagnarockCooldown extends Feature {
-
     private static final long BASE_COOLDOWN_MS = 20_000L;
 
     private final RagnarockCooldownTimer timer = new RagnarockCooldownTimer(
@@ -29,14 +30,14 @@ public final class RagnarockCooldown extends Feature {
     public RagnarockCooldown() {
         setLabel("Ragnarock Cooldown Timer");
         setDescription("Track Ragnarock cooldown, including dungeon Mage reductions.");
-        category(Category.SKYBLOCK);
+        setCategory(Category.SKYBLOCK);
         readyMessage = text("rag_cooldown.message", "Ready Message", "&r&5&lRagnarock &aReady!");
         playSoundOnReady = toggle("rag_cooldown.play_sound", "Play Sound On Ready", false);
         readyVolume = intSlider("rag_cooldown.sound_volume", "Ready Sound Volume (%)", 0, 100, 50);
     }
 
-    public static final String id = "rag_cooldown";
-    @Override public String id() { return id; }
+    public static final String ID = "rag_cooldown";
+    @Override public String id() { return ID; }
 
     @Override
     public void init() {
@@ -49,7 +50,6 @@ public final class RagnarockCooldown extends Feature {
         ClientTickEvents.END_CLIENT_TICK.register(mc -> update());
         ClientPlayConnectionEvents.DISCONNECT.register((h, c) -> timer.reset());
 
-        // worldLoad -> reset
         ClientPlayConnectionEvents.JOIN.register((h, s, c) -> timer.reset());
 
         SlhjAddons.hud().register(new HudElement(this, "rag_cooldown", "Ragnarock Cooldown",
@@ -60,8 +60,8 @@ public final class RagnarockCooldown extends Feature {
     private void update() {
         if (!isEnabled() || !timer.tick()) return;
         if (playSoundOnReady.value().get() && ClientUtils.player() != null) {
-            ClientUtils.mc().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
-                    net.minecraft.sounds.SoundEvents.NOTE_BLOCK_PLING.value(), 1f, readyVolume.value().get().floatValue() / 100f));
+            ClientUtils.mc().getSoundManager().play(SimpleSoundInstance.forUI(
+                    SoundEvents.NOTE_BLOCK_PLING.value(), 1f, readyVolume.value().get().floatValue() / 100f));
         }
         ChatUtils.chat(readyMessage.value().get());
     }

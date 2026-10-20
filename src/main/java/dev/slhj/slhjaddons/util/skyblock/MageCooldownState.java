@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-/** Dungeon-local roster, retained when tab temporarily replaces a class with DEAD. */
 final class MageCooldownState {
     private static final Pattern TAB_ENTRY = Pattern.compile(
             "^\\[\\d+]\\s+(?:\\[[^]]+]\\s+)?(?<name>[A-Za-z0-9_]{1,16})"
@@ -25,14 +24,12 @@ final class MageCooldownState {
     private final Map<String, Member> members = new HashMap<>();
     @Nullable private String uniqueClass;
 
-    /** Input is the unformatted tab display text, including ranks and player symbols. */
     void updateTab(List<String> lines) {
         for (String line : lines) {
             var matcher = TAB_ENTRY.matcher(line.strip());
             if (!matcher.matches()) continue;
             String name = matcher.group("name").toLowerCase(Locale.ROOT);
             if (matcher.group("dead") != null) {
-                // Death does not change a teammate's chosen class or the run's solo bonus.
                 members.putIfAbsent(name, new Member(null, null));
             } else {
                 members.put(name, new Member(matcher.group("class"), decodeLevel(matcher.group("level"))));
@@ -57,7 +54,6 @@ final class MageCooldownState {
         boolean unknownClass = members.values().stream().anyMatch(member -> member.dungeonClass() == null);
         boolean soloMage = "Mage".equals(uniqueClass) || (!otherMage && !unknownClass);
 
-        // Use integer percentages: only the base 25% doubles, never the level bonus.
         int reduction = (soloMage ? 50 : 25) + player.level() / 2;
         return (100 - reduction) / 100.0;
     }

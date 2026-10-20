@@ -1,6 +1,7 @@
 package dev.slhj.slhjaddons.gui;
 
 import dev.slhj.slhjaddons.core.Feature;
+import dev.slhj.slhjaddons.hud.HudPlacement;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public final class SettingsMenuRegressionTests {
 
     private static Feature feature(String id, String label, Feature.Category category, String description) {
         return new Feature() {
-            { setLabel(label); category(category); setDescription(description); }
+            { setLabel(label); setCategory(category); setDescription(description); }
             @Override public String id() { return id; }
         };
     }
@@ -76,7 +77,7 @@ public final class SettingsMenuRegressionTests {
         check(SettingsInputs.finiteFloat("100") == 100f, "finite out-of-range HUD draft allowed until commit");
         for (String invalid : List.of("", "-", "NaN", "Infinity", "1e100", "text"))
             check(SettingsInputs.finiteFloat(invalid) == null, "invalid HUD draft rejected: " + invalid);
-        var placement = new dev.slhj.slhjaddons.hud.HudPlacement();
+        var placement = new HudPlacement();
         placement.scale = Math.clamp(SettingsInputs.finiteFloat("100"), .1f, 10f);
         placement.x = SettingsInputs.finiteFloat("10000");
         placement.constrain(320, 240, 10, 10);

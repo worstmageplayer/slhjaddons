@@ -13,18 +13,17 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.ChatFormatting;
 
 public final class BloodWarpTimer extends Feature {
-
     private static final long DOOR_TIMER_MS = 20_000;
     private final TimedHudAlert alert = new TimedHudAlert();
 
     public BloodWarpTimer() {
         setLabel("Blood Warp Timer");
         setDescription("Show elapsed time after the Blood Door opens.");
-        category(Category.DUNGEONS);
+        setCategory(Category.DUNGEONS);
     }
 
-    public static final String id = "blood_warp_timer";
-    @Override public String id() { return id; }
+    public static final String ID = "blood_warp_timer";
+    @Override public String id() { return ID; }
 
     @Override
     public void init() {

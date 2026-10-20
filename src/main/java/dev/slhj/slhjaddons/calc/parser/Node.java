@@ -1,6 +1,9 @@
 package dev.slhj.slhjaddons.calc.parser;
 
-import dev.slhj.slhjaddons.calc.lexer.Token.*;
+import dev.slhj.slhjaddons.calc.lexer.Token.IdentifierToken;
+import dev.slhj.slhjaddons.calc.lexer.Token.OperatorToken;
+import dev.slhj.slhjaddons.calc.lexer.Token.PrefixToken;
+import dev.slhj.slhjaddons.calc.lexer.Token.SuffixToken;
 
 import java.math.BigDecimal;
 import java.util.List;

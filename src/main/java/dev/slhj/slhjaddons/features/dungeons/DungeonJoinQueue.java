@@ -2,7 +2,6 @@ package dev.slhj.slhjaddons.features.dungeons;
 
 import java.util.function.LongSupplier;
 
-/** Client-tick queue: cancelling cannot leave a background task targeting a new session. */
 final class DungeonJoinQueue {
     private final LongSupplier clock;
     private long cooldownEnd, due;

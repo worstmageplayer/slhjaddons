@@ -3,7 +3,6 @@ package dev.slhj.slhjaddons.features.skyblock;
 import java.util.function.LongSupplier;
 import java.util.regex.Pattern;
 
-/** Tracks one activation; buff-phase CASTING messages are not new casts. */
 final class RagnarockCooldownTimer {
     private static final Pattern CAST_START = Pattern.compile("\\bCASTING IN\\b");
     private final LongSupplier cooldownDuration, clock;
@@ -27,7 +26,6 @@ final class RagnarockCooldownTimer {
         return running ? Math.max(0, duration - Math.max(0, clock.getAsLong() - startedAt)) : 0;
     }
 
-    /** True once per activation, independently of how often the HUD is drawn. */
     boolean tick() {
         if (!running || remainingMs() > 0) return false;
         running = false;

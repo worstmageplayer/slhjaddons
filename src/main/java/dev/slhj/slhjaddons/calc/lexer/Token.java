@@ -8,7 +8,7 @@ import java.util.Map;
 public class Token {
     public sealed interface TokenType
             permits NumberToken, OperatorToken, PrefixToken, SuffixToken,
-            ParenthesisToken, IdentifierToken, CommaToken, SemiColonToken, EndToken {
+            ParenthesisToken, IdentifierToken, CommaToken, SemicolonToken, EndToken {
         String toString();
     }
 
@@ -190,8 +190,8 @@ public class Token {
         }
     }
 
-    public enum SemiColonToken implements TokenType {
-        SEMI_COLON_TOKEN;
+    public enum SemicolonToken implements TokenType {
+        SEMICOLON_TOKEN;
 
         @Override
         public String toString() {
@@ -208,29 +208,29 @@ public class Token {
         }
     }
 
-    private static final int NUMBER_POOL_MAX_CACHE = 5000;
-    private static final int IDENTIFIER_POOL_MAX_CACHE = 50;
+    private static final int NUMBER_POOL_CAPACITY = 5000;
+    private static final int IDENTIFIER_POOL_CAPACITY = 50;
 
-    private final static Map<BigDecimal, NumberToken> numberPool = new LinkedHashMap<>(NUMBER_POOL_MAX_CACHE + 1, 1, true) {
+    private static final Map<BigDecimal, NumberToken> NUMBER_POOL = new LinkedHashMap<>(NUMBER_POOL_CAPACITY + 1, 1, true) {
         @Override
         protected boolean removeEldestEntry(Map.Entry<BigDecimal, NumberToken> eldest) {
-            return size() > NUMBER_POOL_MAX_CACHE;
+            return size() > NUMBER_POOL_CAPACITY;
         }
     };
 
-    private final static Map<String, IdentifierToken> identifierPool = new LinkedHashMap<>(IDENTIFIER_POOL_MAX_CACHE  + 1, 1, true) {
+    private static final Map<String, IdentifierToken> IDENTIFIER_POOL = new LinkedHashMap<>(IDENTIFIER_POOL_CAPACITY + 1, 1, true) {
         @Override
         protected boolean removeEldestEntry(Map.Entry<String, IdentifierToken> eldest) {
-            return size() > IDENTIFIER_POOL_MAX_CACHE ;
+            return size() > IDENTIFIER_POOL_CAPACITY;
         }
     };
 
     public static NumberToken numberToken(String value) {
-        return numberPool.computeIfAbsent(new BigDecimal(value).stripTrailingZeros(), NumberToken::new);
+        return NUMBER_POOL.computeIfAbsent(new BigDecimal(value).stripTrailingZeros(), NumberToken::new);
     }
 
     public static IdentifierToken identifierToken(String id) {
-        return identifierPool.computeIfAbsent(id.intern(), IdentifierToken::new);
+        return IDENTIFIER_POOL.computeIfAbsent(id.intern(), IdentifierToken::new);
     }
 
     public static OperatorToken operatorToken(char c) {

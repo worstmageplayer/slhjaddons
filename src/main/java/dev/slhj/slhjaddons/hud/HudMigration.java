@@ -10,7 +10,7 @@ public final class HudMigration {
         HudPlacement placement = defaults.copy();
         if (id.equals("clock")) {
             boolean right = config.raw("clock.right_aligned") == null
-                    || config.getBool("clock.right_aligned", true);
+                    || config.getBoolean("clock.right_aligned", true);
             float padding = (float) config.getDouble("clock.padding", 5);
             placement.screenAnchor = placement.elementAnchor = right ? HudAnchor.TOP_RIGHT : HudAnchor.TOP_LEFT;
             placement.x = right ? -padding : padding;

@@ -6,11 +6,9 @@ public final class NoBobHurt extends Feature {
     public NoBobHurt() {
         setLabel("No Bob Hurt");
         setDescription("Disable the camera shake when taking damage.");
-        category(Category.MISC);
+        setCategory(Category.MISC);
     }
-    
-    public static final String id = "no_bob_hurt";
-    @Override public String id() { return id; }
 
-    @Override public void init() {}
+    public static final String ID = "no_bob_hurt";
+    @Override public String id() { return ID; }
 }

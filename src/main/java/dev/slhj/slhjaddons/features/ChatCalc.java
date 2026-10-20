@@ -13,13 +13,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class ChatCalc extends Feature {
-
     private static final Pattern DEFINE_PATTERN =
             Pattern.compile("^([a-zA-Z_]\\w*)\\(([^()=]*)\\)=(.+)$");
 
-    public static final String id = "chat_calc";
-    @Override public String id() { return id; }
-    @Override public boolean toggleable() { return false; }
+    public static final String ID = "chat_calc";
+    @Override public String id() { return ID; }
+    @Override public boolean isToggleable() { return false; }
 
     @Override
     public void init() {

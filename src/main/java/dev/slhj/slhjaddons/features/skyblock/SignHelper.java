@@ -7,28 +7,24 @@ import dev.slhj.slhjaddons.util.render.RenderUtils;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public final class SignHelper extends Feature {
-
     private final SignInputState input = new SignInputState(expression -> {
         var result = Calculator.calc(expression);
         return new SignInputState.Result(result.format(), result.commas());
     });
 
-    private final Setting.SliderSetting yPos;
+    private final Setting.SliderSetting verticalPosition;
 
-    public final static String INPUT_SIGN_MARKER = "^^^^^^^^^^^^^^^";
+    public static final String INPUT_SIGN_MARKER = "^^^^^^^^^^^^^^^";
 
     public SignHelper() {
         setLabel("Sign Helper");
         setDescription("Evaluate expressions entered into supported SkyBlock input signs.");
-        category(Category.SKYBLOCK);
-        yPos = intSlider("sign_helper.ypos", "Vertical Position (GUI px)", 0, 100, 55);
+        setCategory(Category.SKYBLOCK);
+        verticalPosition = intSlider("sign_helper.ypos", "Vertical Position (GUI px)", 0, 100, 55);
     }
 
-    public static final String id = "sign_helper";
-    @Override public String id() { return id; }
-
-    @Override
-    public void init() {}
+    public static final String ID = "sign_helper";
+    @Override public String id() { return ID; }
 
     public void render(GuiGraphicsExtractor g) {
         String displayFormula = input.display();
@@ -36,7 +32,7 @@ public final class SignHelper extends Feature {
 
         int screenWidth = g.guiWidth();
         int x = (screenWidth - RenderUtils.stringWidth(displayFormula)) / 2;
-        RenderUtils.text(g, displayFormula, x, yPos.value().get().intValue(), 0xFFFFFFFF, true);
+        RenderUtils.text(g, displayFormula, x, verticalPosition.value().get().intValue(), 0xFFFFFFFF, true);
     }
 
     public void resetSign() { input.reset(); }

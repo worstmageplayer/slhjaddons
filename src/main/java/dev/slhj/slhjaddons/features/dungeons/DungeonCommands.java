@@ -2,18 +2,17 @@ package dev.slhj.slhjaddons.features.dungeons;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.slhj.slhjaddons.core.Feature;
-import dev.slhj.slhjaddons.util.client.ClientUtils;
 import dev.slhj.slhjaddons.util.client.ChatUtils;
+import dev.slhj.slhjaddons.util.client.ClientUtils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import java.util.Locale;
 
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 public final class DungeonCommands extends Feature {
-
     private static final Pattern FLOOR_PATTERN = Pattern.compile("^([mf])([1-7])$", Pattern.CASE_INSENSITIVE);
 
     private static final String[] FLOOR_NAMES = {"", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN"};
@@ -23,11 +22,11 @@ public final class DungeonCommands extends Feature {
     public DungeonCommands() {
         setLabel("Dungeon Commands");
         setDescription("Use /d to warp to dungeons or /d f1-f7 and /d m1-m7 to queue a floor.");
-        category(Category.DUNGEONS);
+        setCategory(Category.DUNGEONS);
     }
 
-    public static final String id = "dungeon_commands";
-    @Override public String id() { return id; }
+    public static final String ID = "dungeon_commands";
+    @Override public String id() { return ID; }
 
     @Override
     public void init() {

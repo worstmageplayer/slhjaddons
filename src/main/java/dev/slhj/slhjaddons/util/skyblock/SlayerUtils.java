@@ -1,12 +1,9 @@
 package dev.slhj.slhjaddons.util.skyblock;
 
-import com.ibm.icu.impl.Pair;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class SlayerUtils {
@@ -38,7 +35,7 @@ public class SlayerUtils {
         return boss && slay;
     }
 
-    public enum BlazeAttunements {
+    public enum BlazeAttunement {
         ASHEN("ASHEN ♨", Set.of("HEARTFIRE_DAGGER", "BURSTFIRE_DAGGER", "FIREDUST_DAGGER"), 0),
         AURIC("AURIC ♨", Set.of("HEARTFIRE_DAGGER", "BURSTFIRE_DAGGER", "FIREDUST_DAGGER"), 1),
         SPIRIT("SPIRIT ♨", Set.of("HEARTMAW_DAGGER", "BURSTMAW_DAGGER", "MAWDUST_DAGGER"), 2),
@@ -48,7 +45,7 @@ public class SlayerUtils {
         private final Set<String> daggers;
         private final int attunementNumber;
 
-        BlazeAttunements(String displayName, Set<String> daggers, int attunementNumber) {
+        BlazeAttunement(String displayName, Set<String> daggers, int attunementNumber) {
             this.displayName = displayName;
             this.daggers = daggers;
             this.attunementNumber = attunementNumber;
@@ -64,24 +61,24 @@ public class SlayerUtils {
         }
 
         @Nullable
-        public static BlazeAttunements fromAttunementNumber(int number) {
-            for (BlazeAttunements a : values()) {
+        public static BlazeAttunement fromAttunementNumber(int number) {
+            for (BlazeAttunement a : values()) {
                 if (a.attunementNumber == number) return a;
             }
             return null;
         }
 
         @Nullable
-        public static BlazeAttunements fromStack(ItemStack stack) {
-            for (BlazeAttunements a : values()) {
+        public static BlazeAttunement fromStack(ItemStack stack) {
+            for (BlazeAttunement a : values()) {
                 if (a.isDagger(stack)) return a;
             }
             return null;
         }
 
         @Nullable
-        public static BlazeAttunements fromArmorStandName(String name) {
-            for (BlazeAttunements a : values()) {
+        public static BlazeAttunement fromArmorStandName(String name) {
+            for (BlazeAttunement a : values()) {
                 if (name.contains(a.displayName)) return a;
             }
             return null;

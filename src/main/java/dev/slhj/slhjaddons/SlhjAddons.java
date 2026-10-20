@@ -2,9 +2,9 @@ package dev.slhj.slhjaddons;
 
 import dev.slhj.slhjaddons.config.SlhjConfig;
 import dev.slhj.slhjaddons.core.Feature;
-import dev.slhj.slhjaddons.hud.HudManager;
 import dev.slhj.slhjaddons.core.FeatureManager;
-import dev.slhj.slhjaddons.features.*;
+import dev.slhj.slhjaddons.features.ChatCalc;
+import dev.slhj.slhjaddons.features.Commands;
 import dev.slhj.slhjaddons.features.dungeons.BloodWarpTimer;
 import dev.slhj.slhjaddons.features.dungeons.DungeonCommands;
 import dev.slhj.slhjaddons.features.dungeons.PartyFinderHelper;
@@ -12,10 +12,18 @@ import dev.slhj.slhjaddons.features.dungeons.SuperboomSwap;
 import dev.slhj.slhjaddons.features.events.AutoZombieShootout;
 import dev.slhj.slhjaddons.features.fishing.AutoFish;
 import dev.slhj.slhjaddons.features.fishing.GoldenFishAlert;
-import dev.slhj.slhjaddons.features.misc.*;
+import dev.slhj.slhjaddons.features.misc.AutoClick;
+import dev.slhj.slhjaddons.features.misc.Clock;
+import dev.slhj.slhjaddons.features.misc.NoBlockBreakParticles;
+import dev.slhj.slhjaddons.features.misc.NoBobHurt;
+import dev.slhj.slhjaddons.features.misc.NoFog;
+import dev.slhj.slhjaddons.features.misc.QuickCommands;
 import dev.slhj.slhjaddons.features.pets.AutoPetRules;
-import dev.slhj.slhjaddons.features.skyblock.*;
+import dev.slhj.slhjaddons.features.skyblock.RagnarockCooldown;
+import dev.slhj.slhjaddons.features.skyblock.ShiftClick;
+import dev.slhj.slhjaddons.features.skyblock.SignHelper;
 import dev.slhj.slhjaddons.features.slayers.AutoBlazeSwap;
+import dev.slhj.slhjaddons.hud.HudManager;
 import dev.slhj.slhjaddons.util.skyblock.CooldownUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -23,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class SlhjAddons implements ClientModInitializer {
-
     public static final String MOD_ID = "slhjaddons";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 

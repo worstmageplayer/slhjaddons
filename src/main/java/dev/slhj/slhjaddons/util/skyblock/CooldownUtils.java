@@ -28,7 +28,6 @@ public final class CooldownUtils {
         return STATE.multiplier(ClientUtils.player().getGameProfile().name());
     }
 
-    /** Refresh on demand as well as on ticks so the first cast uses the latest tab data. */
     private static boolean refresh() {
         var currentLevel = ClientUtils.mc().level;
         if (currentLevel != level) {

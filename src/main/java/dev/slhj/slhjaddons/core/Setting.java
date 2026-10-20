@@ -1,12 +1,11 @@
 package dev.slhj.slhjaddons.core;
 
 public sealed interface Setting
-        permits Setting.ButtonSetting, Setting.HexSetting, Setting.SliderSetting, Setting.TextSetting, Setting.ToggleSetting {
-
+        permits Setting.ButtonSetting, Setting.ColorSetting, Setting.SliderSetting, Setting.TextSetting, Setting.ToggleSetting {
     String key();
     String label();
 
-    record SliderSetting(ConfigValue<Double> value, String label, double min, double max, boolean isInt)
+    record SliderSetting(ConfigValue<Double> value, String label, double min, double max, boolean integer)
             implements Setting {
         @Override public String key() { return value.key(); }
     }
@@ -16,7 +15,7 @@ public sealed interface Setting
         @Override public String key() { return value.key(); }
     }
 
-    record HexSetting(ConfigValue<Integer> value, String label)
+    record ColorSetting(ConfigValue<Integer> value, String label)
             implements Setting {
         @Override public String key() { return value.key(); }
     }

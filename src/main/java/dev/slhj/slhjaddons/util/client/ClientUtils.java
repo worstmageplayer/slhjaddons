@@ -5,6 +5,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class ClientUtils {
     private ClientUtils() {}
 
@@ -29,9 +32,9 @@ public final class ClientUtils {
         return item.getHoverName().getString();
     }
 
-    public static java.util.List<String> tabListPlayers() {
-        if (mc().getConnection() == null) return java.util.List.of();
-        var names = new java.util.ArrayList<String>();
+    public static List<String> tabListPlayers() {
+        if (mc().getConnection() == null) return List.of();
+        var names = new ArrayList<String>();
         for (var info : mc().getConnection().getListedOnlinePlayers()) {
             var display = info.getTabListDisplayName();
             names.add(display != null ? display.getString() : info.getProfile().name());

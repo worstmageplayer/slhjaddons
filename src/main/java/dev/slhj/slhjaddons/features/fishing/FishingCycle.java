@@ -2,7 +2,6 @@ package dev.slhj.slhjaddons.features.fishing;
 
 import java.util.regex.Pattern;
 
-/** A pending recast belongs only to an uninterrupted fishing interaction. */
 final class FishingCycle {
     private static final Pattern TIMER = Pattern.compile("^\\d\\.\\d$");
     private boolean armed;

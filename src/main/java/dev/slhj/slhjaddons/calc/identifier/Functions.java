@@ -2,7 +2,11 @@ package dev.slhj.slhjaddons.calc.identifier;
 
 import dev.slhj.slhjaddons.calc.parser.Node.NodeType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static dev.slhj.slhjaddons.calc.lexer.Lexer.tokenize;
 import static dev.slhj.slhjaddons.calc.parser.Parser.parse;
@@ -11,7 +15,7 @@ public class Functions {
     public record Function(List<String> params, NodeType body) {
     }
 
-    private static final Map<String, Function> functionMap = new HashMap<>();
+    private static final Map<String, Function> FUNCTIONS = new HashMap<>();
 
     static {
         add("cube", List.of("x"), "x^3");
@@ -54,7 +58,7 @@ public class Functions {
             throw new RuntimeException(String.format("Function %s already defined", name));
         }
         NodeType bodyTree = parse(tokenize(body));
-        functionMap.put(name, new Function(params, bodyTree));
+        FUNCTIONS.put(name, new Function(params, bodyTree));
     }
 
     public static void set(String name, List<String> params, String body) {
@@ -62,20 +66,20 @@ public class Functions {
             throw new RuntimeException(String.format("Function %s has not been defined", name));
         }
         NodeType bodyTree = parse(tokenize(body));
-        functionMap.replace(name, new Function(params, bodyTree));
+        FUNCTIONS.replace(name, new Function(params, bodyTree));
     }
 
     public static boolean includes(String name) {
-        return functionMap.containsKey(name);
+        return FUNCTIONS.containsKey(name);
     }
 
     public static Function getFunction(String name) {
-        Function f = functionMap.get(name);
+        Function f = FUNCTIONS.get(name);
         if (f == null) throw new RuntimeException("Function not found: " + name);
         return f;
     }
 
     public static Collection<Function> getFunctions() {
-        return functionMap.values();
+        return FUNCTIONS.values();
     }
 }

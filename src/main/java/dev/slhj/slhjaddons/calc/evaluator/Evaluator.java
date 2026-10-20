@@ -4,7 +4,13 @@ import dev.slhj.slhjaddons.calc.exceptions.EvaluatorException;
 import dev.slhj.slhjaddons.calc.identifier.Functions;
 import dev.slhj.slhjaddons.calc.identifier.Variables;
 import dev.slhj.slhjaddons.calc.lexer.Token;
-import dev.slhj.slhjaddons.calc.parser.Node.*;
+import dev.slhj.slhjaddons.calc.parser.Node.BinaryOperationNode;
+import dev.slhj.slhjaddons.calc.parser.Node.FunctionNode;
+import dev.slhj.slhjaddons.calc.parser.Node.NodeType;
+import dev.slhj.slhjaddons.calc.parser.Node.NumberNode;
+import dev.slhj.slhjaddons.calc.parser.Node.PrefixOperationNode;
+import dev.slhj.slhjaddons.calc.parser.Node.SuffixOperationNode;
+import dev.slhj.slhjaddons.calc.parser.Node.VariableNode;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -15,7 +21,7 @@ import java.util.List;
 import static dev.slhj.slhjaddons.calc.identifier.Functions.getFunction;
 
 public class Evaluator {
-    private static final ArrayDeque<HashMap<String, BigDecimal>> variablesStack = new ArrayDeque<>();
+    private static final ArrayDeque<HashMap<String, BigDecimal>> VARIABLE_SCOPES = new ArrayDeque<>();
 
     public static BigDecimal evaluate(NodeType node) {
         return switch (node) {
@@ -60,29 +66,29 @@ public class Evaluator {
             }
             case VariableNode v -> resolveVariable(v.variable().identifier());
             case FunctionNode f -> {
-                Functions.Function func = getFunction(f.function().identifier());
-                List<String> params = func.params();
-                final int paramsSize = params.size();
+                Functions.Function function = getFunction(f.function().identifier());
+                List<String> params = function.params();
+                final int parameterCount = params.size();
 
-                if (f.args().size() != paramsSize) {
-                    throw new EvaluatorException("Function '" + f.function().identifier() + "' expects " + paramsSize + " args, got " + f.args().size());
+                if (f.args().size() != parameterCount) {
+                    throw new EvaluatorException("Function '" + f.function().identifier() + "' expects " + parameterCount + " args, got " + f.args().size());
                 }
 
-                HashMap<String, BigDecimal> scope = new HashMap<>(paramsSize);
-                for (int i = 0; i < paramsSize; i++) {
+                HashMap<String, BigDecimal> scope = new HashMap<>(parameterCount);
+                for (int i = 0; i < parameterCount; i++) {
                     scope.put(params.get(i), evaluate(f.args().get(i)));
                 }
 
-                variablesStack.push(scope);
-                BigDecimal result =  evaluate(func.body());
-                variablesStack.pop();
+                VARIABLE_SCOPES.push(scope);
+                BigDecimal result = evaluate(function.body());
+                VARIABLE_SCOPES.pop();
                 yield result;
             }
         };
     }
 
     private static BigDecimal resolveVariable(String name) {
-        HashMap<String, BigDecimal> scope = variablesStack.peek();
+        HashMap<String, BigDecimal> scope = VARIABLE_SCOPES.peek();
         if (scope != null && scope.containsKey(name)) return scope.get(name);
 
         if (Variables.includes(name)) return Variables.get(name);

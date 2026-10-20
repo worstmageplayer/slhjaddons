@@ -1,6 +1,5 @@
 package dev.slhj.slhjaddons.hud;
 
-/** Fractions of the screen or of an element's complete visual bounds. */
 public enum HudAnchor {
     TOP_LEFT("Top left", 0, 0), TOP_CENTER("Top center", .5f, 0), TOP_RIGHT("Top right", 1, 0),
     MIDDLE_LEFT("Middle left", 0, .5f), CENTER("Center", .5f, .5f), MIDDLE_RIGHT("Middle right", 1, .5f),
