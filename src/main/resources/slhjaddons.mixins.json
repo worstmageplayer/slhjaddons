@@ -5,6 +5,7 @@
   "client": [
     "AbstractContainerScreenMixin",
     "AbstractSignEditScreenMixin",
+    "CameraMixin",
     "ClientLevelMixin",
     "FogRendererMixin",
     "GameRendererMixin",
